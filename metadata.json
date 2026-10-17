@@ -1,0 +1,6 @@
+{
+  "name": "LoanLens — Check Before You Sign",
+  "description": "Compare Key Facts Statements (KFS), sanction letters, and loan agreements for Indian borrowers. Detect hidden discrepancies, interest rate hikes, and unauthorized insurance before signing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
