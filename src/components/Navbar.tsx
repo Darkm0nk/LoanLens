@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-teal-900 bg-teal-50 border border-teal-200 rounded-md">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-pulse"></span>
-              <span>Live Document Audit (Gemini 3.8 Flash)</span>
+              <span>Document Audit · AI availability depends on quota</span>
             </span>
           )}
         </div>

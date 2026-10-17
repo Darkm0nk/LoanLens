@@ -413,7 +413,7 @@ export default function App() {
                 Upload or Paste Your Loan Documents
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Processed via server-side Gemini 3.8 Flash. Terms and page citations are verified directly against source text.
+                Extracted using server-side Gemini AI. Review each term and source reference against the original document before relying on it.
               </p>
             </div>
 

@@ -174,14 +174,14 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                   ? 'Validating File Format...'
                   : stage === 'uploading'
                   ? 'Uploading Document to Server...'
-                  : 'Analyzing Document with Gemini 3.8 Flash...'}
+                  : 'Analyzing Document with Gemini...'}
               </p>
               <p className="text-[11px] text-slate-500">
-                Extracting loan amount, interest rate spread, APR, EMI, insurance & penal clauses with citations
+                Extracting loan terms and source references. Verify important findings against the original document.
               </p>
             </div>
             <div className="flex items-center gap-1 text-[10px] text-teal-800 font-mono bg-teal-100/60 px-2 py-0.5 rounded">
-              <span>Integration: Server-Side @google/genai</span>
+              <span>Secure server-side AI extraction</span>
             </div>
           </div>
         ) : extractedDoc ? (
