@@ -1,6 +1,5 @@
 import { strict as assert } from 'node:assert';
 import { compareLoanDocuments } from '../src/utils/comparator';
-import { calculateEmi } from '../src/utils/financialMath';
 
 console.log('========================================================');
 console.log('   LOANLENS END-TO-END AUDIT & PIPELINE TEST SUITE');
@@ -176,7 +175,7 @@ ARTICLE 2 - FACILITY AND TERMS:
       documentType: 'kfs',
       documentName: 'fake.pdf',
       mimeType: 'application/pdf',
-      fileBase64: Buffer.from('NOT A REAL PDF FILE HEADER').toString('base64'),
+      fileBase64: Buffer.from('This is a fake PDF file that does not contain the proper PDF magic bytes at all and is deliberately invalid to test error handling').toString('base64'),
     }),
   });
   assert.strictEqual(badPdfRes.status, 400, 'Invalid PDF must return 400');

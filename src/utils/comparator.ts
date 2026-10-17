@@ -8,12 +8,10 @@ import {
   ReviewRecommendation,
   FindingClassification,
 } from '../types/loan';
-import { calculateEmi, compareLifetimeImpact } from './financialMath';
+import { compareLifetimeImpact } from './financialMath';
 import { REGULATORY_RULES } from './regulatoryRules';
 import {
   normalizeTenure,
-  normalizeInterestRate,
-  normalizePrincipal,
   detectTenureUnitConflict,
 } from './unitConverter';
 
@@ -58,10 +56,10 @@ interface DocValues {
 }
 
 export function deriveFindingClassification(
-  fieldKey: keyof ExtractedLoanFields,
-  status: DiscrepancyStatus,
-  severity: DiscrepancySeverity,
-  values: DocValues
+    fieldKey: keyof ExtractedLoanFields,
+    status: DiscrepancyStatus,
+    severity: DiscrepancySeverity,
+    values: DocValues
 ): FindingClassification {
   if (status === 'missing') {
     return 'Missing information';
@@ -73,11 +71,11 @@ export function deriveFindingClassification(
   }
   const valList = [values.kfs, values.sanctionLetter, values.loanAgreement].filter(Boolean);
   const hasUnverified = valList.some(
-    (v) =>
-      v?.isVerifiedInSource === false ||
-      !v?.pageClauseRef ||
-      v.pageClauseRef.toLowerCase().includes('not detected') ||
-      v.pageClauseRef.toLowerCase().includes('not cited')
+      (v) =>
+          v?.isVerifiedInSource === false ||
+          !v?.pageClauseRef ||
+          v.pageClauseRef.toLowerCase().includes('not detected') ||
+          v.pageClauseRef.toLowerCase().includes('not cited')
   );
   if (hasUnverified && status === 'mismatch') {
     return 'Needs manual verification';
@@ -89,9 +87,9 @@ export function deriveFindingClassification(
 }
 
 export function compareLoanDocuments(
-  kfsDoc: ExtractedLoanDocument | null,
-  sanctionDoc: ExtractedLoanDocument | null,
-  agreementDoc: ExtractedLoanDocument | null
+    kfsDoc: ExtractedLoanDocument | null,
+    sanctionDoc: ExtractedLoanDocument | null,
+    agreementDoc: ExtractedLoanDocument | null
 ): LoanComparisonReport {
   const docs = [kfsDoc, sanctionDoc, agreementDoc].filter(Boolean) as ExtractedLoanDocument[];
 
@@ -105,32 +103,32 @@ export function compareLoanDocuments(
   // HARD ISOLATION GUARD: Never allow real docs to be compared against synthetic demo docs!
   if (realDocs.length > 0 && demoDocs.length > 0) {
     throw new Error(
-      'Data Isolation Violation: Cannot compare real uploaded documents with synthetic demo documents. Switch to real mode or clear demo records before auditing user files.'
+        'Data Isolation Violation: Cannot compare real uploaded documents with synthetic demo documents. Switch to real mode or clear demo records before auditing user files.'
     );
   }
 
   // Real Mode Guard: A real-document comparison requires at least 2 real documents
   if (realDocs.length > 0 && realDocs.length < 2) {
     throw new Error(
-      'Insufficient Real Documents: At least two real documents (e.g., KFS and Sanction Letter or Loan Agreement) are required to generate an authentic cross-document audit.'
+        'Insufficient Real Documents: At least two real documents (e.g., KFS and Sanction Letter or Loan Agreement) are required to generate an authentic cross-document audit.'
     );
   }
 
   const isDemo = demoDocs.length > 0;
   const isCombined = docs.some((d) => Boolean(d.isCombinedPackage));
   const combinedFileName =
-    docs.find((d) => d.isCombinedPackage)?.originFileName ||
-    docs.find((d) => d.isCombinedPackage)?.documentName;
+      docs.find((d) => d.isCombinedPackage)?.originFileName ||
+      docs.find((d) => d.isCombinedPackage)?.documentName;
   const singleSourceNotice = isCombined
-    ? `Source: Single uploaded file ("${combinedFileName}") containing multiple labeled contract sections. Findings compare extracted terms across sections of this single document.`
-    : undefined;
+      ? `Source: Single uploaded file ("${combinedFileName}") containing multiple labeled contract sections. Findings compare extracted terms across sections of this single document.`
+      : undefined;
 
   const lenderName =
-    kfsDoc?.lenderName || sanctionDoc?.lenderName || agreementDoc?.lenderName || 'Lending Institution';
+      kfsDoc?.lenderName || sanctionDoc?.lenderName || agreementDoc?.lenderName || 'Lending Institution';
   const borrowerName =
-    kfsDoc?.borrowerName || sanctionDoc?.borrowerName || agreementDoc?.borrowerName || 'Borrower';
+      kfsDoc?.borrowerName || sanctionDoc?.borrowerName || agreementDoc?.borrowerName || 'Borrower';
   const loanType =
-    kfsDoc?.loanType || sanctionDoc?.loanType || agreementDoc?.loanType || 'Retail Term Loan';
+      kfsDoc?.loanType || sanctionDoc?.loanType || agreementDoc?.loanType || 'Retail Term Loan';
 
   const comparisons: FieldComparison[] = [];
 
@@ -143,22 +141,22 @@ export function compareLoanDocuments(
 
   // Helper to build 3-column values
   const buildValues = (
-    kfsField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
-    sanctionField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
-    agreeField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
-    key: keyof ExtractedLoanFields = 'loanAmount'
+      kfsField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
+      sanctionField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
+      agreeField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
+      key: keyof ExtractedLoanFields = 'loanAmount'
   ): DocValues => {
     const values: DocValues = {};
 
     const checkIsMissing = (val: any) =>
-      val === null ||
-      val === undefined ||
-      val === '' ||
-      (typeof val === 'number' && val <= 0 && key !== 'insurance' && key !== 'processingFees') ||
-      (typeof val === 'string' &&
-        (val.toLowerCase().includes('not specified') ||
-          val.toLowerCase().includes('not mentioned') ||
-          val.toLowerCase().includes('not stated')));
+        val === null ||
+        val === undefined ||
+        val === '' ||
+        (typeof val === 'number' && val <= 0 && key !== 'insurance' && key !== 'processingFees') ||
+        (typeof val === 'string' &&
+            (val.toLowerCase().includes('not specified') ||
+                val.toLowerCase().includes('not mentioned') ||
+                val.toLowerCase().includes('not stated')));
 
     const checkVerified = (field?: { value: any; pageClauseRef?: string; isVerifiedInSource?: boolean }) => {
       if (!field || checkIsMissing(field.value)) return false;
@@ -166,11 +164,11 @@ export function compareLoanDocuments(
       if (!ref) return false;
       const lower = ref.toLowerCase();
       if (
-        lower.includes('not detected') ||
-        lower.includes('not cited') ||
-        lower.includes('not specified') ||
-        lower.includes('not found') ||
-        lower.includes('evidence not verified')
+          lower.includes('not detected') ||
+          lower.includes('not cited') ||
+          lower.includes('not specified') ||
+          lower.includes('not found') ||
+          lower.includes('evidence not verified')
       ) {
         return false;
       }
@@ -183,13 +181,13 @@ export function compareLoanDocuments(
       values.kfs = {
         display: formatFieldValue(key, kfsField.value, kfsField),
         rawText:
-          isMissing
-            ? 'Not stated in document'
-            : kfsField.rawText &&
-              !kfsField.rawText.toLowerCase().includes('not specified') &&
-              !kfsField.rawText.toLowerCase().includes('not mentioned')
-            ? kfsField.rawText
-            : 'Not stated in document',
+            isMissing
+                ? 'Not stated in document'
+                : kfsField.rawText &&
+                !kfsField.rawText.toLowerCase().includes('not specified') &&
+                !kfsField.rawText.toLowerCase().includes('not mentioned')
+                    ? kfsField.rawText
+                    : 'Not stated in document',
         pageClauseRef: isVerified ? kfsField.pageClauseRef : 'Evidence not verified',
         notes: kfsField.notes,
         isVerifiedInSource: isVerified,
@@ -201,13 +199,13 @@ export function compareLoanDocuments(
       values.sanctionLetter = {
         display: formatFieldValue(key, sanctionField.value, sanctionField),
         rawText:
-          isMissing
-            ? 'Not stated in document'
-            : sanctionField.rawText &&
-              !sanctionField.rawText.toLowerCase().includes('not specified') &&
-              !sanctionField.rawText.toLowerCase().includes('not mentioned')
-            ? sanctionField.rawText
-            : 'Not stated in document',
+            isMissing
+                ? 'Not stated in document'
+                : sanctionField.rawText &&
+                !sanctionField.rawText.toLowerCase().includes('not specified') &&
+                !sanctionField.rawText.toLowerCase().includes('not mentioned')
+                    ? sanctionField.rawText
+                    : 'Not stated in document',
         pageClauseRef: isVerified ? sanctionField.pageClauseRef : 'Evidence not verified',
         notes: sanctionField.notes,
         isVerifiedInSource: isVerified,
@@ -219,13 +217,13 @@ export function compareLoanDocuments(
       values.loanAgreement = {
         display: formatFieldValue(key, agreeField.value, agreeField),
         rawText:
-          isMissing
-            ? 'Not stated in document'
-            : agreeField.rawText &&
-              !agreeField.rawText.toLowerCase().includes('not specified') &&
-              !agreeField.rawText.toLowerCase().includes('not mentioned')
-            ? agreeField.rawText
-            : 'Not stated in document',
+            isMissing
+                ? 'Not stated in document'
+                : agreeField.rawText &&
+                !agreeField.rawText.toLowerCase().includes('not specified') &&
+                !agreeField.rawText.toLowerCase().includes('not mentioned')
+                    ? agreeField.rawText
+                    : 'Not stated in document',
         pageClauseRef: isVerified ? agreeField.pageClauseRef : 'Evidence not verified',
         notes: agreeField.notes,
         isVerifiedInSource: isVerified,
@@ -369,22 +367,22 @@ export function compareLoanDocuments(
 
         // Deterministic lifetime cost variance calculation with complete input validation
         const basePrincipal =
-          kfsField?.value && kfsField.value > 0
-            ? kfsDoc?.fields.loanAmount.value
-            : sanctionDoc?.fields.loanAmount.value || agreementDoc?.fields.loanAmount.value;
+            kfsField?.value && kfsField.value > 0
+                ? kfsDoc?.fields.loanAmount.value
+                : sanctionDoc?.fields.loanAmount.value || agreementDoc?.fields.loanAmount.value;
         const compPrincipal = agreementDoc?.fields.loanAmount.value || basePrincipal;
         const tenureMonths =
-          kfsDoc?.fields.tenureMonths.value ||
-          agreementDoc?.fields.tenureMonths.value ||
-          sanctionDoc?.fields.tenureMonths.value;
+            kfsDoc?.fields.tenureMonths.value ||
+            agreementDoc?.fields.tenureMonths.value ||
+            sanctionDoc?.fields.tenureMonths.value;
 
         if (
-          !basePrincipal ||
-          basePrincipal <= 0 ||
-          !compPrincipal ||
-          compPrincipal <= 0 ||
-          !tenureMonths ||
-          tenureMonths <= 0
+            !basePrincipal ||
+            basePrincipal <= 0 ||
+            !compPrincipal ||
+            compPrincipal <= 0 ||
+            !tenureMonths ||
+            tenureMonths <= 0
         ) {
           financialImpact = 'Insufficient information to estimate';
           calculationAssumptions = [
@@ -392,8 +390,8 @@ export function compareLoanDocuments(
           ];
         } else {
           const impact = compareLifetimeImpact(
-            { principal: basePrincipal, ratePercent: minRate, tenureMonths },
-            { principal: compPrincipal, ratePercent: maxRate, tenureMonths }
+              { principal: basePrincipal, ratePercent: minRate, tenureMonths },
+              { principal: compPrincipal, ratePercent: maxRate, tenureMonths }
           );
 
           if (impact.canCalculate) {
@@ -470,7 +468,7 @@ export function compareLoanDocuments(
       severity = 'info';
       summary = 'Annual Percentage Rate (APR) was not located in the submitted files.';
       lenderQuestion =
-        'Under RBI Circular DOR.MCS.REC.17/01.01.001/2024-25, lenders must provide an all-inclusive APR in the KFS. Please provide the APR calculation breakdown.';
+          'Under RBI Circular DOR.MCS.REC.17/01.01.001/2024-25, lenders must provide an all-inclusive APR in the KFS. Please provide the APR calculation breakdown.';
     } else if (aprs.length === 1) {
       // Requirement 2: The KFS states 9.45% APR, while the sanction letter and loan agreement do not state APR.
       // Show the KFS value and mark the other two as "Not stated in document." Do not report an APR difference of 9.45 percentage points.
@@ -478,7 +476,7 @@ export function compareLoanDocuments(
       severity = 'info';
       summary = `The KFS states ${aprs[0].toFixed(2)}% APR, while the sanction letter and loan agreement do not state APR. Under RBI mandates, all-inclusive APR disclosure is required in the Key Facts Statement.`;
       lenderQuestion =
-        'The Key Facts Statement provides an all-inclusive APR. Please confirm that all fees incorporated into the APR are reflected without alteration in the final loan schedules.';
+          'The Key Facts Statement provides an all-inclusive APR. Please confirm that all fees incorporated into the APR are reflected without alteration in the final loan schedules.';
     } else {
       const minApr = Math.min(...aprs);
       const maxApr = Math.max(...aprs);
@@ -496,7 +494,7 @@ export function compareLoanDocuments(
           'Verify what documentation fees, insurance premiums, or administrative charges account for this APR spread.',
         ];
         lenderQuestion =
-          'Why does the stated APR differ between documents? What third-party fees, documentation charges, or insurance costs account for this difference?';
+            'Why does the stated APR differ between documents? What third-party fees, documentation charges, or insurance costs account for this difference?';
       } else if (aprs.length === docs.length) {
         status = 'match';
         severity = 'clean';
@@ -580,7 +578,7 @@ export function compareLoanDocuments(
         severity = 'clean';
         summary = `Repayment tenure aligns at ${tenures[0]} months (${(tenures[0] / 12).toFixed(1)} yrs). Note: Documents express tenure in differing units (Years vs Months) which convert to the same duration.`;
         lenderQuestion =
-          'Documents quote tenure in differing units (years vs months). Please ensure the final execution copy cites total tenure in both months and years for precision.';
+            'Documents quote tenure in differing units (years vs months). Please ensure the final execution copy cites total tenure in both months and years for precision.';
       } else {
         status = 'mismatch';
         severity = 'critical';
@@ -616,7 +614,7 @@ export function compareLoanDocuments(
       summary,
       lenderQuestion,
       rbiGuideline:
-        'Loan tenure determines the total interest commitment and monthly liquidity. Any change in repayment schedule requires clear written agreement with the borrower.',
+          'Loan tenure determines the total interest commitment and monthly liquidity. Any change in repayment schedule requires clear written agreement with the borrower.',
       verificationNotice: 'Applicability Caveat: Verify whether a moratorium period was added to the repayment commencement date.',
       isSampleData: isDemo,
     });
@@ -717,7 +715,7 @@ export function compareLoanDocuments(
       financialImpact,
       calculationAssumptions,
       rbiGuideline:
-        'The KFS must contain an illustrative repayment schedule indicating installment breakdown into principal and interest.',
+          'The KFS must contain an illustrative repayment schedule indicating installment breakdown into principal and interest.',
       verificationNotice: 'Applicability Caveat: Check whether broken-period interest or initial broken days were added to the first installment.',
       isSampleData: isDemo,
     });
@@ -914,7 +912,7 @@ export function compareLoanDocuments(
       status = 'mismatch';
       severity = 'warning';
       summary =
-        'Compounding penal interest clause noted in the draft agreement. Needs verification under RBI Circular DoR.MCS.REC.28/01.01.001/2023-24.';
+          'Compounding penal interest clause noted in the draft agreement. Needs verification under RBI Circular DoR.MCS.REC.28/01.01.001/2023-24.';
       lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} specifies compounding penal interest on delayed installments. Under RBI Circular DoR.MCS.REC.28/01.01.001/2023-24 (effective April 1, 2024), lenders are required to levy reasonable penal charges rather than compounding penal interest. Could you clarify if this clause will be updated to reflect simple penal charges?`;
     } else if (hasKfsPenal && hasAgreePenal) {
       status = 'match';
@@ -954,9 +952,9 @@ export function compareLoanDocuments(
 
     const agreePenalty = agreeField?.hasPenalty;
     const isFloating =
-      kfsDoc?.fields.interestRate.rateType === 'floating' ||
-      sanctionDoc?.fields.interestRate.rateType === 'floating' ||
-      agreementDoc?.fields.interestRate.rateType === 'floating';
+        kfsDoc?.fields.interestRate.rateType === 'floating' ||
+        sanctionDoc?.fields.interestRate.rateType === 'floating' ||
+        agreementDoc?.fields.interestRate.rateType === 'floating';
 
     const hasKfsPrepay = Boolean(kfsDoc && kfsField?.value && !kfsField.value.toLowerCase().includes('not specified') && !kfsField.value.toLowerCase().includes('not mentioned'));
     const hasAgreePrepay = Boolean(agreementDoc && agreeField?.value && !agreeField.value.toLowerCase().includes('not specified') && !agreeField.value.toLowerCase().includes('not mentioned'));
@@ -975,7 +973,7 @@ export function compareLoanDocuments(
       status = 'mismatch';
       severity = 'warning';
       summary =
-        'Prepayment charge clause noted. Needs verification under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14 for individual floating-rate loans.';
+          'Prepayment charge clause noted. Needs verification under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14 for individual floating-rate loans.';
       lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} references a prepayment or foreclosure fee. Under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14, foreclosure penalties are prohibited on floating-rate term loans to individual borrowers. If this facility is sanctioned to an individual on a floating rate, could you confirm that zero foreclosure charges apply?`;
     } else if (hasKfsPrepay && hasAgreePrepay) {
       status = 'match';
@@ -1018,18 +1016,18 @@ export function compareLoanDocuments(
   let riskRating: 'Consistent' | 'Minor Variances' | 'Variances Noted' = 'Consistent';
   let recommendation: ReviewRecommendation = 'Terms Aligned Across Documents';
   let recommendationNote =
-    'Extracted terms across submitted documents demonstrate consistent alignment. Standard review before execution is always recommended.';
+      'Extracted terms across submitted documents demonstrate consistent alignment. Standard review before execution is always recommended.';
 
   if (criticalCount > 0) {
     riskRating = 'Variances Noted';
     recommendation = 'Review Variances with Lender';
     recommendationNote =
-      'Material variances were identified between pre-contract offers and the draft agreement. Variances frequently occur due to benchmark reset timing, updated schedules, or ancillary service inclusions. We recommend reviewing these points with your loan officer before executing the contract.';
+        'Material variances were identified between pre-contract offers and the draft agreement. Variances frequently occur due to benchmark reset timing, updated schedules, or ancillary service inclusions. We recommend reviewing these points with your loan officer before executing the contract.';
   } else if (warningCount > 0 || mismatchCount > 0) {
     riskRating = 'Minor Variances';
     recommendation = 'Clarifications Recommended';
     recommendationNote =
-      'Minor variances or omitted disclosures were observed. Request written clarification from your lender to ensure the final execution copy mirrors your agreed terms.';
+        'Minor variances or omitted disclosures were observed. Request written clarification from your lender to ensure the final execution copy mirrors your agreed terms.';
   }
 
   comparisons.forEach((c) => {
@@ -1039,8 +1037,8 @@ export function compareLoanDocuments(
   });
 
   const keyWarnings: string[] = comparisons
-    .filter((c) => c.severity === 'critical' || (c.severity === 'warning' && c.status === 'mismatch'))
-    .map((c) => `${c.label}: ${c.summary}`);
+      .filter((c) => c.severity === 'critical' || (c.severity === 'warning' && c.status === 'mismatch'))
+      .map((c) => `${c.label}: ${c.summary}`);
 
   return {
     comparedAt: new Date().toISOString(),
@@ -1078,49 +1076,49 @@ function formatFieldValue(key: keyof ExtractedLoanFields, val: any, fullField?: 
         if (val <= 0) return 'Not extracted';
         return formatINR(val, false);
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     case 'interestRate': {
       if (typeof val === 'number') {
         if (val <= 0) return 'Not extracted';
         const typeStr = fullField?.rateType && fullField.rateType !== 'unknown' ? ` (${fullField.rateType})` : '';
         return `${formatPercent(val)}${typeStr}`;
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     }
     case 'apr':
       if (typeof val === 'number') {
         if (val <= 0) return 'Not extracted';
         return `${val.toFixed(2)}% APR`;
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     case 'tenureMonths':
       if (typeof val === 'number') {
         if (val <= 0) return 'Not extracted';
         const yrs = (val / 12).toFixed(1);
         return `${val} months (${yrs} yrs)`;
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     case 'processingFees':
       if (typeof val === 'number') {
         if (val === 0) return '₹0 (Nil / Waived)';
         return formatINR(val, false);
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     case 'insurance':
       if (typeof val === 'number') {
         return val === 0
-          ? '₹0 (None / Voluntary)'
-          : `${formatINR(val, false)}${fullField?.isMandatory ? ' [Mandatory]' : ' [Optional]'}`;
+            ? '₹0 (None / Voluntary)'
+            : `${formatINR(val, false)}${fullField?.isMandatory ? ' [Mandatory]' : ' [Optional]'}`;
       }
-      return val ? String(val) : 'Not stated in document';
+      return val ? String(val) : 'Not extracted';
     case 'penalCharges':
     case 'prepaymentCharges': {
       const str = String(val).trim();
       if (
-        !str ||
-        str.toLowerCase().includes('not specified') ||
-        str.toLowerCase().includes('not mentioned') ||
-        str.toLowerCase().includes('not stated')
+          !str ||
+          str.toLowerCase().includes('not specified') ||
+          str.toLowerCase().includes('not mentioned') ||
+          str.toLowerCase().includes('not stated')
       ) {
         return 'Not extracted';
       }

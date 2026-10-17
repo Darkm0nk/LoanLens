@@ -75,8 +75,8 @@ runTest('Missing inputs return null and do not invent figures', () => {
 
 runTest('Lifetime impact comparison calculates exact variance with stated assumptions', () => {
   const comp = compareLifetimeImpact(
-    { principal: 4200000, ratePercent: 8.75, tenureMonths: 240 },
-    { principal: 4278000, ratePercent: 9.25, tenureMonths: 240 }
+      { principal: 4200000, ratePercent: 8.75, tenureMonths: 240 },
+      { principal: 4278000, ratePercent: 9.25, tenureMonths: 240 }
   );
 
   assert.strictEqual(comp.canCalculate, true);
@@ -84,13 +84,13 @@ runTest('Lifetime impact comparison calculates exact variance with stated assump
   assert.strictEqual(comp.principalDifference, 78000);
   assert.strictEqual(comp.lifetimeCostDifference, (39181 * 240) - (37116 * 240)); // 495600
   assert.ok(comp.assumptions.length >= 2);
-  assert.ok(comp.assumptions[0].includes('Assumed Principal: Base ₹42,00,000'));
+  assert.ok(comp.assumptions[0].includes('Base calculation: ₹42,00,000'));
 });
 
 runTest('Lifetime impact gracefully reports inability to compute when inputs are missing', () => {
   const compMissing = compareLifetimeImpact(
-    { principal: 4200000, ratePercent: null, tenureMonths: 240 },
-    { principal: 4278000, ratePercent: 9.25, tenureMonths: null }
+      { principal: 4200000, ratePercent: null, tenureMonths: 240 },
+      { principal: 4278000, ratePercent: 9.25, tenureMonths: null }
   );
 
   assert.strictEqual(compMissing.canCalculate, false);
@@ -105,9 +105,9 @@ console.log('\n[2] Matching Values Audit:');
 
 runTest('Clean scenario produces 9 exact matches across all loan terms', () => {
   const report = compareLoanDocuments(
-    DEMO_SCENARIO_CLEAN.kfsDoc,
-    DEMO_SCENARIO_CLEAN.sanctionDoc,
-    DEMO_SCENARIO_CLEAN.agreementDoc
+      DEMO_SCENARIO_CLEAN.kfsDoc,
+      DEMO_SCENARIO_CLEAN.sanctionDoc,
+      DEMO_SCENARIO_CLEAN.agreementDoc
   );
 
   assert.strictEqual(report.totalTermsEvaluated, 9);
@@ -131,9 +131,9 @@ console.log('\n[3] Mismatches Audit:');
 
 runTest('Discrepancy scenario flags variances and cautious recommendation', () => {
   const report = compareLoanDocuments(
-    DEMO_SCENARIO_DISCREPANCY.kfsDoc,
-    DEMO_SCENARIO_DISCREPANCY.sanctionDoc,
-    DEMO_SCENARIO_DISCREPANCY.agreementDoc
+      DEMO_SCENARIO_DISCREPANCY.kfsDoc,
+      DEMO_SCENARIO_DISCREPANCY.sanctionDoc,
+      DEMO_SCENARIO_DISCREPANCY.agreementDoc
   );
 
   assert.strictEqual(report.totalTermsEvaluated, 9);
@@ -293,7 +293,7 @@ runTest('Empty payload or payload under 50 bytes rejected', () => {
 runTest('Non-PDF file with application/pdf mimeType rejected for missing %PDF header', () => {
   // Base64 encoding of "Hello world, this is a plain text file pretending to be a PDF."
   const fakePdfBase64 = Buffer.from(
-    'Hello world, this is a plain text file pretending to be a PDF for test.'
+      'Hello world, this is a plain text file pretending to be a PDF for test.'
   ).toString('base64');
 
   const res = validateDocumentFile(fakePdfBase64, 'application/pdf', 'corrupt_doc.pdf');
@@ -303,7 +303,7 @@ runTest('Non-PDF file with application/pdf mimeType rejected for missing %PDF he
 
 runTest('Authentic PDF header (%PDF-1.4) passes validation', () => {
   const validPdfHeader = Buffer.from(
-    '%PDF-1.4\n1 0 obj\n<< /Title (Test Document) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF'
+      '%PDF-1.4\n1 0 obj\n<< /Title (Test Document) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF'
   ).toString('base64');
 
   const res = validateDocumentFile(validPdfHeader, 'application/pdf', 'sample_kfs.pdf');
@@ -317,7 +317,7 @@ runTest('Pasted text shorter than 30 characters is rejected', () => {
   assert.ok(resTooShort.error?.includes('too brief'));
 
   const resValid = validateTextContent(
-    'Key Facts Statement: Loan Amount: ₹42,00,000, Interest Rate: 8.75% p.a., Tenure: 240 months, EMI: ₹37,116.'
+      'Key Facts Statement: Loan Amount: ₹42,00,000, Interest Rate: 8.75% p.a., Tenure: 240 months, EMI: ₹37,116.'
   );
   assert.strictEqual(resValid.isValid, true);
 });
@@ -402,8 +402,8 @@ runTest('No inflammatory, unverified claims (e.g. "illegal", "criminal") in regu
     const combined = `${rule.summary} ${rule.guidanceText} ${rule.circularTitle}`.toLowerCase();
     for (const badWord of prohibitedWords) {
       assert.ok(
-        !combined.includes(badWord),
-        `Regulatory rule "${key}" contains sensationalist word "${badWord}". Use precise regulatory terms instead.`
+          !combined.includes(badWord),
+          `Regulatory rule "${key}" contains sensationalist word "${badWord}". Use precise regulatory terms instead.`
       );
     }
   }
@@ -416,9 +416,9 @@ console.log('\n[9] Side-by-Side Classification & Evidence Integrity Audit:');
 
 runTest('Findings are accurately classified into the 4 regulatory categories', () => {
   const discrepancyReport = compareLoanDocuments(
-    DEMO_SCENARIO_DISCREPANCY.kfsDoc,
-    DEMO_SCENARIO_DISCREPANCY.sanctionDoc,
-    DEMO_SCENARIO_DISCREPANCY.agreementDoc
+      DEMO_SCENARIO_DISCREPANCY.kfsDoc,
+      DEMO_SCENARIO_DISCREPANCY.sanctionDoc,
+      DEMO_SCENARIO_DISCREPANCY.agreementDoc
   );
 
   // Interest rate mismatch with verified values is Confirmed discrepancy

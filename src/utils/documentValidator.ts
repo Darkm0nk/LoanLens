@@ -13,9 +13,9 @@ export interface ValidationResult {
  * Specifically checks for minimum size and valid %PDF magic header for PDF files.
  */
 export function validateDocumentFile(
-  base64Data: string | null | undefined,
-  mimeType?: string,
-  fileName?: string
+    base64Data: string | null | undefined,
+    mimeType?: string,
+    fileName?: string
 ): ValidationResult {
   if (!base64Data || typeof base64Data !== 'string') {
     return { isValid: false, error: 'Document data is missing.' };
@@ -41,8 +41,8 @@ export function validateDocumentFile(
   }
 
   const isPdf =
-    mimeType === 'application/pdf' ||
-    (Boolean(fileName) && fileName!.toLowerCase().endsWith('.pdf'));
+      mimeType === 'application/pdf' ||
+      (Boolean(fileName) && fileName!.toLowerCase().endsWith('.pdf'));
 
   if (isPdf) {
     try {

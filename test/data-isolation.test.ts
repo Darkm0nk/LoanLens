@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { compareLoanDocuments, formatINR, formatPercent } from '../src/utils/comparator';
 import { ExtractedLoanDocument, LoanComparisonReport } from '../src/types/loan';
-import { DEMO_SCENARIO_CLEAN, DEMO_SCENARIO_DISCREPANCY } from '../src/data/demoData';
+import { DEMO_SCENARIO_DISCREPANCY } from '../src/data/demoData';
 
 console.log('========================================================');
 console.log('   LOANLENS DATA-ISOLATION & CONTAMINATION TEST SUITE');
@@ -111,13 +111,13 @@ runTest('Engine throws explicit Data Isolation Violation if real doc is compared
   const demoSanction = DEMO_SCENARIO_DISCREPANCY.sanctionDoc; // isDemo: true
 
   assert.throws(
-    () => {
-      compareLoanDocuments(realKfs, demoSanction, null);
-    },
-    (err: any) => {
-      assert.ok(err.message.includes('Data Isolation Violation'));
-      return true;
-    }
+      () => {
+        compareLoanDocuments(realKfs, demoSanction, null);
+      },
+      (err: any) => {
+        assert.ok(err.message.includes('Data Isolation Violation'));
+        return true;
+      }
   );
 });
 
@@ -127,13 +127,13 @@ runTest('Engine throws if real doc is mixed with 2 demo docs', () => {
   const demoAgreement = DEMO_SCENARIO_DISCREPANCY.agreementDoc;
 
   assert.throws(
-    () => {
-      compareLoanDocuments(realKfs, demoSanction, demoAgreement);
-    },
-    (err: any) => {
-      assert.ok(err.message.includes('Data Isolation Violation'));
-      return true;
-    }
+      () => {
+        compareLoanDocuments(realKfs, demoSanction, demoAgreement);
+      },
+      (err: any) => {
+        assert.ok(err.message.includes('Data Isolation Violation'));
+        return true;
+      }
   );
 });
 
@@ -146,13 +146,13 @@ runTest('Single real document cannot generate an audit and throws Insufficient R
   const realKfs = createRealDocument({ documentType: 'kfs' });
 
   assert.throws(
-    () => {
-      compareLoanDocuments(realKfs, null, null);
-    },
-    (err: any) => {
-      assert.ok(err.message.includes('Insufficient Real Documents'));
-      return true;
-    }
+      () => {
+        compareLoanDocuments(realKfs, null, null);
+      },
+      (err: any) => {
+        assert.ok(err.message.includes('Insufficient Real Documents'));
+        return true;
+      }
   );
 });
 

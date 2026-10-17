@@ -30,23 +30,23 @@ export interface LifetimeImpactComparison {
  * @param tenureMonths Total tenure in months (e.g. 240 for 20 years)
  */
 export function calculateEmi(
-  principal: number | null | undefined,
-  annualRatePercent: number | null | undefined,
-  tenureMonths: number | null | undefined
+    principal: number | null | undefined,
+    annualRatePercent: number | null | undefined,
+    tenureMonths: number | null | undefined
 ): EmiCalculationResult | null {
   if (
-    principal === null ||
-    principal === undefined ||
-    isNaN(principal) ||
-    principal <= 0 ||
-    annualRatePercent === null ||
-    annualRatePercent === undefined ||
-    isNaN(annualRatePercent) ||
-    annualRatePercent < 0 ||
-    tenureMonths === null ||
-    tenureMonths === undefined ||
-    isNaN(tenureMonths) ||
-    tenureMonths <= 0
+      principal === null ||
+      principal === undefined ||
+      isNaN(principal) ||
+      principal <= 0 ||
+      annualRatePercent === null ||
+      annualRatePercent === undefined ||
+      isNaN(annualRatePercent) ||
+      annualRatePercent < 0 ||
+      tenureMonths === null ||
+      tenureMonths === undefined ||
+      isNaN(tenureMonths) ||
+      tenureMonths <= 0
   ) {
     return null;
   }
@@ -92,8 +92,8 @@ export function calculateEmi(
  * Never guesses or uses arbitrary multipliers.
  */
 export function compareLifetimeImpact(
-  baseLoan: { principal?: number | null; ratePercent?: number | null; tenureMonths?: number | null },
-  comparisonLoan: { principal?: number | null; ratePercent?: number | null; tenureMonths?: number | null }
+    baseLoan: { principal?: number | null; ratePercent?: number | null; tenureMonths?: number | null },
+    comparisonLoan: { principal?: number | null; ratePercent?: number | null; tenureMonths?: number | null }
 ): LifetimeImpactComparison {
   const missingFields: string[] = [];
   if (!baseLoan.principal || baseLoan.principal <= 0) missingFields.push('base principal');
@@ -107,7 +107,8 @@ export function compareLifetimeImpact(
   if (missingFields.length > 0) {
     return {
       canCalculate: false,
-      reason: 'Insufficient information to estimate: required inputs are missing or invalid.',      emiDifferenceMonthly: 0,
+      reason: `Insufficient information to estimate: missing ${missingFields.join(', ')}`,
+      emiDifferenceMonthly: 0,
       principalDifference: 0,
       lifetimeCostDifference: 0,
       lifetimeInterestDifference: 0,
@@ -146,9 +147,8 @@ export function compareLifetimeImpact(
     lifetimeCostDifference,
     lifetimeInterestDifference,
     assumptions: [
-      `Assumed Principal: Base ₹${(baseLoan.principal || 0).toLocaleString('en-IN')} vs Comparison ₹${(comparisonLoan.principal || 0).toLocaleString('en-IN')}`,
-      `Assumed Interest Rate: Base ${(baseLoan.ratePercent || 0).toFixed(2)}% p.a. vs Comparison ${(comparisonLoan.ratePercent || 0).toFixed(2)}% p.a.`,
-      `Assumed Tenure: ${baseLoan.tenureMonths} months (${((baseLoan.tenureMonths || 0) / 12).toFixed(1)} yrs)`,
+      `Base calculation: ₹${(baseLoan.principal || 0).toLocaleString('en-IN')} at ${(baseLoan.ratePercent || 0).toFixed(2)}% p.a. over ${baseLoan.tenureMonths} months`,
+      `Comparison calculation: ₹${(comparisonLoan.principal || 0).toLocaleString('en-IN')} at ${(comparisonLoan.ratePercent || 0).toFixed(2)}% p.a. over ${comparisonLoan.tenureMonths} months`,
       `Repayment Method: Equated Monthly Installment (standard monthly-rest reducing balance amortization)`,
       `Monthly Outflow: ₹${baseResult.monthlyEmi.toLocaleString('en-IN')}/month (Base) vs ₹${compResult.monthlyEmi.toLocaleString('en-IN')}/month (Comparison) [Difference: ₹${Math.abs(emiDifferenceMonthly).toLocaleString('en-IN')}/month]`,
       `Lifetime Cost: ₹${baseResult.totalPayment.toLocaleString('en-IN')} (Base) vs ₹${compResult.totalPayment.toLocaleString('en-IN')} (Comparison) [Variance: ~₹${Math.abs(lifetimeCostDifference).toLocaleString('en-IN')}]`,
