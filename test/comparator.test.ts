@@ -84,7 +84,7 @@ runTest('Lifetime impact comparison calculates exact variance with stated assump
   assert.strictEqual(comp.principalDifference, 78000);
   assert.strictEqual(comp.lifetimeCostDifference, (39181 * 240) - (37116 * 240)); // 495600
   assert.ok(comp.assumptions.length >= 2);
-  assert.ok(comp.assumptions[0].includes('Base calculation: ₹42,00,000'));
+  assert.ok(comp.assumptions[0].includes('Assumed Principal: Base ₹42,00,000'));
 });
 
 runTest('Lifetime impact gracefully reports inability to compute when inputs are missing', () => {

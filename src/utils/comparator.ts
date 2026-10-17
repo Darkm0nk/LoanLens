@@ -19,8 +19,8 @@ import {
 
 // Indian currency formatter (Lakhs and Crores: 12,34,567)
 export function formatINR(val: number | null | undefined, allowZero = false): string {
-  if (val === null || val === undefined || isNaN(val)) return 'Not stated in document';
-  if (val === 0 && !allowZero) return 'Not stated in document';
+  if (val === null || val === undefined || isNaN(val)) return 'Not available';
+  if (val === 0 && !allowZero) return 'Not available';
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -29,7 +29,7 @@ export function formatINR(val: number | null | undefined, allowZero = false): st
 }
 
 export function formatPercent(val: number | null | undefined): string {
-  if (val === null || val === undefined || isNaN(val) || val <= 0) return 'Not stated in document';
+  if (val === null || val === undefined || isNaN(val) || val <= 0) return 'Not available';
   return `${val.toFixed(2)}% p.a.`;
 }
 
@@ -1069,19 +1069,19 @@ export function compareLoanDocuments(
 }
 
 function formatFieldValue(key: keyof ExtractedLoanFields, val: any, fullField?: any): string {
-  if (val === null || val === undefined || val === '') return 'Not stated in document';
+  if (val === null || val === undefined || val === '') return 'Not extracted';
 
   switch (key) {
     case 'loanAmount':
     case 'emi':
       if (typeof val === 'number') {
-        if (val <= 0) return 'Not stated in document';
+        if (val <= 0) return 'Not extracted';
         return formatINR(val, false);
       }
       return val ? String(val) : 'Not stated in document';
     case 'interestRate': {
       if (typeof val === 'number') {
-        if (val <= 0) return 'Not stated in document';
+        if (val <= 0) return 'Not extracted';
         const typeStr = fullField?.rateType && fullField.rateType !== 'unknown' ? ` (${fullField.rateType})` : '';
         return `${formatPercent(val)}${typeStr}`;
       }
@@ -1089,13 +1089,13 @@ function formatFieldValue(key: keyof ExtractedLoanFields, val: any, fullField?: 
     }
     case 'apr':
       if (typeof val === 'number') {
-        if (val <= 0) return 'Not stated in document';
+        if (val <= 0) return 'Not extracted';
         return `${val.toFixed(2)}% APR`;
       }
       return val ? String(val) : 'Not stated in document';
     case 'tenureMonths':
       if (typeof val === 'number') {
-        if (val <= 0) return 'Not stated in document';
+        if (val <= 0) return 'Not extracted';
         const yrs = (val / 12).toFixed(1);
         return `${val} months (${yrs} yrs)`;
       }
@@ -1122,7 +1122,7 @@ function formatFieldValue(key: keyof ExtractedLoanFields, val: any, fullField?: 
         str.toLowerCase().includes('not mentioned') ||
         str.toLowerCase().includes('not stated')
       ) {
-        return 'Not stated in document';
+        return 'Not extracted';
       }
       return str;
     }

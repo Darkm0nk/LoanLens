@@ -36,7 +36,7 @@ export const REGULATORY_RULES: Record<string, RegulatoryRule> = {
     summary:
       'Lenders are required to provide a standardized KFS to borrowers prior to contract execution. Any fee or charge not mentioned in the KFS cannot be charged to the borrower at any stage.',
     guidanceText:
-      'Under RBI Circular DOR.MCS.REC.17/01.01.001/2024-25, lenders are expected to provide a standardized KFS detailing the all-inclusive APR and fee schedule. If terms in the draft agreement differ from the KFS, request written confirmation from the lender. Note: A discrepancy between negotiation stages does not constitute proof of illegality or wrongdoing.',
+      'Under RBI Circular DOR.MCS.REC.17/01.01.001/2024-25, lenders are expected to provide a standardized KFS detailing the all-inclusive APR and fee schedule. If terms in the draft agreement differ from the KFS, request written confirmation from the lender. Note: A discrepancy between negotiation stages does not, by itself, establish non-compliance or wrongdoing.',
     verificationNotice:
       'Applicability Caveat: Applies to facilities sanctioned on or after October 1, 2024. Differences between negotiation copies and final schedules may reflect approved underwriting revisions; verify whether an amended KFS was issued. A discrepancy alone does not prove regulatory violation.',
   },

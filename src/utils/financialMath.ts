@@ -107,8 +107,7 @@ export function compareLifetimeImpact(
   if (missingFields.length > 0) {
     return {
       canCalculate: false,
-      reason: 'Insufficient information to estimate',
-      emiDifferenceMonthly: 0,
+      reason: 'Insufficient information to estimate: required inputs are missing or invalid.',      emiDifferenceMonthly: 0,
       principalDifference: 0,
       lifetimeCostDifference: 0,
       lifetimeInterestDifference: 0,
