@@ -425,10 +425,28 @@ CRITICAL VERIFICATION INSTRUCTIONS:
 
     res.json(extractedResult);
   } catch (error: any) {
-    console.error('Error during document extraction:', error);
-    res.status(500).json({
-      error: error?.message || 'Failed to extract loan terms from the document.',
-      details: error?.status || 'INTERNAL_ERROR',
+    const providerStatus = Number(error?.status ?? error?.statusCode ?? 0);
+    const providerMessage = String(error?.message ?? '');
+    const quotaExceeded =
+      providerStatus === 429 ||
+      /RESOURCE_EXHAUSTED|quota exceeded|rate limit/i.test(providerMessage);
+
+    if (quotaExceeded) {
+      console.warn('Gemini free-tier quota reached; automatic retry skipped.');
+      res.status(429).json({
+        code: 'GEMINI_QUOTA_EXCEEDED',
+        error: 'The Gemini free-tier request limit has been reached. Please wait for the quota to reset, or use the sample demo. This application does not enable billing automatically.',
+      });
+      return;
+    }
+
+    console.error('Document extraction failed:', {
+      status: providerStatus || 'unknown',
+      message: providerMessage.slice(0, 300),
+    });
+    res.status(502).json({
+      code: 'DOCUMENT_EXTRACTION_FAILED',
+      error: 'Gemini could not process this document right now. Please try later or use the sample demo.',
     });
   }
 });

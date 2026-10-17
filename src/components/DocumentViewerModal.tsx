@@ -141,7 +141,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
           <div className="px-6 py-2.5 bg-teal-50 border-b border-teal-200 text-teal-950 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-teal-700 shrink-0" />
             <span>
-              <strong>Live Extraction:</strong> Extracted directly from uploaded document using Gemini 3.8 Flash structured output.
+              <strong>AI Extraction:</strong> Extracted from the uploaded document using Gemini structured output. Verify terms and references against the original document.
             </span>
           </div>
         )}
@@ -209,7 +209,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-          <span>{document.isDemo ? 'Synthetic Demo Record' : 'Processed via Gemini 3.8 Flash'}</span>
+          <span>{document.isDemo ? 'Synthetic Demo Record' : 'Processed via Gemini AI'}</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-medium transition-colors"

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DashboardLayout from './components/DashboardLayout';
 import { HeroBanner } from './components/HeroBanner';
 import { DocumentUploadCard } from './components/DocumentUploadCard';
@@ -22,10 +22,12 @@ import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from './data/demoData'
 import { ArrowRight, UploadCloud, Sparkles, FileText, Scale, ShieldCheck, Mail } from 'lucide-react';
 
 export default function App() {
+  // Document states
   const [kfsDoc, setKfsDoc] = useState<ExtractedLoanDocument | null>(null);
   const [sanctionDoc, setSanctionDoc] = useState<ExtractedLoanDocument | null>(null);
   const [agreementDoc, setAgreementDoc] = useState<ExtractedLoanDocument | null>(null);
 
+  // Loading, stage, and error states per card
   const [loadingMap, setLoadingMap] = useState<Record<LoanDocumentType, boolean>>({
     kfs: false,
     sanction_letter: false,
@@ -42,9 +44,11 @@ export default function App() {
     loan_agreement: null,
   });
 
+  // Active Demo Scenario
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>('home_loan_discrepancy');
   const [currentSection, setCurrentSection] = useState<'dashboard' | 'audit' | 'compare' | 'rbi'>('audit');
 
+  // Modals
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
   const [isRbiModalOpen, setIsRbiModalOpen] = useState(false);
   const [inspectDoc, setInspectDoc] = useState<ExtractedLoanDocument | null>(null);
@@ -102,16 +106,20 @@ export default function App() {
     }
 
     try {
+      // 1. Validation Stage
       const validExtensions = ['.pdf', '.png', '.jpg', '.jpeg', '.txt'];
       const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!validExtensions.includes(fileExt)) {
-        throw new Error(`Unsupported file type (${fileExt}). Please upload a PDF, image, or TXT file.`);
+        throw new Error(`Unsupported file type (${fileExt}). Please upload a PDF, image (PNG/JPG), or TXT file.`);
       }
+
       if (file.size < 50) {
         throw new Error('The selected file is empty (0 bytes). Please select a valid document.');
       }
 
+      // 2. Uploading Stage
       setStageMap((prev) => ({ ...prev, [docType]: 'uploading' }));
+
       let resolvedMime = file.type;
       if (!resolvedMime || resolvedMime === 'application/octet-stream') {
         if (fileExt === '.pdf') resolvedMime = 'application/pdf';
@@ -145,6 +153,7 @@ export default function App() {
         };
       }
 
+      // 3. Extracting Stage (Gemini Model API)
       setStageMap((prev) => ({ ...prev, [docType]: 'extracting' }));
       const res = await fetch('/api/extract', {
         method: 'POST',
@@ -158,6 +167,7 @@ export default function App() {
       }
 
       const extracted: ExtractedLoanDocument = await res.json();
+      // Ensure real uploads are never marked as demo
       extracted.isDemo = false;
       if (options?.isCombined) {
         extracted.isCombinedPackage = true;
@@ -171,13 +181,14 @@ export default function App() {
       setStageMap((prev) => ({ ...prev, [docType]: 'failed' }));
       setErrorMap((prev) => ({
         ...prev,
-        [docType]: err.message || 'Failed to extract loan terms.',
+        [docType]: err.message || 'Failed to extract loan terms. Please check your file or try pasting text.',
       }));
     } finally {
       setLoadingMap((prev) => ({ ...prev, [docType]: false }));
     }
   }
 
+  // Handle all-in-one multi-section extraction from a single combined PDF
   async function handleProcessAllSectionsFromFile(file: File) {
     setIsProcessingCombined(true);
     try {
@@ -192,25 +203,27 @@ export default function App() {
         }),
       ]);
       setKfsDoc((prev) =>
-          prev
-              ? {
-                ...prev,
-                isCombinedPackage: true,
-                originFileName: file.name,
-                originSection: prev.originSection || 'Section 1: Key Facts Statement',
-              }
-              : null
+        prev
+          ? {
+              ...prev,
+              isCombinedPackage: true,
+              originFileName: file.name,
+              originSection: prev.originSection || 'Section 1: Key Facts Statement',
+            }
+          : null
       );
     } finally {
       setIsProcessingCombined(false);
     }
   }
 
+  // Handle text input and call backend Gemini extraction
   async function handleTextSubmit(docType: LoanDocumentType, text: string, docName: string) {
     setLoadingMap((prev) => ({ ...prev, [docType]: true }));
     setStageMap((prev) => ({ ...prev, [docType]: 'extracting' }));
     setErrorMap((prev) => ({ ...prev, [docType]: null }));
 
+    // CRITICAL DATA ISOLATION GUARD:
     if (activeScenarioId !== null || kfsDoc?.isDemo || sanctionDoc?.isDemo || agreementDoc?.isDemo) {
       setActiveScenarioId(null);
       if (docType === 'kfs') {
@@ -227,8 +240,9 @@ export default function App() {
 
     try {
       if (text.trim().length < 30) {
-        throw new Error('Pasted text is too brief to contain standard loan terms.');
+        throw new Error('Pasted text is too brief to contain standard loan terms. Please paste complete loan clauses or schedules.');
       }
+
       const res = await fetch('/api/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -293,28 +307,36 @@ export default function App() {
     });
   };
 
+  // Real vs Demo document separation
   const realDocs = [kfsDoc, sanctionDoc, agreementDoc].filter(
-      (d): d is ExtractedLoanDocument => Boolean(d && !d.isDemo)
+    (d): d is ExtractedLoanDocument => Boolean(d && !d.isDemo)
   );
   const demoDocs = [kfsDoc, sanctionDoc, agreementDoc].filter(
-      (d): d is ExtractedLoanDocument => Boolean(d && d.isDemo)
+    (d): d is ExtractedLoanDocument => Boolean(d && d.isDemo)
   );
+
   const isDemoActive = Boolean(activeScenarioId || (demoDocs.length > 0 && realDocs.length === 0));
   const realDocCount = realDocs.length;
   const docCount = isDemoActive ? demoDocs.length : realDocCount;
 
+  // Run deterministic comparison with strict data-isolation enforcement
   const report: LoanComparisonReport | null = useMemo(() => {
     try {
+      // Demo mode: evaluate demo records only when no real docs exist
       if (isDemoActive && demoDocs.length >= 2 && realDocs.length === 0) {
         return compareLoanDocuments(kfsDoc, sanctionDoc, agreementDoc);
       }
+
+      // Real mode: require AT LEAST TWO real documents to generate an authentic audit
       if (!isDemoActive && realDocCount >= 2) {
         return compareLoanDocuments(
-            kfsDoc && !kfsDoc.isDemo ? kfsDoc : null,
-            sanctionDoc && !sanctionDoc.isDemo ? sanctionDoc : null,
-            agreementDoc && !agreementDoc.isDemo ? agreementDoc : null
+          kfsDoc && !kfsDoc.isDemo ? kfsDoc : null,
+          sanctionDoc && !sanctionDoc.isDemo ? sanctionDoc : null,
+          agreementDoc && !agreementDoc.isDemo ? agreementDoc : null
         );
       }
+
+      // Fewer than 2 real documents: do NOT generate audit! Waiting for documents.
       return null;
     } catch (err) {
       console.error('Audit comparison evaluation guard:', err);
