@@ -1,6 +1,5 @@
 import React from 'react';
-import { ShieldCheck, AlertTriangle, CheckCircle2, ArrowDown, FileSearch, Sparkles, Scale, UploadCloud } from 'lucide-react';
-import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from '../data/demoData';
+import { ShieldCheck, AlertTriangle, CheckCircle2, ArrowDown, FileSearch, Sparkles, UploadCloud } from 'lucide-react';
 
 interface HeroBannerProps {
   onLoadScenario: (scenarioId: string) => void;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { X, FileText, CheckCircle2, Sparkles } from 'lucide-react';
 import { ExtractedLoanDocument } from '../types/loan';
 import { formatINR, formatPercent } from '../utils/comparator';
 

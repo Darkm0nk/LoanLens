@@ -481,6 +481,90 @@ runTest('Unverified citations are classified as "Needs manual verification"', ()
   assert.strictEqual(rateComp?.classification, 'Needs manual verification');
 });
 
+runTest('Clean match terms produce undefined finding classification rather than Needs manual verification', () => {
+  const cleanReport = compareLoanDocuments(
+    DEMO_SCENARIO_CLEAN.kfsDoc,
+    DEMO_SCENARIO_CLEAN.sanctionDoc,
+    DEMO_SCENARIO_CLEAN.agreementDoc
+  );
+  assert.strictEqual(cleanReport.matchCount, 9);
+  for (const comp of cleanReport.comparisons) {
+    assert.strictEqual(comp.status, 'match');
+    assert.strictEqual(
+      comp.classification,
+      undefined,
+      `Field ${comp.fieldKey} should not have a finding classification when terms match`
+    );
+  }
+});
+
+runTest('Strict isVerifiedInSource requirement rejects unverified citations when omitted or undefined', () => {
+  const docWithOmittedVerification: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      loanAmount: {
+        value: 4200000,
+        rawText: 'Rs. 42,00,000/-',
+        pageClauseRef: 'Page 1, Item 1',
+        isVerifiedInSource: undefined, // omitted verification
+      },
+    },
+  };
+  const doc2: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      loanAmount: {
+        value: 4500000,
+        rawText: 'Rs. 45,00,000/-',
+        pageClauseRef: 'Page 2, Item 2',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(docWithOmittedVerification, null, doc2);
+  const amountComp = report.comparisons.find((c) => c.fieldKey === 'loanAmount');
+  assert.strictEqual(amountComp?.status, 'mismatch');
+  assert.strictEqual(amountComp?.values.kfs?.isVerifiedInSource, false);
+  assert.strictEqual(amountComp?.values.kfs?.pageClauseRef, 'Evidence not verified');
+  assert.strictEqual(amountComp?.classification, 'Needs manual verification');
+});
+
+runTest('Sanction letter unverified citation triggers Needs manual verification on variance', () => {
+  const kfsDoc: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      loanAmount: {
+        value: 4200000,
+        rawText: 'Rs. 42,00,000/-',
+        pageClauseRef: 'Page 1, Item 1',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const sanctionDoc: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.sanctionDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.sanctionDoc.fields,
+      loanAmount: {
+        value: 4300000,
+        rawText: 'Rs. 43,00,000/-',
+        pageClauseRef: 'Page reference not detected in document text',
+        isVerifiedInSource: false,
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(kfsDoc, sanctionDoc, null);
+  const amountComp = report.comparisons.find((c) => c.fieldKey === 'loanAmount');
+  assert.strictEqual(amountComp?.status, 'mismatch');
+  assert.strictEqual(amountComp?.values.sanctionLetter?.isVerifiedInSource, false);
+  assert.strictEqual(amountComp?.classification, 'Needs manual verification');
+});
+
 console.log(`\n========================================`);
 console.log(`All ${passedTests} of ${totalTests} Comprehensive Quality & Audit Tests Passed!`);
 console.log(`========================================\n`);

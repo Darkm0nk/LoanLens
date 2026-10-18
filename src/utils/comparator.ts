@@ -56,11 +56,14 @@ interface DocValues {
 }
 
 export function deriveFindingClassification(
-    fieldKey: keyof ExtractedLoanFields,
-    status: DiscrepancyStatus,
-    severity: DiscrepancySeverity,
-    values: DocValues
-): FindingClassification {
+  fieldKey: keyof ExtractedLoanFields,
+  status: DiscrepancyStatus,
+  severity: DiscrepancySeverity,
+  values: DocValues
+): FindingClassification | undefined {
+  if (status === 'match') {
+    return undefined;
+  }
   if (status === 'missing') {
     return 'Missing information';
   }
@@ -132,13 +135,6 @@ export function compareLoanDocuments(
 
   const comparisons: FieldComparison[] = [];
 
-  // Helper to identify document names that stated a term vs unstated
-  const getDocName = (docType: 'kfs' | 'sanctionLetter' | 'loanAgreement') => {
-    if (docType === 'kfs') return 'Key Facts Statement (KFS)';
-    if (docType === 'sanctionLetter') return 'Sanction Letter';
-    return 'Loan Agreement';
-  };
-
   // Helper to build 3-column values
   const buildValues = (
       kfsField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
@@ -172,7 +168,7 @@ export function compareLoanDocuments(
       ) {
         return false;
       }
-      return field.isVerifiedInSource ?? true;
+      return field.isVerifiedInSource === true;
     };
 
     if (kfsDoc && kfsField) {

@@ -324,13 +324,17 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       return;
     }
 
-    const checkVerified = (ref?: string) =>
+    const checkVerified = (ref?: string, raw?: string) =>
       Boolean(
         ref &&
           !ref.toLowerCase().includes('not detected') &&
           !ref.toLowerCase().includes('not found') &&
           !ref.toLowerCase().includes('not cited') &&
-          !ref.toLowerCase().includes('not specified')
+          !ref.toLowerCase().includes('not specified') &&
+          !ref.toLowerCase().includes('not mentioned') &&
+          (!raw ||
+            (!raw.toLowerCase().includes('not specified') &&
+              !raw.toLowerCase().includes('not mentioned')))
       );
 
     const extractedResult = {
@@ -405,20 +409,26 @@ CRITICAL VERIFICATION INSTRUCTIONS:
         penalCharges: {
           value: parsedData.fields?.penalCharges?.value || 'Not specified in document',
           isCompoundedInterest: Boolean(parsedData.fields?.penalCharges?.isCompoundedInterest),
-          isRbiCompliant: parsedData.fields?.penalCharges?.isRbiCompliant ?? true,
+          isRbiCompliant: parsedData.fields?.penalCharges?.isRbiCompliant === true,
           rawText: parsedData.fields?.penalCharges?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.penalCharges?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.penalCharges?.notes,
-          isVerifiedInSource: checkVerified(parsedData.fields?.penalCharges?.pageClauseRef),
+          isVerifiedInSource: checkVerified(
+            parsedData.fields?.penalCharges?.pageClauseRef,
+            parsedData.fields?.penalCharges?.rawText
+          ),
         },
         prepaymentCharges: {
           value: parsedData.fields?.prepaymentCharges?.value || 'Not specified in document',
           hasPenalty: Boolean(parsedData.fields?.prepaymentCharges?.hasPenalty),
-          isFloatingNilExempt: parsedData.fields?.prepaymentCharges?.isFloatingNilExempt ?? true,
+          isFloatingNilExempt: parsedData.fields?.prepaymentCharges?.isFloatingNilExempt === true,
           rawText: parsedData.fields?.prepaymentCharges?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.prepaymentCharges?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.prepaymentCharges?.notes,
-          isVerifiedInSource: checkVerified(parsedData.fields?.prepaymentCharges?.pageClauseRef),
+          isVerifiedInSource: checkVerified(
+            parsedData.fields?.prepaymentCharges?.pageClauseRef,
+            parsedData.fields?.prepaymentCharges?.rawText
+          ),
         },
       },
     };

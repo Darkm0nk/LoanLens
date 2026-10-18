@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
   UploadCloud,
-  FileText,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -23,6 +22,7 @@ interface DocumentUploadCardProps {
   isLoading: boolean;
   stage?: UploadProcessingStage;
   error: string | null;
+  onDismissError?: () => void;
   onFileUpload: (file: File) => void;
   onTextSubmit: (text: string, docName: string) => void;
   onClear: () => void;
@@ -32,7 +32,6 @@ interface DocumentUploadCardProps {
 }
 
 export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
-  docType,
   title,
   badge,
   description,
@@ -40,6 +39,7 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
   isLoading,
   stage = 'idle',
   error,
+  onDismissError,
   onFileUpload,
   onTextSubmit,
   onClear,
@@ -157,8 +157,13 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setLocalError(null)}
-              className="text-slate-400 hover:text-slate-600 text-xs"
+              onClick={() => {
+                setLocalError(null);
+                onDismissError?.();
+              }}
+              className="text-slate-400 hover:text-slate-700 text-xs cursor-pointer p-0.5 rounded hover:bg-rose-100 transition-colors"
+              title="Dismiss error notification"
+              aria-label="Dismiss error notification"
             >
               ✕
             </button>

@@ -48,15 +48,18 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
   if (!isOpen || !comparison) return null;
 
   // Derive classification if not explicitly set
-  const classification: FindingClassification =
+  const classification: FindingClassification | undefined =
     comparison.classification ||
-    (comparison.status === 'missing'
+    (comparison.status === 'match'
+      ? undefined
+      : comparison.status === 'missing'
       ? 'Missing information'
       : comparison.fieldKey === 'penalCharges' ||
         comparison.fieldKey === 'prepaymentCharges' ||
         comparison.fieldKey === 'insurance'
       ? 'Possible regulatory concern'
       : comparison.values.loanAgreement?.isVerifiedInSource === false ||
+        comparison.values.sanctionLetter?.isVerifiedInSource === false ||
         comparison.values.kfs?.isVerifiedInSource === false
       ? 'Needs manual verification'
       : 'Confirmed discrepancy');
@@ -95,7 +98,20 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     },
   };
 
-  const currentClass = classificationConfig[classification];
+  const matchConfig = {
+    label: 'Terms Aligned (Match)',
+    badge: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    bg: 'bg-emerald-50/70 border-emerald-200',
+    icon: <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />,
+    desc: 'Extracted terms and source references align consistently across all submitted contract documents.',
+  };
+
+  const currentClass =
+    comparison.status === 'match'
+      ? matchConfig
+      : classification
+      ? classificationConfig[classification]
+      : classificationConfig['Needs manual verification'];
 
   // Discrepancy navigation
   const currentIndex = allComparisons.findIndex((c) => c.fieldKey === comparison.fieldKey);

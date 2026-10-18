@@ -35,20 +35,24 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
   };
 
   // Derive classification
-  const classification: FindingClassification =
+  const classification: FindingClassification | undefined =
     comparison.classification ||
-    (comparison.status === 'missing'
+    (comparison.status === 'match'
+      ? undefined
+      : comparison.status === 'missing'
       ? 'Missing information'
       : comparison.fieldKey === 'penalCharges' ||
         comparison.fieldKey === 'prepaymentCharges' ||
         comparison.fieldKey === 'insurance'
       ? 'Possible regulatory concern'
       : comparison.values.loanAgreement?.isVerifiedInSource === false ||
+        comparison.values.sanctionLetter?.isVerifiedInSource === false ||
         comparison.values.kfs?.isVerifiedInSource === false
       ? 'Needs manual verification'
       : 'Confirmed discrepancy');
 
   const classificationBadge = () => {
+    if (!classification || comparison.status === 'match') return null;
     switch (classification) {
       case 'Confirmed discrepancy':
         return (
@@ -105,7 +109,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
 
   const isMismatch = comparison.status === 'mismatch';
 
-  const renderSourceRef = (ref?: string, isVerified?: boolean) => {
+  const renderSourceRef = (ref?: string) => {
     if (!ref || ref === 'Not cited' || ref === 'Not specified' || ref.includes('not detected')) {
       return (
         <span className="text-slate-400 italic text-[11px]">
@@ -176,7 +180,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.kfs?.pageClauseRef, comparison.values.kfs?.isVerifiedInSource)}
+            {renderSourceRef(comparison.values.kfs?.pageClauseRef)}
           </div>
         </div>
 
@@ -196,7 +200,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.sanctionLetter?.pageClauseRef, comparison.values.sanctionLetter?.isVerifiedInSource)}
+            {renderSourceRef(comparison.values.sanctionLetter?.pageClauseRef)}
           </div>
         </div>
 
@@ -226,7 +230,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.loanAgreement?.pageClauseRef, comparison.values.loanAgreement?.isVerifiedInSource)}
+            {renderSourceRef(comparison.values.loanAgreement?.pageClauseRef)}
           </div>
         </div>
       </div>
