@@ -513,8 +513,9 @@ export default function App() {
                   </div>
               )}
 
-              {/* 3 Upload Cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {/* 3 Upload Cards - With dark mode background */}
+              <div className="rounded-2xl p-6 border border-slate-200">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <DocumentUploadCard
                     docType="kfs"
                     title="Key Facts Statement (KFS)"
@@ -566,6 +567,7 @@ export default function App() {
                     onLoadSampleDoc={() => handleLoadSingleSample('loan_agreement')}
                     sampleButtonLabel="Load Sample Agreement"
                 />
+              </div>
               </div>
 
               {/* Divider between upload cards and comparison report */}
