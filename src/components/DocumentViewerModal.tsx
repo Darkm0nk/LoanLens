@@ -30,6 +30,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.loanAmount.rawText,
       ref: document.fields.loanAmount.pageClauseRef,
       isVerified: document.fields.loanAmount.isVerifiedInSource,
+      verificationLevel: document.fields.loanAmount.verificationLevel,
       notes: document.fields.loanAmount.notes,
     },
     {
@@ -38,6 +39,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.interestRate.rawText,
       ref: document.fields.interestRate.pageClauseRef,
       isVerified: document.fields.interestRate.isVerifiedInSource,
+      verificationLevel: document.fields.interestRate.verificationLevel,
       notes: document.fields.interestRate.benchmark || document.fields.interestRate.notes,
     },
     {
@@ -46,6 +48,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.apr.rawText,
       ref: document.fields.apr.pageClauseRef,
       isVerified: document.fields.apr.isVerifiedInSource,
+      verificationLevel: document.fields.apr.verificationLevel,
       notes: document.fields.apr.notes,
     },
     {
@@ -54,6 +57,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.tenureMonths.rawText,
       ref: document.fields.tenureMonths.pageClauseRef,
       isVerified: document.fields.tenureMonths.isVerifiedInSource,
+      verificationLevel: document.fields.tenureMonths.verificationLevel,
       notes: document.fields.tenureMonths.notes,
     },
     {
@@ -62,6 +66,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.emi.rawText,
       ref: document.fields.emi.pageClauseRef,
       isVerified: document.fields.emi.isVerifiedInSource,
+      verificationLevel: document.fields.emi.verificationLevel,
       notes: document.fields.emi.notes,
     },
     {
@@ -70,6 +75,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.processingFees.rawText,
       ref: document.fields.processingFees.pageClauseRef,
       isVerified: document.fields.processingFees.isVerifiedInSource,
+      verificationLevel: document.fields.processingFees.verificationLevel,
       notes: document.fields.processingFees.gstDetails,
     },
     {
@@ -78,6 +84,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.insurance.rawText,
       ref: document.fields.insurance.pageClauseRef,
       isVerified: document.fields.insurance.isVerifiedInSource,
+      verificationLevel: document.fields.insurance.verificationLevel,
       notes: document.fields.insurance.policyName,
     },
     {
@@ -86,6 +93,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.penalCharges.rawText,
       ref: document.fields.penalCharges.pageClauseRef,
       isVerified: document.fields.penalCharges.isVerifiedInSource,
+      verificationLevel: document.fields.penalCharges.verificationLevel,
       notes: document.fields.penalCharges.isCompoundedInterest ? 'Clause specifies compounded penal interest' : 'Flat penal charge structure',
     },
     {
@@ -94,6 +102,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       raw: document.fields.prepaymentCharges.rawText,
       ref: document.fields.prepaymentCharges.pageClauseRef,
       isVerified: document.fields.prepaymentCharges.isVerifiedInSource,
+      verificationLevel: document.fields.prepaymentCharges.verificationLevel,
       notes: document.fields.prepaymentCharges.hasPenalty ? 'Foreclosure fee referenced in schedule' : 'Zero foreclosure fee',
     },
   ];
@@ -192,7 +201,26 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                     <td className="py-2.5 px-3 font-mono font-medium text-slate-900">{row.val}</td>
                     <td className="py-2.5 px-3 text-slate-600 text-[11px]">
                       {row.ref && !row.ref.includes('not detected') ? (
-                        <span className="font-mono">{row.ref}</span>
+                        <div className="space-y-1">
+                          <span className="font-mono block">{row.ref}</span>
+                          {row.verificationLevel === 'source_verified' || row.isVerified ? (
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              Source Verified
+                            </span>
+                          ) : row.verificationLevel === 'excerpt_corroborated' ? (
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+                              Excerpt Corroborated
+                            </span>
+                          ) : row.verificationLevel === 'ai_extracted' ? (
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                              AI-Extracted
+                            </span>
+                          ) : (
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                              Not Verified
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-slate-400 italic">Page reference not detected in document text</span>
                       )}

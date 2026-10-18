@@ -7,6 +7,7 @@ import {
   DiscrepancySeverity,
   ReviewRecommendation,
   FindingClassification,
+  SourceVerificationLevel,
 } from '../types/loan';
 import { compareLifetimeImpact } from './financialMath';
 import { REGULATORY_RULES } from './regulatoryRules';
@@ -39,6 +40,8 @@ interface DocValues {
     pageClauseRef: string;
     notes?: string;
     isVerifiedInSource?: boolean;
+    verificationLevel?: SourceVerificationLevel;
+    verificationDetails?: string;
   };
   sanctionLetter?: {
     display: string;
@@ -46,6 +49,8 @@ interface DocValues {
     pageClauseRef: string;
     notes?: string;
     isVerifiedInSource?: boolean;
+    verificationLevel?: SourceVerificationLevel;
+    verificationDetails?: string;
   };
   loanAgreement?: {
     display: string;
@@ -53,6 +58,8 @@ interface DocValues {
     pageClauseRef: string;
     notes?: string;
     isVerifiedInSource?: boolean;
+    verificationLevel?: SourceVerificationLevel;
+    verificationDetails?: string;
   };
 }
 
@@ -138,9 +145,33 @@ export function compareLoanDocuments(
 
   // Helper to build 3-column values
   const buildValues = (
-      kfsField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
-      sanctionField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
-      agreeField?: { value: any; rawText: string; pageClauseRef: string; notes?: string; isVerifiedInSource?: boolean },
+      kfsField?: {
+        value: any;
+        rawText: string;
+        pageClauseRef: string;
+        notes?: string;
+        isVerifiedInSource?: boolean;
+        verificationLevel?: SourceVerificationLevel;
+        verificationDetails?: string;
+      },
+      sanctionField?: {
+        value: any;
+        rawText: string;
+        pageClauseRef: string;
+        notes?: string;
+        isVerifiedInSource?: boolean;
+        verificationLevel?: SourceVerificationLevel;
+        verificationDetails?: string;
+      },
+      agreeField?: {
+        value: any;
+        rawText: string;
+        pageClauseRef: string;
+        notes?: string;
+        isVerifiedInSource?: boolean;
+        verificationLevel?: SourceVerificationLevel;
+        verificationDetails?: string;
+      },
       key: keyof ExtractedLoanFields = 'loanAmount'
   ): DocValues => {
     const values: DocValues = {};
@@ -155,29 +186,81 @@ export function compareLoanDocuments(
                 val.toLowerCase().includes('not mentioned') ||
                 val.toLowerCase().includes('not stated')));
 
-    const checkVerified = (field?: { value: any; rawText?: string; pageClauseRef?: string; isVerifiedInSource?: boolean }) => {
-      if (!field || checkIsMissing(field.value)) return false;
-      if (field.isVerifiedInSource !== true) return false;
-      const ref = field.pageClauseRef;
-      if (!ref) return false;
-      const lower = ref.toLowerCase();
-      if (
-          lower.includes('not detected') ||
-          lower.includes('not cited') ||
-          lower.includes('not specified') ||
-          lower.includes('not found') ||
-          lower.includes('evidence not verified') ||
-          lower.includes('unverified')
-      ) {
-        return false;
+    const evaluateDocField = (
+      doc: ExtractedLoanDocument | null | undefined,
+      field?: {
+        value: any;
+        rawText?: string;
+        pageClauseRef?: string;
+        notes?: string;
+        isVerifiedInSource?: boolean;
+        verificationLevel?: SourceVerificationLevel;
+        verificationDetails?: string;
       }
-      const substantiation = verifySourceSubstantiation(field.value, field.rawText, field.pageClauseRef, key);
-      return substantiation.isVerified;
+    ): {
+      isVerified: boolean;
+      verificationLevel: SourceVerificationLevel;
+      details?: string;
+    } => {
+      if (!field || checkIsMissing(field.value)) {
+        return {
+          isVerified: false,
+          verificationLevel: 'unverified',
+          details: 'No value extracted',
+        };
+      }
+
+      // If source verification was not established or omitted in the extraction
+      if (field.isVerifiedInSource !== true && !field.verificationLevel) {
+        return {
+          isVerified: false,
+          verificationLevel: 'unverified',
+          details: 'Evidence not verified',
+        };
+      }
+
+      // If document is a synthetic demo benchmark, keep its preset verification level if present
+      if (doc?.isDemo && (field.verificationLevel || field.isVerifiedInSource === true)) {
+        return {
+          isVerified: field.isVerifiedInSource === true,
+          verificationLevel: field.verificationLevel || (field.isVerifiedInSource ? 'source_verified' : 'unverified'),
+          details: field.verificationDetails || (field.isVerifiedInSource ? 'Synthetic benchmark verified' : 'Evidence not verified'),
+        };
+      }
+
+      const res = verifySourceSubstantiation(
+        field.value,
+        field.rawText,
+        field.pageClauseRef,
+        key,
+        doc?.sourceText
+      );
+
+      // If field already has an explicit verificationLevel from server/client and no new sourceText was provided
+      if (field.verificationLevel && !doc?.sourceText) {
+        return {
+          isVerified: field.verificationLevel === 'source_verified',
+          verificationLevel: field.verificationLevel,
+          details: field.verificationDetails || res.details || res.reason,
+        };
+      }
+
+      return {
+        isVerified: res.isVerified,
+        verificationLevel: res.verificationLevel,
+        details: res.details || res.reason,
+      };
     };
 
     if (kfsDoc && kfsField) {
       const isMissing = checkIsMissing(kfsField.value);
-      const isVerified = checkVerified(kfsField);
+      const evalRes = evaluateDocField(kfsDoc, kfsField);
+      const isRefNegative =
+        !kfsField.pageClauseRef ||
+        kfsField.pageClauseRef.toLowerCase().includes('not detected') ||
+        kfsField.pageClauseRef.toLowerCase().includes('not cited') ||
+        kfsField.pageClauseRef.toLowerCase().includes('not specified');
+
       values.kfs = {
         display: formatFieldValue(key, kfsField.value, kfsField),
         rawText:
@@ -188,21 +271,27 @@ export function compareLoanDocuments(
                 !kfsField.rawText.toLowerCase().includes('not mentioned')
                     ? kfsField.rawText
                     : 'Not stated in document',
-        pageClauseRef: isVerified
-            ? kfsField.pageClauseRef
-            : (!kfsField.pageClauseRef ||
-               kfsField.pageClauseRef.toLowerCase().includes('not detected') ||
-               kfsField.pageClauseRef.toLowerCase().includes('not cited') ||
-               kfsField.pageClauseRef.toLowerCase().includes('not specified'))
-                ? 'Page reference not detected in document text'
-                : 'Evidence not verified',
+        pageClauseRef:
+          evalRes.verificationLevel === 'unverified'
+            ? isRefNegative
+              ? 'Page reference not detected in document text'
+              : 'Evidence not verified'
+            : kfsField.pageClauseRef,
         notes: kfsField.notes,
-        isVerifiedInSource: isVerified,
+        isVerifiedInSource: evalRes.isVerified,
+        verificationLevel: evalRes.verificationLevel,
+        verificationDetails: evalRes.details,
       };
     }
     if (sanctionDoc && sanctionField) {
       const isMissing = checkIsMissing(sanctionField.value);
-      const isVerified = checkVerified(sanctionField);
+      const evalRes = evaluateDocField(sanctionDoc, sanctionField);
+      const isRefNegative =
+        !sanctionField.pageClauseRef ||
+        sanctionField.pageClauseRef.toLowerCase().includes('not detected') ||
+        sanctionField.pageClauseRef.toLowerCase().includes('not cited') ||
+        sanctionField.pageClauseRef.toLowerCase().includes('not specified');
+
       values.sanctionLetter = {
         display: formatFieldValue(key, sanctionField.value, sanctionField),
         rawText:
@@ -213,21 +302,27 @@ export function compareLoanDocuments(
                 !sanctionField.rawText.toLowerCase().includes('not mentioned')
                     ? sanctionField.rawText
                     : 'Not stated in document',
-        pageClauseRef: isVerified
-            ? sanctionField.pageClauseRef
-            : (!sanctionField.pageClauseRef ||
-               sanctionField.pageClauseRef.toLowerCase().includes('not detected') ||
-               sanctionField.pageClauseRef.toLowerCase().includes('not cited') ||
-               sanctionField.pageClauseRef.toLowerCase().includes('not specified'))
-                ? 'Page reference not detected in document text'
-                : 'Evidence not verified',
+        pageClauseRef:
+          evalRes.verificationLevel === 'unverified'
+            ? isRefNegative
+              ? 'Page reference not detected in document text'
+              : 'Evidence not verified'
+            : sanctionField.pageClauseRef,
         notes: sanctionField.notes,
-        isVerifiedInSource: isVerified,
+        isVerifiedInSource: evalRes.isVerified,
+        verificationLevel: evalRes.verificationLevel,
+        verificationDetails: evalRes.details,
       };
     }
     if (agreementDoc && agreeField) {
       const isMissing = checkIsMissing(agreeField.value);
-      const isVerified = checkVerified(agreeField);
+      const evalRes = evaluateDocField(agreementDoc, agreeField);
+      const isRefNegative =
+        !agreeField.pageClauseRef ||
+        agreeField.pageClauseRef.toLowerCase().includes('not detected') ||
+        agreeField.pageClauseRef.toLowerCase().includes('not cited') ||
+        agreeField.pageClauseRef.toLowerCase().includes('not specified');
+
       values.loanAgreement = {
         display: formatFieldValue(key, agreeField.value, agreeField),
         rawText:
@@ -238,16 +333,16 @@ export function compareLoanDocuments(
                 !agreeField.rawText.toLowerCase().includes('not mentioned')
                     ? agreeField.rawText
                     : 'Not stated in document',
-        pageClauseRef: isVerified
-            ? agreeField.pageClauseRef
-            : (!agreeField.pageClauseRef ||
-               agreeField.pageClauseRef.toLowerCase().includes('not detected') ||
-               agreeField.pageClauseRef.toLowerCase().includes('not cited') ||
-               agreeField.pageClauseRef.toLowerCase().includes('not specified'))
-                ? 'Page reference not detected in document text'
-                : 'Evidence not verified',
+        pageClauseRef:
+          evalRes.verificationLevel === 'unverified'
+            ? isRefNegative
+              ? 'Page reference not detected in document text'
+              : 'Evidence not verified'
+            : agreeField.pageClauseRef,
         notes: agreeField.notes,
-        isVerifiedInSource: isVerified,
+        isVerifiedInSource: evalRes.isVerified,
+        verificationLevel: evalRes.verificationLevel,
+        verificationDetails: evalRes.details,
       };
     }
     return values;

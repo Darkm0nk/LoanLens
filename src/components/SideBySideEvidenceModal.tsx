@@ -162,6 +162,75 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     );
   }
 
+  function renderEvidenceReference(val?: {
+    pageClauseRef: string;
+    isVerifiedInSource?: boolean;
+    verificationLevel?: string;
+    verificationDetails?: string;
+  }) {
+    if (!val?.pageClauseRef || val.pageClauseRef === 'Not cited' || val.pageClauseRef.includes('not detected')) {
+      return (
+        <div className="flex items-center gap-1 text-slate-400 text-[11px] mt-0.5 italic">
+          <span>Page reference not detected in document text</span>
+        </div>
+      );
+    }
+    if (
+      val.verificationLevel === 'unverified' ||
+      (val.isVerifiedInSource === false && (!val.verificationLevel || val.verificationLevel === 'unverified')) ||
+      val.pageClauseRef.includes('not verified')
+    ) {
+      return (
+        <div className="mt-0.5 space-y-1">
+          <div className="flex items-center gap-1 text-amber-800 text-xs font-medium">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>{val.pageClauseRef}</span>
+          </div>
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+            Evidence Not Verified
+          </span>
+        </div>
+      );
+    }
+    if (val.verificationLevel === 'source_verified' || val.isVerifiedInSource === true) {
+      return (
+        <div className="mt-0.5 space-y-1">
+          <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>{val.pageClauseRef}</span>
+          </div>
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+            Source Text Verified
+          </span>
+        </div>
+      );
+    }
+    if (val.verificationLevel === 'excerpt_corroborated') {
+      return (
+        <div className="mt-0.5 space-y-1">
+          <div className="flex items-center gap-1 text-slate-800 font-medium text-xs">
+            <Info className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+            <span>{val.pageClauseRef}</span>
+          </div>
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-100 text-sky-900 border border-sky-300">
+            Excerpt Corroborated (Source Unverified)
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="mt-0.5 space-y-1">
+        <div className="flex items-center gap-1 text-slate-700 font-medium text-xs">
+          <FileText className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+          <span>{val.pageClauseRef}</span>
+        </div>
+        <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-300">
+          AI-Extracted (Source Not Verified)
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       role="dialog"
@@ -329,20 +398,10 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
-                  {comparison.values.kfs?.isVerifiedInSource ? (
-                    <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{comparison.values.kfs.pageClauseRef}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-amber-800 text-[11px] mt-0.5">
-                      <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
-                      <span>{comparison.values.kfs?.pageClauseRef || 'Reference not detected'}</span>
-                    </div>
-                  )}
+                  {renderEvidenceReference(comparison.values.kfs)}
                 </div>
 
                 {/* Verbatim Excerpt */}
@@ -379,20 +438,10 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
-                  {comparison.values.sanctionLetter?.isVerifiedInSource ? (
-                    <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{comparison.values.sanctionLetter.pageClauseRef}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-amber-800 text-[11px] mt-0.5">
-                      <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
-                      <span>{comparison.values.sanctionLetter?.pageClauseRef || 'Reference not detected'}</span>
-                    </div>
-                  )}
+                  {renderEvidenceReference(comparison.values.sanctionLetter)}
                 </div>
 
                 {/* Verbatim Excerpt */}
@@ -430,20 +479,10 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
-                  {comparison.values.loanAgreement?.isVerifiedInSource ? (
-                    <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{comparison.values.loanAgreement.pageClauseRef}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-amber-800 text-[11px] mt-0.5">
-                      <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
-                      <span>{comparison.values.loanAgreement?.pageClauseRef || 'Reference not detected'}</span>
-                    </div>
-                  )}
+                  {renderEvidenceReference(comparison.values.loanAgreement)}
                 </div>
 
                 {/* Verbatim Excerpt */}

@@ -241,6 +241,7 @@ CRITICAL VERIFICATION INSTRUCTIONS:
 4. Identify the Lender Name, Borrower Name, and Loan Type accurately. If borrower name is redacted or absent, return "Borrower".`;
 
     let contentsPayload: any;
+    let documentSourceText: string | undefined;
 
     if (fileBase64 && mimeType) {
       const fileValidation = validateDocumentFile(fileBase64, mimeType, documentName);
@@ -258,12 +259,15 @@ CRITICAL VERIFICATION INSTRUCTIONS:
         } catch {
           textDecoded = '';
         }
+        documentSourceText = textDecoded;
         contentsPayload = [
           {
             text: `Document Type: ${docTypeLabel}\nDocument Name: ${documentName || 'Uploaded Text Document'}\n\nDocument Text Content:\n"""\n${textDecoded}\n"""\n\nPlease extract all 9 key loan terms and exact clause references from the text above as defined in the schema.`,
           },
         ];
       } else {
+        // Binary PDF or image sent directly to Gemini multimodal without local text extraction
+        documentSourceText = undefined;
         contentsPayload = [
           {
             inlineData: {
@@ -283,6 +287,7 @@ CRITICAL VERIFICATION INSTRUCTIONS:
         return;
       }
 
+      documentSourceText = textContent;
       contentsPayload = [
         {
           text: `Document Type: ${docTypeLabel}\nDocument Name: ${documentName || 'Pasted Content'}\n\nDocument Text:\n"""\n${textContent}\n"""\n\nPlease extract all 9 key loan terms and exact clause references from the text above as defined in the schema.`,
@@ -326,15 +331,77 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       return;
     }
 
-    const checkFieldVerified = (
+    const evaluateField = (
       val: any,
       raw?: string,
       ref?: string,
       fieldKey?: keyof ExtractedLoanFields
-    ): boolean => {
-      const res = verifySourceSubstantiation(val, raw, ref, fieldKey);
-      return res.isVerified;
+    ) => {
+      return verifySourceSubstantiation(val, raw, ref, fieldKey, documentSourceText);
     };
+
+    const loanAmountVer = evaluateField(
+      parsedData.fields?.loanAmount?.value,
+      parsedData.fields?.loanAmount?.rawText,
+      parsedData.fields?.loanAmount?.pageClauseRef,
+      'loanAmount'
+    );
+
+    const interestRateVer = evaluateField(
+      parsedData.fields?.interestRate?.value,
+      parsedData.fields?.interestRate?.rawText,
+      parsedData.fields?.interestRate?.pageClauseRef,
+      'interestRate'
+    );
+
+    const aprVer = evaluateField(
+      parsedData.fields?.apr?.value,
+      parsedData.fields?.apr?.rawText,
+      parsedData.fields?.apr?.pageClauseRef,
+      'apr'
+    );
+
+    const tenureVer = evaluateField(
+      parsedData.fields?.tenureMonths?.value,
+      parsedData.fields?.tenureMonths?.rawText,
+      parsedData.fields?.tenureMonths?.pageClauseRef,
+      'tenureMonths'
+    );
+
+    const emiVer = evaluateField(
+      parsedData.fields?.emi?.value,
+      parsedData.fields?.emi?.rawText,
+      parsedData.fields?.emi?.pageClauseRef,
+      'emi'
+    );
+
+    const feesVer = evaluateField(
+      parsedData.fields?.processingFees?.value,
+      parsedData.fields?.processingFees?.rawText,
+      parsedData.fields?.processingFees?.pageClauseRef,
+      'processingFees'
+    );
+
+    const insuranceVer = evaluateField(
+      parsedData.fields?.insurance?.value,
+      parsedData.fields?.insurance?.rawText,
+      parsedData.fields?.insurance?.pageClauseRef,
+      'insurance'
+    );
+
+    const penalVer = evaluateField(
+      parsedData.fields?.penalCharges?.value,
+      parsedData.fields?.penalCharges?.rawText,
+      parsedData.fields?.penalCharges?.pageClauseRef,
+      'penalCharges'
+    );
+
+    const prepayVer = evaluateField(
+      parsedData.fields?.prepaymentCharges?.value,
+      parsedData.fields?.prepaymentCharges?.rawText,
+      parsedData.fields?.prepaymentCharges?.pageClauseRef,
+      'prepaymentCharges'
+    );
 
     const extractedResult = {
       id: `doc-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -349,18 +416,17 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       borrowerName: parsedData.borrowerName || 'Borrower',
       loanType: parsedData.loanType || 'Retail Loan',
       rawSummary: parsedData.rawSummary,
+      sourceText: documentSourceText,
+      hasIndependentSourceText: Boolean(documentSourceText && documentSourceText.trim().length > 10),
       fields: {
         loanAmount: {
           value: parsedData.fields?.loanAmount?.value ?? null,
           rawText: parsedData.fields?.loanAmount?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.loanAmount?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.loanAmount?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.loanAmount?.value,
-            parsedData.fields?.loanAmount?.rawText,
-            parsedData.fields?.loanAmount?.pageClauseRef,
-            'loanAmount'
-          ),
+          isVerifiedInSource: loanAmountVer.isVerified,
+          verificationLevel: loanAmountVer.verificationLevel,
+          verificationDetails: loanAmountVer.details || loanAmountVer.reason,
         },
         interestRate: {
           value: parsedData.fields?.interestRate?.value ?? null,
@@ -369,48 +435,36 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           rawText: parsedData.fields?.interestRate?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.interestRate?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.interestRate?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.interestRate?.value,
-            parsedData.fields?.interestRate?.rawText,
-            parsedData.fields?.interestRate?.pageClauseRef,
-            'interestRate'
-          ),
+          isVerifiedInSource: interestRateVer.isVerified,
+          verificationLevel: interestRateVer.verificationLevel,
+          verificationDetails: interestRateVer.details || interestRateVer.reason,
         },
         apr: {
           value: parsedData.fields?.apr?.value ?? null,
           rawText: parsedData.fields?.apr?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.apr?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.apr?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.apr?.value,
-            parsedData.fields?.apr?.rawText,
-            parsedData.fields?.apr?.pageClauseRef,
-            'apr'
-          ),
+          isVerifiedInSource: aprVer.isVerified,
+          verificationLevel: aprVer.verificationLevel,
+          verificationDetails: aprVer.details || aprVer.reason,
         },
         tenureMonths: {
           value: parsedData.fields?.tenureMonths?.value ?? null,
           rawText: parsedData.fields?.tenureMonths?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.tenureMonths?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.tenureMonths?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.tenureMonths?.value,
-            parsedData.fields?.tenureMonths?.rawText,
-            parsedData.fields?.tenureMonths?.pageClauseRef,
-            'tenureMonths'
-          ),
+          isVerifiedInSource: tenureVer.isVerified,
+          verificationLevel: tenureVer.verificationLevel,
+          verificationDetails: tenureVer.details || tenureVer.reason,
         },
         emi: {
           value: parsedData.fields?.emi?.value ?? null,
           rawText: parsedData.fields?.emi?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.emi?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.emi?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.emi?.value,
-            parsedData.fields?.emi?.rawText,
-            parsedData.fields?.emi?.pageClauseRef,
-            'emi'
-          ),
+          isVerifiedInSource: emiVer.isVerified,
+          verificationLevel: emiVer.verificationLevel,
+          verificationDetails: emiVer.details || emiVer.reason,
         },
         processingFees: {
           value: parsedData.fields?.processingFees?.value ?? null,
@@ -419,12 +473,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           rawText: parsedData.fields?.processingFees?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.processingFees?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.processingFees?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.processingFees?.value,
-            parsedData.fields?.processingFees?.rawText,
-            parsedData.fields?.processingFees?.pageClauseRef,
-            'processingFees'
-          ),
+          isVerifiedInSource: feesVer.isVerified,
+          verificationLevel: feesVer.verificationLevel,
+          verificationDetails: feesVer.details || feesVer.reason,
         },
         insurance: {
           value: parsedData.fields?.insurance?.value ?? null,
@@ -433,12 +484,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           rawText: parsedData.fields?.insurance?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.insurance?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.insurance?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.insurance?.value,
-            parsedData.fields?.insurance?.rawText,
-            parsedData.fields?.insurance?.pageClauseRef,
-            'insurance'
-          ),
+          isVerifiedInSource: insuranceVer.isVerified,
+          verificationLevel: insuranceVer.verificationLevel,
+          verificationDetails: insuranceVer.details || insuranceVer.reason,
         },
         penalCharges: {
           value: parsedData.fields?.penalCharges?.value || 'Not specified in document',
@@ -453,12 +501,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           rawText: parsedData.fields?.penalCharges?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.penalCharges?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.penalCharges?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.penalCharges?.value,
-            parsedData.fields?.penalCharges?.rawText,
-            parsedData.fields?.penalCharges?.pageClauseRef,
-            'penalCharges'
-          ),
+          isVerifiedInSource: penalVer.isVerified,
+          verificationLevel: penalVer.verificationLevel,
+          verificationDetails: penalVer.details || penalVer.reason,
         },
         prepaymentCharges: {
           value: parsedData.fields?.prepaymentCharges?.value || 'Not specified in document',
@@ -473,12 +518,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           rawText: parsedData.fields?.prepaymentCharges?.rawText || 'Not specified in document',
           pageClauseRef: parsedData.fields?.prepaymentCharges?.pageClauseRef || 'Page reference not detected in document text',
           notes: parsedData.fields?.prepaymentCharges?.notes,
-          isVerifiedInSource: checkFieldVerified(
-            parsedData.fields?.prepaymentCharges?.value,
-            parsedData.fields?.prepaymentCharges?.rawText,
-            parsedData.fields?.prepaymentCharges?.pageClauseRef,
-            'prepaymentCharges'
-          ),
+          isVerifiedInSource: prepayVer.isVerified,
+          verificationLevel: prepayVer.verificationLevel,
+          verificationDetails: prepayVer.details || prepayVer.reason,
         },
       },
     };

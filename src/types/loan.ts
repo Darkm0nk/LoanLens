@@ -1,11 +1,19 @@
 export type LoanDocumentType = 'kfs' | 'sanction_letter' | 'loan_agreement';
 
+export type SourceVerificationLevel =
+  | 'source_verified'
+  | 'excerpt_corroborated'
+  | 'ai_extracted'
+  | 'unverified';
+
 export interface FieldExtraction<T = any> {
   value: T;
   rawText: string;
   pageClauseRef: string;
   notes?: string;
   isVerifiedInSource?: boolean;
+  verificationLevel?: SourceVerificationLevel;
+  verificationDetails?: string;
 }
 
 export interface InterestRateField extends FieldExtraction<number | null> {
@@ -65,6 +73,8 @@ export interface ExtractedLoanDocument {
   fileSize?: string;
   fields: ExtractedLoanFields;
   rawSummary?: string;
+  sourceText?: string;
+  hasIndependentSourceText?: boolean;
 }
 
 export type DiscrepancyStatus = 'match' | 'mismatch' | 'missing';
@@ -91,6 +101,8 @@ export interface FieldComparison {
       pageClauseRef: string;
       notes?: string;
       isVerifiedInSource?: boolean;
+      verificationLevel?: SourceVerificationLevel;
+      verificationDetails?: string;
     };
     sanctionLetter?: {
       display: string;
@@ -98,6 +110,8 @@ export interface FieldComparison {
       pageClauseRef: string;
       notes?: string;
       isVerifiedInSource?: boolean;
+      verificationLevel?: SourceVerificationLevel;
+      verificationDetails?: string;
     };
     loanAgreement?: {
       display: string;
@@ -105,6 +119,8 @@ export interface FieldComparison {
       pageClauseRef: string;
       notes?: string;
       isVerifiedInSource?: boolean;
+      verificationLevel?: SourceVerificationLevel;
+      verificationDetails?: string;
     };
   };
   summary: string;

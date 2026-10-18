@@ -15,7 +15,11 @@ import {
   validateTextContent,
   validateAiParsedData,
 } from '../src/utils/documentValidator';
-import { verifySourceSubstantiation } from '../src/utils/sourceVerifier';
+import {
+  verifySourceSubstantiation,
+  matchesNumericToken,
+  verifyExcerptInSourceText,
+} from '../src/utils/sourceVerifier';
 
 console.log('--- Starting LoanLens Quality & Audit Comprehensive Test Suite ---');
 
@@ -881,15 +885,204 @@ runTest('Plausible pageClauseRef with mismatched numeric source text evaluates t
   assert.ok(resultAmt.reason?.includes('does not substantiate'));
 });
 
-runTest('Supported citation with matching source text and numbers evaluates to isVerifiedInSource: true', () => {
-  const resultRate = verifySourceSubstantiation(8.75, 'Applicable rate of interest shall be floating rate of 8.75% per annum.', 'Page 1, Clause 2.1', 'interestRate');
+runTest('Supported citation with matching source text and numbers evaluates to source_verified', () => {
+  const sampleDocText = `
+    Key Facts Statement:
+    Applicable rate of interest shall be floating rate of 8.75% per annum.
+    Sanctioned facility amount of INR 42,00,000/- (Forty Two Lakhs Only).
+    Loan tenure shall be 240 months from first disbursement.
+  `;
+  const resultRate = verifySourceSubstantiation(8.75, 'Applicable rate of interest shall be floating rate of 8.75% per annum.', 'Page 1, Clause 2.1', 'interestRate', sampleDocText);
   assert.strictEqual(resultRate.isVerified, true);
+  assert.strictEqual(resultRate.verificationLevel, 'source_verified');
 
-  const resultAmt = verifySourceSubstantiation(4200000, 'Sanctioned facility amount of INR 42,00,000/- (Forty Two Lakhs Only).', 'Page 1, Schedule A', 'loanAmount');
+  const resultAmt = verifySourceSubstantiation(4200000, 'Sanctioned facility amount of INR 42,00,000/- (Forty Two Lakhs Only).', 'Page 1, Schedule A', 'loanAmount', sampleDocText);
   assert.strictEqual(resultAmt.isVerified, true);
+  assert.strictEqual(resultAmt.verificationLevel, 'source_verified');
 
-  const resultTenure = verifySourceSubstantiation(240, 'Loan tenure shall be 240 months from first disbursement.', 'Page 2, Item 4', 'tenureMonths');
+  const resultTenure = verifySourceSubstantiation(240, 'Loan tenure shall be 240 months from first disbursement.', 'Page 2, Item 4', 'tenureMonths', sampleDocText);
   assert.strictEqual(resultTenure.isVerified, true);
+  assert.strictEqual(resultTenure.verificationLevel, 'source_verified');
+});
+
+// ---------------------------------------------------------
+// 11. MULTI-TIER SOURCE VERIFICATION & STRICT MATCHING AUDIT
+// ---------------------------------------------------------
+console.log('\n[11] Multi-Tier Source Verification & Strict Matching Audit:');
+
+runTest('AI excerpt with plausible citation without source text is marked excerpt_corroborated and isVerified: false', () => {
+  const result = verifySourceSubstantiation(
+    8.75,
+    'Applicable rate of interest shall be floating rate of 8.75% per annum.',
+    'Page 1, Clause 2.1',
+    'interestRate'
+    // sourceText omitted / unavailable
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'excerpt_corroborated');
+  assert.ok(result.details?.includes('source document text not independently verified'));
+});
+
+runTest('AI excerpt that does not exist in provided source text is marked ai_extracted and fails verification', () => {
+  const sourceText = 'Sanction letter for Mr. Sharma. Loan sanctioned is Rs. 40,00,000 at 9.00% p.a.';
+  const fabricatedExcerpt = 'Special promotional interest rate of 8.75% per annum approved.';
+  const result = verifySourceSubstantiation(
+    8.75,
+    fabricatedExcerpt,
+    'Page 1, Clause 2',
+    'interestRate',
+    sourceText
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'ai_extracted');
+  assert.ok(result.reason?.includes('does not exist in provided document text'));
+});
+
+runTest('Strict numeric token boundary: 500 does NOT match inside 5000 or 15000', () => {
+  // Test numeric boundary function directly
+  assert.strictEqual(matchesNumericToken('Processing fee of Rs 5000', 500), false);
+  assert.strictEqual(matchesNumericToken('Late charges of INR 15,000', 500), false);
+  assert.strictEqual(matchesNumericToken('Penalty of 50000 INR', 500), false);
+  assert.strictEqual(matchesNumericToken('Prepayment fee ₹5,000/-', 500), false);
+
+  // Correct matches
+  assert.strictEqual(matchesNumericToken('Processing fee of Rs. 500/-', 500), true);
+  assert.strictEqual(matchesNumericToken('Flat ₹500 per month', 500), true);
+  assert.strictEqual(matchesNumericToken('Overdue fee of INR 500.00', 500), true);
+  assert.strictEqual(matchesNumericToken('Fee is 5,000 INR', 5000), true);
+
+  // Test through verifySourceSubstantiation
+  const resSubstring5000 = verifySourceSubstantiation(
+    500,
+    'Processing fee of Rs. 5,000/- plus applicable taxes.',
+    'Page 2, Schedule A',
+    'processingFees'
+  );
+  assert.strictEqual(resSubstring5000.isVerified, false);
+  assert.strictEqual(resSubstring5000.verificationLevel, 'unverified');
+
+  const resSubstring15000 = verifySourceSubstantiation(
+    500,
+    'Late payment penal charge of INR 15,000 fixed.',
+    'Page 3, Clause 8',
+    'emi'
+  );
+  assert.strictEqual(resSubstring15000.isVerified, false);
+  assert.strictEqual(resSubstring15000.verificationLevel, 'unverified');
+});
+
+runTest('Processing fee strictness: word "fee" or "processing" alone without numeric fee fails substantiation', () => {
+  const resGenericWord = verifySourceSubstantiation(
+    5000,
+    'The borrower shall pay standard processing fee and administrative fee.',
+    'Page 2, Clause 4',
+    'processingFees'
+  );
+  assert.strictEqual(resGenericWord.isVerified, false);
+  assert.strictEqual(resGenericWord.verificationLevel, 'unverified');
+  assert.ok(resGenericWord.reason?.includes('does not substantiate'));
+
+  // Exact amount 5000 passes corroboration
+  const resExactAmount = verifySourceSubstantiation(
+    5000,
+    'Flat processing fee of INR 5,000 plus GST.',
+    'Page 2, Clause 4',
+    'processingFees'
+  );
+  assert.strictEqual(resExactAmount.verificationLevel, 'excerpt_corroborated');
+
+  // Percentage fee passes corroboration
+  const resPercentFee = verifySourceSubstantiation(
+    5000,
+    'Processing charges at 0.50% of sanctioned loan amount.',
+    'Page 2, Clause 4',
+    'processingFees'
+  );
+  assert.strictEqual(resPercentFee.verificationLevel, 'excerpt_corroborated');
+});
+
+runTest('Formatted currency, percentages, and tenure correctly match normalized source text', () => {
+  const fullDocumentSource = `
+    KEY FACTS STATEMENT (KFS)
+    Sanctioned Loan Facility: INR 42,00,000/- (Forty-Two Lakhs Only).
+    Applicable Interest Rate: 8.75% p.a. (Floating: Repo 6.50% + 2.25%).
+    Annual Percentage Rate (APR): 9.15% per annum all inclusive.
+    Repayment Tenure: 20 years (240 equated monthly installments).
+    Monthly Installment (EMI): ₹37,116 per month.
+    Processing Fee: ₹5,000 + 18% GST.
+  `;
+
+  // INR Lakhs normalization
+  const resAmt = verifySourceSubstantiation(
+    4200000,
+    'INR 42,00,000/- (Forty-Two Lakhs Only)',
+    'Page 1, Table 1',
+    'loanAmount',
+    fullDocumentSource
+  );
+  assert.strictEqual(resAmt.isVerified, true);
+  assert.strictEqual(resAmt.verificationLevel, 'source_verified');
+
+  // Percentage normalization
+  const resRate = verifySourceSubstantiation(
+    8.75,
+    '8.75% p.a. (Floating: Repo 6.50% + 2.25%)',
+    'Page 1, Clause 2',
+    'interestRate',
+    fullDocumentSource
+  );
+  assert.strictEqual(resRate.isVerified, true);
+  assert.strictEqual(resRate.verificationLevel, 'source_verified');
+
+  // Tenure months to years normalization
+  const resTenure = verifySourceSubstantiation(
+    240,
+    '20 years (240 equated monthly installments)',
+    'Page 1, Table 1',
+    'tenureMonths',
+    fullDocumentSource
+  );
+  assert.strictEqual(resTenure.isVerified, true);
+  assert.strictEqual(resTenure.verificationLevel, 'source_verified');
+
+  // EMI with ₹ symbol and commas
+  const resEmi = verifySourceSubstantiation(
+    37116,
+    '₹37,116 per month',
+    'Page 2, Schedule B',
+    'emi',
+    fullDocumentSource
+  );
+  assert.strictEqual(resEmi.isVerified, true);
+  assert.strictEqual(resEmi.verificationLevel, 'source_verified');
+});
+
+runTest('Genuinely supported excerpt present in source text evaluates to source_verified and isVerified: true', () => {
+  const sourceText = 'This Agreement confirms the loan amount of ₹42,00,000 sanctioned to the Borrower.';
+  const excerpt = 'loan amount of ₹42,00,000 sanctioned';
+  const result = verifySourceSubstantiation(
+    4200000,
+    excerpt,
+    'Page 1, Clause 1.1',
+    'loanAmount',
+    sourceText
+  );
+  assert.strictEqual(result.isVerified, true);
+  assert.strictEqual(result.verificationLevel, 'source_verified');
+  assert.strictEqual(result.details, 'Source independently verified in document text');
+});
+
+runTest('Scanned or unavailable source text returns explicit unverified-source state (excerpt_corroborated, isVerified: false)', () => {
+  const result = verifySourceSubstantiation(
+    37116,
+    'Equated Monthly Installment (EMI) shall be INR 37,116/- payable by 5th of each month.',
+    'Page 2, Clause 4',
+    'emi',
+    undefined // sourceText unavailable for binary/scanned PDF
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'excerpt_corroborated');
+  assert.strictEqual(result.details, 'Excerpt corroborated — source document text not independently verified');
 });
 
 console.log(`\n========================================`);

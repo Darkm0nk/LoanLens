@@ -145,7 +145,12 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
 
   const isMismatch = comparison.status === 'mismatch';
 
-  const renderSourceRef = (ref?: string, isVerifiedInSource?: boolean) => {
+  const renderSourceRef = (
+    ref?: string,
+    isVerifiedInSource?: boolean,
+    verificationLevel?: string,
+    details?: string
+  ) => {
     if (!ref || ref === 'Not cited' || ref === 'Not specified' || ref.includes('not detected')) {
       return (
         <span className="text-slate-400 italic text-[11px]">
@@ -153,16 +158,57 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         </span>
       );
     }
-    if (isVerifiedInSource === false || ref.includes('not verified') || ref.includes('Evidence not verified')) {
+    if (
+      verificationLevel === 'unverified' ||
+      isVerifiedInSource === false && (!verificationLevel || verificationLevel === 'unverified') ||
+      ref.includes('not verified') ||
+      ref.includes('Evidence not verified')
+    ) {
       return (
-        <span className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium border border-amber-200" title={ref}>
+        <span
+          className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium border border-amber-200"
+          title={details || ref}
+        >
           Evidence not verified: excerpt does not substantiate value
         </span>
       );
     }
+    if (verificationLevel === 'source_verified' || isVerifiedInSource === true) {
+      return (
+        <span className="inline-flex items-center gap-1.5 flex-wrap">
+          <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+          <span
+            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0"
+            title={details || 'Excerpt verified in actual document text'}
+          >
+            Source Verified
+          </span>
+        </span>
+      );
+    }
+    if (verificationLevel === 'excerpt_corroborated') {
+      return (
+        <span className="inline-flex items-center gap-1.5 flex-wrap">
+          <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+          <span
+            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 shrink-0"
+            title={details || 'Excerpt corroborated — source document text not independently verified'}
+          >
+            Excerpt Corroborated (Source Unverified)
+          </span>
+        </span>
+      );
+    }
+    // ai_extracted
     return (
-      <span className="text-slate-600 font-medium truncate" title={ref}>
-        {ref}
+      <span className="inline-flex items-center gap-1.5 flex-wrap">
+        <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+        <span
+          className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0"
+          title={details || 'AI-extracted — source not independently verified'}
+        >
+          AI-Extracted (Source Not Verified)
+        </span>
       </span>
     );
   };
@@ -195,7 +241,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
               type="button"
               onClick={() => onInspectEvidence(comparison)}
               className="text-xs bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/90 font-medium px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
-              title="Inspect side-by-side contract excerpts and verified citations"
+              title="Inspect side-by-side contract excerpts and evidence citations"
             >
               <FileText className="w-3.5 h-3.5 text-teal-700" />
               <span>Inspect Evidence</span>
@@ -224,7 +270,12 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.kfs?.pageClauseRef, comparison.values.kfs?.isVerifiedInSource)}
+            {renderSourceRef(
+              comparison.values.kfs?.pageClauseRef,
+              comparison.values.kfs?.isVerifiedInSource,
+              comparison.values.kfs?.verificationLevel,
+              comparison.values.kfs?.verificationDetails
+            )}
           </div>
         </div>
 
@@ -244,7 +295,12 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.sanctionLetter?.pageClauseRef, comparison.values.sanctionLetter?.isVerifiedInSource)}
+            {renderSourceRef(
+              comparison.values.sanctionLetter?.pageClauseRef,
+              comparison.values.sanctionLetter?.isVerifiedInSource,
+              comparison.values.sanctionLetter?.verificationLevel,
+              comparison.values.sanctionLetter?.verificationDetails
+            )}
           </div>
         </div>
 
@@ -274,7 +330,12 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.loanAgreement?.pageClauseRef, comparison.values.loanAgreement?.isVerifiedInSource)}
+            {renderSourceRef(
+              comparison.values.loanAgreement?.pageClauseRef,
+              comparison.values.loanAgreement?.isVerifiedInSource,
+              comparison.values.loanAgreement?.verificationLevel,
+              comparison.values.loanAgreement?.verificationDetails
+            )}
           </div>
         </div>
       </div>

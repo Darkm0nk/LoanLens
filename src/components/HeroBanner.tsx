@@ -101,7 +101,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     Sample Case B: Consistent Alignment (Personal Loan)
                   </div>
                   <div className="text-[11px] text-slate-600">
-                    Synthetic profile: Verified terms across KFS, Sanction & Agreement with 100% match
+                    Synthetic profile: Aligned terms across KFS, Sanction & Agreement with 100% match
                   </div>
                 </div>
               </button>
