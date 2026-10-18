@@ -205,7 +205,7 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
             <div className="flex items-center gap-2.5 shrink-0">
               <button
                   onClick={onOpenDisputeLetter}
-                  className="px-4 py-2 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-4 py-2 bg-teal-800 hover:bg-teal-900 dark:bg-teal-700 dark:hover:bg-teal-600 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Mail className="w-4 h-4" />
                 <span>Draft Clarification Notice</span>

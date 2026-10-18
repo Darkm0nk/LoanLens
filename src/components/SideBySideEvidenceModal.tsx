@@ -141,7 +141,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     );
 
     return (
-      <div className="p-3 bg-slate-900 text-slate-100 rounded-lg text-xs font-mono leading-relaxed border border-slate-800 whitespace-pre-wrap select-text">
+      <div className="p-3 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-lg text-xs font-mono leading-relaxed border border-slate-200 dark:border-slate-800 whitespace-pre-wrap select-text">
         {parts.map((part, i) => {
           const isHighlight =
             /\b(?:\d+(?:\.\d+)?%|\d+(?:\.\d+)?\s*(?:lakhs?|cr|crores?|months?|years?|bps|p\.a\.)|₹\s*[\d,]+|compound|floating|fixed|mandatory|penal interest)/i.test(
@@ -150,7 +150,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
           return isHighlight ? (
             <mark
               key={i}
-              className="bg-teal-500/30 text-teal-200 font-bold px-1 py-0.5 rounded border border-teal-400/40"
+              className="bg-teal-100 dark:bg-teal-500/30 text-teal-900 dark:text-teal-200 font-bold px-1 py-0.5 rounded border border-teal-300 dark:border-teal-400/40"
             >
               {part}
             </mark>
@@ -601,7 +601,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
                   onClose();
                   onOpenDisputeLetter();
                 }}
-                className="px-3.5 py-2 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 text-white font-semibold rounded-lg shadow-xs transition-colors"
+                className="px-3.5 py-2 bg-teal-800 hover:bg-teal-900 dark:bg-teal-700 dark:hover:bg-teal-600 text-white font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
               >
                 Include in Clarification Notice
               </button>

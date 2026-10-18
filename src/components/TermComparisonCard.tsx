@@ -466,18 +466,18 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
       </div>
 
       {showRawExcerpts && (
-        <div className="mt-2.5 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] font-mono space-y-2 border border-slate-800">
+        <div className="mt-2.5 p-3 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-[11px] font-mono space-y-2 border border-slate-200 dark:border-slate-800">
           <div>
-            <span className="text-teal-400 font-semibold block">Key Facts Statement:</span>
-            <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.kfs?.rawText || 'Not specified in document'}</p>
+            <span className="text-teal-700 dark:text-teal-400 font-semibold block">Key Facts Statement:</span>
+            <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{comparison.values.kfs?.rawText || 'Not specified in document'}</p>
           </div>
           <div>
-            <span className="text-teal-400 font-semibold block">Sanction Letter:</span>
-            <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.sanctionLetter?.rawText || 'Not specified in document'}</p>
+            <span className="text-teal-700 dark:text-teal-400 font-semibold block">Sanction Letter:</span>
+            <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{comparison.values.sanctionLetter?.rawText || 'Not specified in document'}</p>
           </div>
           <div>
-            <span className="text-teal-400 font-semibold block">Loan Agreement:</span>
-            <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.loanAgreement?.rawText || 'Not specified in document'}</p>
+            <span className="text-teal-700 dark:text-teal-400 font-semibold block">Loan Agreement:</span>
+            <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{comparison.values.loanAgreement?.rawText || 'Not specified in document'}</p>
           </div>
         </div>
       )}

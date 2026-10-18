@@ -629,7 +629,7 @@ export default function App() {
                   <button
                       type="button"
                       onClick={() => setIsDisputeModalOpen(true)}
-                      className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-teal-800 hover:bg-teal-900 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
                   >
                     <Mail className="w-4 h-4 text-amber-300" />
                     <span>Draft Lender Clarification Notice</span>

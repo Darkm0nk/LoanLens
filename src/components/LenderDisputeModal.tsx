@@ -182,7 +182,7 @@ Contact: [Insert Phone / Email]`;
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-md flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-3 py-1.5 bg-teal-800 hover:bg-teal-900 text-white font-medium rounded-md flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
             >
               {copied ? (
                 <>

@@ -153,7 +153,7 @@ export default function DashboardLayout({
                                     safeSection === 'dashboard'
                                         ? darkMode
                                             ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
-                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                            : 'bg-teal-700 text-white font-semibold shadow-xs'
                                         : darkMode
                                             ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
                                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'
@@ -168,7 +168,7 @@ export default function DashboardLayout({
                                     safeSection === 'audit' || safeSection === 'compare'
                                         ? darkMode
                                             ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
-                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                            : 'bg-teal-700 text-white font-semibold shadow-xs'
                                         : darkMode
                                             ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
                                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'
@@ -183,7 +183,7 @@ export default function DashboardLayout({
                                     safeSection === 'rbi'
                                         ? darkMode
                                             ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
-                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                            : 'bg-teal-700 text-white font-semibold shadow-xs'
                                         : darkMode
                                             ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
                                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'

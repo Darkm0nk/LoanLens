@@ -183,7 +183,7 @@ export const RbiRightsModal: React.FC<RbiRightsModalProps> = ({ isOpen, onClose 
           <span>Official Source: Reserve Bank of India (rbi.org.in)</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-md font-medium transition-colors"
+            className="px-4 py-1.5 bg-teal-800 hover:bg-teal-900 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-md font-medium transition-colors cursor-pointer"
           >
             Close Guide
           </button>

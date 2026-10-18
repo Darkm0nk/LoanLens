@@ -352,7 +352,7 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                 <button
                   type="submit"
                   disabled={!pastedText.trim()}
-                  className="w-full py-2 px-3 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 bg-teal-800 hover:bg-teal-900 dark:bg-teal-700 dark:hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                 >
                   Analyze Pasted Text with Gemini
                 </button>
