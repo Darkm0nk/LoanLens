@@ -1,106 +1,96 @@
 # LoanLens — Check Before You Sign
 
-**LoanLens** is a fintech web application designed for Indian borrowers to systematically cross-audit loan documents before signing.
+**LoanLens** is an open-source fintech web application designed for Indian retail borrowers (home loans, personal loans, loans against property) to systematically cross-audit their loan documents before signing.
 
-In retail lending in India (housing loans, personal loans, loan against property), commercial terms can occasionally differ between initial pre-contract disclosures (**Key Facts Statement (KFS)** or **Sanction Letter**) and the 25–40 page **Loan Agreement** draft—including external benchmark spreads, upfront fee inclusions, ancillary credit insurance, and penal clauses.
+In retail lending across India, commercial terms frequently vary between initial pre-contract disclosures (**Key Facts Statement (KFS)** or **Sanction Letter**) and the lengthy (25–40 page) execution draft of the **Loan Agreement**—including external benchmark spreads, upfront administrative charges, ancillary credit insurance bundling, and penal clauses.
 
-LoanLens extracts and cross-evaluates 9 core loan terms across documents, identifying variances, displaying verified source page/clause references only when detected in the source text, providing verified RBI regulatory circular contexts, and generating a formal clarification letter for the borrower to review with their lender.
-
----
-
-## What Has Been Audited & Implemented
-
-### 1. Unmistakable Demo Mode
-- All synthetic sample documents, borrower names (`[Sample Data]`), lender institutions (`[Sample Data]`), and comparative metrics are explicitly designated as sample demonstration data.
-- The UI features clear visual banners and pill badges in navigation, upload cards, comparison tables, and dispute letters to ensure synthetic data is never mistaken for user-uploaded documents.
-- Clearly states that Google Gemini AI evaluates user-uploaded files only, and does not analyze private documents in Demo Mode.
-
-### 2. Rigorous Regulatory Auditing (RBI & IRDAI Citations)
-- All sensationalist or unsupported claims (e.g. "illegal", "criminal", "predatory trap") have been removed.
-- Findings are grounded in verified circular identifiers, issue dates, effective dates, official notification URLs, and specific applicability conditions:
-  - **KFS Mandate:** RBI Circular `RBI/2024-25/18 DOR.MCS.REC.17/01.01.001/2024-25` (Effective October 1, 2024 for retail and MSME loans).
-  - **Penal Charges vs. Penal Interest:** RBI Circular `RBI/2023-24/53 DoR.MCS.REC.28/01.01.001/2023-24` (Effective April 1, 2024 requiring reasonable penal charges rather than compounding penal interest).
-  - **Foreclosure Charges:** RBI Circular `DBOD.Dir.BC.115/13.03.00/2013-14` (Exemption strictly applies to individual retail borrowers on floating-rate term loans).
-  - **Ancillary Insurance Bundling:** IRDAI `IRDAI/NL/GDL/MISC/10/2024` & RBI Fair Practices Directions (Freedom of insurance provider choice).
-  - **External Benchmark Linked Rate (EBLR):** RBI Circular `DBR.Dir.BC.No.14/13.03.00/2019-20`.
-- Conditional rules are labeled with explicit verification notices (e.g., verifying whether a loan is floating-rate, whether a co-borrower is a commercial entity, or if property insurance is required as collateral protection).
-
-### 3. Cautious Review Recommendations
-- Verdicts are presented objectively as:
-  - **Terms Aligned Across Documents** (Consistent)
-  - **Clarifications Recommended** (Minor Variances)
-  - **Review Variances with Lender** (Variances Noted)
-- Explicit notice informs borrowers: *A document discrepancy alone does not constitute proof of error or wrongdoing. Terms may adjust during underwriting due to benchmark reset schedules or administrative parameters. Clarify all points with your lender.*
-
-### 4. Real Gemini Document Understanding & 4-Tier Source Verification
-- Real PDF and image files are processed server-side via `@google/genai` (`gemini-3.8-flash`) using strict JSON schema output.
-- Distinct pipeline stages: Validating, Uploading, Extracting, Completed, or Failed.
-- **Strict 4-Tier Evidence Hierarchy & Hardened Ground-Truth Verification:**
-  1. **Source Independently Verified (`source_verified`):** Value strictly matches excerpt under numeric token boundary rules, and the complete excerpt is verified to exist in the actual document source text via normalized full-substring or sequential ellipsis-segment matching. `isVerifiedInSource` evaluates to `true`.
-  2. **Excerpt Corroborated (`excerpt_corroborated`):** Value is strictly consistent with the AI-supplied excerpt under numeric token and claim-specific rules, but underlying document source text is unverified or unavailable (e.g. binary/scanned PDFs or images sent to Gemini multimodal without local OCR text extraction). LoanLens transparently indicates *"AI-extracted — source not independently verified"* and `isVerifiedInSource` evaluates to `false`.
-  3. **AI-Extracted (`ai_extracted`):** Excerpt or value returned by Gemini without independent corroboration, or excerpt not found in document text.
-  4. **Unverified / Insufficient Evidence (`unverified`):** Citations or excerpts are missing, placeholder (`"Not mentioned"`, `"None"`), negative (`"Not detected"`), short/generic phrases, or contradict extracted numbers or claim assertions.
-- **Full Normalized Substring & Segment Matching:** Eliminates prefix-matching vulnerabilities. Fabricated continuations or truncated excerpts fail verification. Non-contiguous excerpts (`...`) require every non-empty segment to appear in sequential order.
-- **Decoupled Citation Location Provenance:** Decouples text excerpt verification from location metadata. Validates clause numbers and page markers against source text, transparently classifying unpaginated text as `unpaginated_source` and citations absent from source as `ai_reported`.
-- **Contextual Processing-Fee Percentage Isolation:** Prevents unrelated percentages (such as interest rates, APRs, GST, or prepayment penalties) from falsely corroborating processing fee values.
-- **Claim-Specific Qualitative Corroboration:** Verifies qualitative loan terms against specific assertions:
-  - **Insurance:** Substantiates extracted premium amounts and checks whether mandatory vs. voluntary/optional claims are supported by source language.
-  - **Penal Charges:** Validates specific charge amounts/rates and requires explicit evidence of simple/flat or non-compounding structure before accepting RBI-compliance assertions.
-  - **Prepayment Charges:** Validates penalty percentages, lock-in terms, and nil-waiver claims against actual contractual provisions.
-- Pre-upload validation verifies authentic `%PDF` magic bytes and minimum file length, rejecting malformed, empty, or renamed binary files.
-- Failures (malformed JSON, unparseable scans, server errors) are reported transparently and never fabricate a fake successful analysis.
-
-### 5. Deterministic Financial Math & Unit Reconciliation
-- EMI formula: $E = P \cdot r \cdot \frac{(1+r)^n}{(1+r)^n - 1}$ with reducing balance compounding.
-- Lifetime impact calculations require all necessary inputs (principal, interest rate, tenure); when inputs are missing, LoanLens states *"Lifetime impact cannot be computed because required parameters are missing"* instead of fabricating estimates.
-- Stated calculation assumptions are displayed for borrower review.
-- Unit reconciliation engine detects and resolves unit conflicts:
-  - **Tenure:** Converts years to months (e.g., "20 Years" vs "240 Months") and reconciles equivalent durations.
-  - **Interest Rate:** Normalizes monthly rates to annualized percentages (% p.a.).
-  - **Principal:** Normalizes Lakhs and Crores to INR.
+LoanLens automatically extracts, normalizes, and cross-evaluates **9 core loan terms** across all three document types, verifying contractual clause references against ground-truth document text, applying Reserve Bank of India (RBI) regulatory circulars, and generating a formal clarification letter for borrowers to present to their lending institution.
 
 ---
 
-## Test Suite
+## Architecture & Request Data Flow
 
-Run the quality and audit test suite:
-
-```bash
-npm test
+```mermaid
+flowchart TD
+    User["Borrower / User"] -->|Uploads PDF / Image / Text| Frontend["React 19 + Vite Frontend SPA"]
+    Frontend -->|POST /api/extract| ExpressServer["Express 4 Server-Side Gateway"]
+    ExpressServer -->|Payload & Magic-Byte Validation| Validator["Document Validator"]
+    Validator -->|Grounded System Prompt + JSON Schema| GeminiAPI["Google Gemini 3.8 Flash API"]
+    GeminiAPI -->|Structured Term JSON| ExpressServer
+    ExpressServer -->|Ground-Truth Text & Location Matching| SourceVerifier["Multi-Tier Source Verifier"]
+    SourceVerifier -->|Extracted Loan Document with Verification Tiers| Frontend
+    Frontend -->|Client-Side Deterministic Engine| Comparator["Loan Comparator & Financial Math"]
+    Comparator -->|Side-by-Side Audit Matrix| Dashboard["Audit Matrix & Dispute Letter Generator"]
 ```
 
-The test suite executes 74 automated deterministic checks across two comprehensive test suites:
-- **Financial Calculations (6 tests):** Reducing-balance EMI formula accuracy, zero percent interest edge cases, missing input rejection, lifetime impact cost variance, and assumption disclosures.
-- **Matching Values (1 test):** 100% term-by-term match verification across all 9 core loan terms.
-- **Mismatches (1 test):** Principal, interest rate, tenure, EMI, fee, insurance, penal charge, and prepayment charge variance detection.
-- **Missing Terms & Partial Documents (2 tests):** Omitted APR and fee disclosures, graceful single-document intake evaluation.
-- **Conflicting Units Reconciliation (4 tests):** Tenure in years vs months reconciliation, duration discrepancy mismatch flagging, monthly vs annual interest rate normalization (% p.m. to % p.a.), and Lakhs/Crores to INR normalization.
-- **Malformed PDFs & Payload Validation (4 tests):** Small corrupt payload rejection (<50 bytes), missing `%PDF` header rejection, authentic PDF magic byte validation, brief text rejection.
-- **Failed AI Responses & Integrity (5 tests):** Malformed JSON rejection, missing schema fields rejection, missing required loan term rejection, empty/primitive model response rejection, synthetic demo flag preservation.
-- **Regulatory Sourcing & Grounding (2 tests):** Circular identifier validation, official HTTPS URL verification, absence of inflammatory or sensationalist language.
-- **Side-by-Side Classification & Evidence Integrity (6 tests):** Regulatory finding classification (Confirmed discrepancy, Missing information, Possible regulatory concern, Needs manual verification), clean matches verified without false positive warnings, strict affirmative `isVerifiedInSource === true` requirement, and sanction letter unverified citation handling.
-- **Regulatory Status & Source Substantiation Regression (10 tests):** Missing or null regulatory status handling (`isRbiCompliant: null`, `isFloatingNilExempt: null`) producing explicit `not_assessed` states without false positive/negative claims, contradictory penal clause detection, contradictory prepayment term detection, verified positive compliance matches, confirmed negative non-compliance variance reporting, fixed-rate prepayment penalty exclusion, fabricated citation rejection with placeholder text, mismatched numeric source excerpt rejection, and confirmed substantiated citations with source text.
-- **Multi-Tier Source Verification & Strict Matching (7 tests):** AI excerpt with plausible citation without source text marked `excerpt_corroborated` (`isVerified: false`), fabricated excerpt missing from source text marked `ai_extracted`, strict numeric token boundary check (`500` never matching inside `5000` or `15000`), processing fee strictness rejecting generic words like `"fee"`, formatted currency/percentages/tenure matching normalized source text, supported excerpt present in source text marked `source_verified` (`isVerified: true`), and scanned/unavailable source text returning explicit unverified-source state.
-- **Evidence Verification Hardening & Adversarial Regression (15 tests):** Prefix vulnerability elimination (fabricated long continuations fail), truncated excerpt failure, normalized formatting resilience, nonexistent page/clause location rejection, unpaginated source location decoupling, contextual processing-fee percentage corroboration, unrelated interest percentage fee rejection, mismatched fee percentage rejection, insurance premium and mandatory status claim corroboration, penal charge amount and RBI-compliance structure corroboration, prepayment penalty rate and waiver corroboration, scanned/image source degradation handling, conservative comparator classification on unverified evidence, demo-data isolation invariance, and short/generic excerpt rejection.
-- **Data Isolation & Contamination Guards (11 tests):** Hard isolation guards preventing demo and real document cross-audit, minimum 2-real-document requirement, demo record purging upon real document upload, document replacement integrity, invalidation on document clear, failed extraction isolation, ₹0 formatting prevention for missing values, and combined document attribution without misleading physical section splitting claims.
+1. **Intake & Validation:** The browser client captures files (PDF, images, TXT) and validates file boundaries (authentic `%PDF` header magic bytes, minimum text lengths).
+2. **Server-Side Extraction:** The Express backend calls Gemini 3.8 Flash (`@google/genai`) using a strict JSON schema and low temperature (`0.1`) to ensure deterministic extraction.
+3. **Ground-Truth Source Verification:** The server-side verifier cross-checks every extracted excerpt against actual document text using full-substring and sequential ellipsis-segment matching, assigning an explicit evidence tier and citation location status.
+4. **Deterministic Client-Side Comparison:** The browser runs client-side comparison, unit normalization, and reducing-balance financial math without storing documents on disk or making unneeded API calls.
 
-To execute automated headless browser UI tests with Playwright:
-```bash
-npm run test:ui
-```
-Executes 5 end-to-end browser tests in headless Chromium verifying dashboard navigation, dynamic borrower avatars, upload validation error dismissal, clean match evidence inspection, and intake guard states.
+---
 
-To execute live Gemini API end-to-end integration tests (requires valid `GEMINI_API_KEY` and local server running on port 3000):
-```bash
-npm run test:e2e
-```
+## Core Capabilities & Technical Guarantees
+
+### 1. Unmistakable Demo Mode & Data Isolation
+- **Persistent Sample Indicators:** When viewing pre-computed demonstration profiles (e.g. Vikramaditya Sharma or Pooja Iyer), the top navbar displays a `Sample Data Mode` badge, upload cards carry `Synthetic Sample` badges, and the comparison view presents a `Synthetic Demonstration Mode Active` banner.
+- **Strict Data Isolation:** Demo data and real user documents are strictly isolated. Uploading a real document automatically purges demo slots. LoanLens requires at least two real documents before generating an authentic audit, and will never evaluate real documents against synthetic benchmarks.
+
+### 2. Multi-Tier Source Verification & Location Provenance
+LoanLens never presents an AI excerpt as verified source evidence unless it has been corroborated against ground-truth text:
+- **`source_verified`:** The numeric value matches under token boundary rules, and the complete excerpt is corroborated against actual document text via normalized full-substring or sequential ellipsis-segment matching (`isVerifiedInSource === true`).
+- **`excerpt_corroborated`:** The numeric value matches the AI excerpt, but underlying source text is unavailable (e.g. binary/scanned PDFs or images sent directly to Gemini multimodal without local OCR text). The UI explicitly displays *"AI-extracted — source not independently verified"* (`isVerifiedInSource === false`).
+- **`ai_extracted`:** The excerpt or value was generated by AI without independent corroboration or was not found in the source text.
+- **`unverified`:** Citations or excerpts are missing, placeholder (`"Not mentioned"`), negative (`"Not detected"`), or contradict extracted numbers.
+- **Decoupled Location Provenance:** Clause and page references are verified independently from text excerpts, assigning statuses of `verified`, `ai_reported`, or `unpaginated_source`.
+
+### 3. Rigorous Regulatory Auditing (RBI & IRDAI Citations)
+All claims are grounded in verified circular identifiers, issue dates, official URLs, and specific applicability conditions:
+- **KFS Mandate:** RBI Circular `RBI/2024-25/18 DOR.MCS.REC.17/01.01.001/2024-25` (Mandatory Key Facts Statement for retail and MSME loans).
+- **Penal Charges vs. Penal Interest:** RBI Circular `RBI/2023-24/53 DoR.MCS.REC.28/01.01.001/2023-24` (Requires reasonable flat penal charges; prohibits compounding of penal interest).
+- **Foreclosure Charges:** RBI Circular `DBOD.Dir.BC.115/13.03.00/2013-14` (Prepayment penalties waived for individual retail borrowers on floating-rate term loans).
+- **Ancillary Insurance Bundling:** IRDAI `IRDAI/NL/GDL/MISC/10/2024` & RBI Fair Practices Directions (Prohibits coercive bundling of insurance as a condition precedent).
+- **External Benchmark Linked Rate (EBLR):** RBI Circular `DBR.Dir.BC.No.14/13.03.00/2019-20`.
+
+### 4. Deterministic Financial Math & Unit Reconciliation
+- **Reducing-Balance EMI Calculation:**
+  $$E = P \cdot r \cdot \frac{(1+r)^n}{(1+r)^n - 1}$$
+- **Zero Hallucination of Missing Values:** If principal, interest rate, or tenure inputs are missing, LoanLens states *"Lifetime impact cannot be computed because required parameters are missing"* rather than inventing estimates or displaying misleading ₹0 figures.
+- **Unit Normalization:**
+  - **Tenure:** Reconciles years and months (e.g., "20 Years" in KFS matches "240 Months" in Loan Agreement).
+  - **Interest Rate:** Normalizes monthly rates (% p.m.) to annualized percentages (% p.a.).
+  - **Principal:** Normalizes Lakhs and Crores to exact INR numbers.
+
+### 5. Privacy, Storage & Security
+- **In-Memory Processing:** Uploaded files and extracted terms are processed transiently in server memory and client browser state.
+- **Zero Persistent Disk Storage:** No borrower documents, PDF files, images, or extracted terms are saved to server disks or databases.
+- **No Secret Leaks:** All API keys are loaded via environment variables and never exposed to client-side bundles.
+
+---
+
+## Supported Documents & Input Formats
+
+| Document Type | Role | Typical Formats |
+| :--- | :--- | :--- |
+| **Key Facts Statement (KFS)** | RBI-mandated standardized summary sheet with APR, fees, and schedule | PDF, TXT, PNG, JPG (Max 25MB) |
+| **Sanction Letter** | Formal approval letter communicating sanctioned limit and conditions | PDF, TXT, PNG, JPG (Max 25MB) |
+| **Loan Agreement** | Detailed execution contract draft containing covenants and clauses | PDF, TXT, PNG, JPG (Max 25MB) |
+
+*Single-Source Multi-Section Support:* If a borrower uploads a single combined package (e.g. Sanction Letter and Agreement bound together), LoanLens scans the file across all slots while explicitly displaying a Single-Source Multi-Section attribution notice.
 
 ---
 
 ## Local Development & Setup
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js 20+
+- npm 10+
+- Google Gemini API Key (optional for synthetic demo and offline test suite; required for live document extraction)
+
+### 1. Clone & Install
 ```bash
+git clone https://github.com/Darkm0nk/LoanLens.git
+cd LoanLens
 npm install
 ```
 
@@ -108,16 +98,85 @@ npm install
 ```bash
 cp .env.example .env
 ```
-Ensure `GEMINI_API_KEY` is set in your `.env` file (in Google AI Studio, this is automatically injected from user secrets).
+Edit `.env` to configure your Gemini API Key:
+```env
+GEMINI_API_KEY="your-gemini-api-key-here"
+PORT=3000
+NODE_ENV=development
+```
 
-### 3. Start Development Server
+### 3. Start Application
 ```bash
 npm run dev
 ```
-Open `http://localhost:3000` in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Build for Production
 ```bash
 npm run build
 npm start
 ```
+
+---
+
+## Verification & Test Suite
+
+The LoanLens codebase is covered by deterministic unit, integration, and browser test suites:
+
+### 1. Quality & Audit Test Suite (74 Tests)
+```bash
+npm test
+```
+Executes two comprehensive offline test suites without consuming Gemini API tokens:
+- **`test/comparator.test.ts` (63 Tests):**
+  - Financial math: reducing-balance EMI, zero-percent interest, missing input rejection, lifetime impact.
+  - Matching & mismatch detection: 9 core terms, unit reconciliation (years vs. months, % p.m. to % p.a., Lakhs/Crores).
+  - Document validation: %PDF magic bytes, payload length guards, text length guards.
+  - AI failure handling: malformed JSON, missing fields, schema validation.
+  - Regulatory grounding: RBI circular links, non-inflammatory language.
+  - Regulatory status regression: `isRbiCompliant: null` and `isFloatingNilExempt: null` producing explicit `not_assessed` states, contradictory penal/prepayment clause detection.
+  - Multi-tier source verification: token boundaries, contextual processing fee corroboration, full-substring/ellipsis-segment matching, location provenance decoupling.
+  - Adversarial checks: fabricated prefix rejection, truncated excerpt failure, unrelated percentage rejection.
+- **`test/data-isolation.test.ts` (11 Tests):**
+  - Data isolation guards: throws on demo/real mixing.
+  - Minimum 2-real-document requirement.
+  - Demo-to-real purge simulation.
+  - Replacement integrity and stale report invalidation on document clearing.
+  - ₹0 missing value formatting prevention.
+
+### 2. TypeScript Lint & Typecheck
+```bash
+npm run lint
+```
+Executes `tsc --noEmit` with zero errors.
+
+### 3. Production Bundle Build
+```bash
+npm run build
+```
+Executes Vite production build and assets packaging.
+
+### 4. End-to-End Headless Browser UI Tests (Playwright)
+```bash
+npm run test:ui
+```
+Executes 5 automated browser journeys in headless Chromium:
+1. Navigation across Overview, Intake & Comparison, and RBI Guide tabs.
+2. Dynamic borrower avatar derivation and Sample Data Mode header pill.
+3. Upload error notification handling and dismiss button action.
+4. Aligned term verification with emerald status badges and Aligned modal header.
+5. Single-document intake guard: resetting and loading 1 document displays awaiting notice.
+
+### 5. Optional Live Gemini API Integration Test
+```bash
+npm run test:e2e
+```
+*Note: Requires valid `GEMINI_API_KEY` and running local server on port 3000.*
+
+---
+
+## Known Limitations & Troubleshooting
+
+- **Gemini Free-Tier Rate Limits (HTTP 429):** Free-tier Gemini keys have rate limits (e.g. 15 requests per minute). If quota is exceeded, LoanLens responds with a `GEMINI_QUOTA_EXCEEDED` message and skips automatic retries to avoid wasting quota. You can continue testing using pre-computed synthetic demo cases.
+- **Scanned Image / Raster PDFs:** Scanned image-only PDFs sent to Gemini multimodal are extracted accurately, but because raw machine-readable text is not extracted on the client, they are classified under the `excerpt_corroborated` tier rather than `source_verified`.
+- **Regulatory Disclaimers:** A contractual variance between a pre-sanction offer and loan agreement does not prove fraud or regulatory non-compliance. Terms may adjust during underwriting due to risk assessment or benchmark reset dates. LoanLens recommends clarifying all variances with the lending institution.
