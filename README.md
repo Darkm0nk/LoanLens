@@ -35,12 +35,18 @@ LoanLens extracts and cross-evaluates 9 core loan terms across documents, identi
 ### 4. Real Gemini Document Understanding & 4-Tier Source Verification
 - Real PDF and image files are processed server-side via `@google/genai` (`gemini-3.8-flash`) using strict JSON schema output.
 - Distinct pipeline stages: Validating, Uploading, Extracting, Completed, or Failed.
-- **Strict 4-Tier Evidence Hierarchy:**
-  1. **Source Independently Verified (`source_verified`):** Value strictly matches excerpt under numeric token boundary rules AND excerpt is verified to exist in the actual document source text via normalized matching. `isVerifiedInSource` evaluates to `true`.
-  2. **Excerpt Corroborated (`excerpt_corroborated`):** Value is strictly consistent with the AI-supplied excerpt under numeric token rules, but underlying document source text is unverified or unavailable (e.g. binary/scanned PDFs or images sent to Gemini multimodal without local OCR text extraction). LoanLens transparently indicates *"AI-extracted — source not independently verified"* and `isVerifiedInSource` evaluates to `false`.
+- **Strict 4-Tier Evidence Hierarchy & Hardened Ground-Truth Verification:**
+  1. **Source Independently Verified (`source_verified`):** Value strictly matches excerpt under numeric token boundary rules, and the complete excerpt is verified to exist in the actual document source text via normalized full-substring or sequential ellipsis-segment matching. `isVerifiedInSource` evaluates to `true`.
+  2. **Excerpt Corroborated (`excerpt_corroborated`):** Value is strictly consistent with the AI-supplied excerpt under numeric token and claim-specific rules, but underlying document source text is unverified or unavailable (e.g. binary/scanned PDFs or images sent to Gemini multimodal without local OCR text extraction). LoanLens transparently indicates *"AI-extracted — source not independently verified"* and `isVerifiedInSource` evaluates to `false`.
   3. **AI-Extracted (`ai_extracted`):** Excerpt or value returned by Gemini without independent corroboration, or excerpt not found in document text.
-  4. **Unverified / Insufficient Evidence (`unverified`):** Citations or excerpts are missing, placeholder (`"Not mentioned"`, `"None"`), negative (`"Not detected"`), or contradict extracted numbers.
-- **Strict Boundary Matching:** Eliminates loose substring matching (e.g., `500` will never match inside `5000` or `15000`). Generic words like `"fee"` or `"processing"` alone will never substantiate a specific numeric processing fee amount.
+  4. **Unverified / Insufficient Evidence (`unverified`):** Citations or excerpts are missing, placeholder (`"Not mentioned"`, `"None"`), negative (`"Not detected"`), short/generic phrases, or contradict extracted numbers or claim assertions.
+- **Full Normalized Substring & Segment Matching:** Eliminates prefix-matching vulnerabilities. Fabricated continuations or truncated excerpts fail verification. Non-contiguous excerpts (`...`) require every non-empty segment to appear in sequential order.
+- **Decoupled Citation Location Provenance:** Decouples text excerpt verification from location metadata. Validates clause numbers and page markers against source text, transparently classifying unpaginated text as `unpaginated_source` and citations absent from source as `ai_reported`.
+- **Contextual Processing-Fee Percentage Isolation:** Prevents unrelated percentages (such as interest rates, APRs, GST, or prepayment penalties) from falsely corroborating processing fee values.
+- **Claim-Specific Qualitative Corroboration:** Verifies qualitative loan terms against specific assertions:
+  - **Insurance:** Substantiates extracted premium amounts and checks whether mandatory vs. voluntary/optional claims are supported by source language.
+  - **Penal Charges:** Validates specific charge amounts/rates and requires explicit evidence of simple/flat or non-compounding structure before accepting RBI-compliance assertions.
+  - **Prepayment Charges:** Validates penalty percentages, lock-in terms, and nil-waiver claims against actual contractual provisions.
 - Pre-upload validation verifies authentic `%PDF` magic bytes and minimum file length, rejecting malformed, empty, or renamed binary files.
 - Failures (malformed JSON, unparseable scans, server errors) are reported transparently and never fabricate a fake successful analysis.
 
@@ -63,7 +69,7 @@ Run the quality and audit test suite:
 npm test
 ```
 
-The test suite executes 59 automated deterministic checks across two comprehensive test suites:
+The test suite executes 74 automated deterministic checks across two comprehensive test suites:
 - **Financial Calculations (6 tests):** Reducing-balance EMI formula accuracy, zero percent interest edge cases, missing input rejection, lifetime impact cost variance, and assumption disclosures.
 - **Matching Values (1 test):** 100% term-by-term match verification across all 9 core loan terms.
 - **Mismatches (1 test):** Principal, interest rate, tenure, EMI, fee, insurance, penal charge, and prepayment charge variance detection.
@@ -75,6 +81,7 @@ The test suite executes 59 automated deterministic checks across two comprehensi
 - **Side-by-Side Classification & Evidence Integrity (6 tests):** Regulatory finding classification (Confirmed discrepancy, Missing information, Possible regulatory concern, Needs manual verification), clean matches verified without false positive warnings, strict affirmative `isVerifiedInSource === true` requirement, and sanction letter unverified citation handling.
 - **Regulatory Status & Source Substantiation Regression (10 tests):** Missing or null regulatory status handling (`isRbiCompliant: null`, `isFloatingNilExempt: null`) producing explicit `not_assessed` states without false positive/negative claims, contradictory penal clause detection, contradictory prepayment term detection, verified positive compliance matches, confirmed negative non-compliance variance reporting, fixed-rate prepayment penalty exclusion, fabricated citation rejection with placeholder text, mismatched numeric source excerpt rejection, and confirmed substantiated citations with source text.
 - **Multi-Tier Source Verification & Strict Matching (7 tests):** AI excerpt with plausible citation without source text marked `excerpt_corroborated` (`isVerified: false`), fabricated excerpt missing from source text marked `ai_extracted`, strict numeric token boundary check (`500` never matching inside `5000` or `15000`), processing fee strictness rejecting generic words like `"fee"`, formatted currency/percentages/tenure matching normalized source text, supported excerpt present in source text marked `source_verified` (`isVerified: true`), and scanned/unavailable source text returning explicit unverified-source state.
+- **Evidence Verification Hardening & Adversarial Regression (15 tests):** Prefix vulnerability elimination (fabricated long continuations fail), truncated excerpt failure, normalized formatting resilience, nonexistent page/clause location rejection, unpaginated source location decoupling, contextual processing-fee percentage corroboration, unrelated interest percentage fee rejection, mismatched fee percentage rejection, insurance premium and mandatory status claim corroboration, penal charge amount and RBI-compliance structure corroboration, prepayment penalty rate and waiver corroboration, scanned/image source degradation handling, conservative comparator classification on unverified evidence, demo-data isolation invariance, and short/generic excerpt rejection.
 - **Data Isolation & Contamination Guards (11 tests):** Hard isolation guards preventing demo and real document cross-audit, minimum 2-real-document requirement, demo record purging upon real document upload, document replacement integrity, invalidation on document clear, failed extraction isolation, ₹0 formatting prevention for missing values, and combined document attribution without misleading physical section splitting claims.
 
 To execute automated headless browser UI tests with Playwright:

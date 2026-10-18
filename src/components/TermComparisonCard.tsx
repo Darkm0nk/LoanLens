@@ -149,7 +149,10 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     ref?: string,
     isVerifiedInSource?: boolean,
     verificationLevel?: string,
-    details?: string
+    details?: string,
+    isLocationVerified?: boolean,
+    locationStatus?: string,
+    locationDetails?: string
   ) => {
     if (!ref || ref === 'Not cited' || ref === 'Not specified' || ref.includes('not detected')) {
       return (
@@ -160,7 +163,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     }
     if (
       verificationLevel === 'unverified' ||
-      isVerifiedInSource === false && (!verificationLevel || verificationLevel === 'unverified') ||
+      (isVerifiedInSource === false && (!verificationLevel || verificationLevel === 'unverified')) ||
       ref.includes('not verified') ||
       ref.includes('Evidence not verified')
     ) {
@@ -174,12 +177,13 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
       );
     }
     if (verificationLevel === 'source_verified' || isVerifiedInSource === true) {
+      const locationTooltip = locationDetails || (isLocationVerified ? 'Location verified' : 'Location AI-reported');
       return (
         <span className="inline-flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+          <span className="text-slate-700 font-medium truncate" title={`${ref} (${locationTooltip})`}>{ref}</span>
           <span
             className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0"
-            title={details || 'Excerpt verified in actual document text'}
+            title={details || `Excerpt verified in document text. ${locationTooltip}`}
           >
             Source Verified
           </span>
@@ -189,7 +193,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     if (verificationLevel === 'excerpt_corroborated') {
       return (
         <span className="inline-flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+          <span className="text-slate-700 font-medium truncate" title={`${ref} (Source unverified)`}>{ref}</span>
           <span
             className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 shrink-0"
             title={details || 'Excerpt corroborated — source document text not independently verified'}
@@ -202,7 +206,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     // ai_extracted
     return (
       <span className="inline-flex items-center gap-1.5 flex-wrap">
-        <span className="text-slate-700 font-medium truncate" title={ref}>{ref}</span>
+        <span className="text-slate-700 font-medium truncate" title={`${ref} (Uncorroborated)`}>{ref}</span>
         <span
           className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0"
           title={details || 'AI-extracted — source not independently verified'}
@@ -274,7 +278,10 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
               comparison.values.kfs?.pageClauseRef,
               comparison.values.kfs?.isVerifiedInSource,
               comparison.values.kfs?.verificationLevel,
-              comparison.values.kfs?.verificationDetails
+              comparison.values.kfs?.verificationDetails,
+              comparison.values.kfs?.isLocationVerified,
+              comparison.values.kfs?.locationStatus,
+              comparison.values.kfs?.locationDetails
             )}
           </div>
         </div>
@@ -299,7 +306,10 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
               comparison.values.sanctionLetter?.pageClauseRef,
               comparison.values.sanctionLetter?.isVerifiedInSource,
               comparison.values.sanctionLetter?.verificationLevel,
-              comparison.values.sanctionLetter?.verificationDetails
+              comparison.values.sanctionLetter?.verificationDetails,
+              comparison.values.sanctionLetter?.isLocationVerified,
+              comparison.values.sanctionLetter?.locationStatus,
+              comparison.values.sanctionLetter?.locationDetails
             )}
           </div>
         </div>
@@ -334,7 +344,10 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
               comparison.values.loanAgreement?.pageClauseRef,
               comparison.values.loanAgreement?.isVerifiedInSource,
               comparison.values.loanAgreement?.verificationLevel,
-              comparison.values.loanAgreement?.verificationDetails
+              comparison.values.loanAgreement?.verificationDetails,
+              comparison.values.loanAgreement?.isLocationVerified,
+              comparison.values.loanAgreement?.locationStatus,
+              comparison.values.loanAgreement?.locationDetails
             )}
           </div>
         </div>

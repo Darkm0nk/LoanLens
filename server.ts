@@ -335,9 +335,10 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       val: any,
       raw?: string,
       ref?: string,
-      fieldKey?: keyof ExtractedLoanFields
+      fieldKey?: keyof ExtractedLoanFields,
+      metadata?: any
     ) => {
-      return verifySourceSubstantiation(val, raw, ref, fieldKey, documentSourceText);
+      return verifySourceSubstantiation(val, raw, ref, fieldKey, documentSourceText, metadata);
     };
 
     const loanAmountVer = evaluateField(
@@ -351,7 +352,8 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       parsedData.fields?.interestRate?.value,
       parsedData.fields?.interestRate?.rawText,
       parsedData.fields?.interestRate?.pageClauseRef,
-      'interestRate'
+      'interestRate',
+      { rateType: parsedData.fields?.interestRate?.rateType }
     );
 
     const aprVer = evaluateField(
@@ -379,28 +381,38 @@ CRITICAL VERIFICATION INSTRUCTIONS:
       parsedData.fields?.processingFees?.value,
       parsedData.fields?.processingFees?.rawText,
       parsedData.fields?.processingFees?.pageClauseRef,
-      'processingFees'
+      'processingFees',
+      { percentage: parsedData.fields?.processingFees?.percentage }
     );
 
     const insuranceVer = evaluateField(
       parsedData.fields?.insurance?.value,
       parsedData.fields?.insurance?.rawText,
       parsedData.fields?.insurance?.pageClauseRef,
-      'insurance'
+      'insurance',
+      { isMandatory: parsedData.fields?.insurance?.isMandatory }
     );
 
     const penalVer = evaluateField(
       parsedData.fields?.penalCharges?.value,
       parsedData.fields?.penalCharges?.rawText,
       parsedData.fields?.penalCharges?.pageClauseRef,
-      'penalCharges'
+      'penalCharges',
+      {
+        isCompoundedInterest: parsedData.fields?.penalCharges?.isCompoundedInterest,
+        isRbiCompliant: parsedData.fields?.penalCharges?.isRbiCompliant,
+      }
     );
 
     const prepayVer = evaluateField(
       parsedData.fields?.prepaymentCharges?.value,
       parsedData.fields?.prepaymentCharges?.rawText,
       parsedData.fields?.prepaymentCharges?.pageClauseRef,
-      'prepaymentCharges'
+      'prepaymentCharges',
+      {
+        hasPenalty: parsedData.fields?.prepaymentCharges?.hasPenalty,
+        isFloatingNilExempt: parsedData.fields?.prepaymentCharges?.isFloatingNilExempt,
+      }
     );
 
     const extractedResult = {
@@ -427,6 +439,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: loanAmountVer.isVerified,
           verificationLevel: loanAmountVer.verificationLevel,
           verificationDetails: loanAmountVer.details || loanAmountVer.reason,
+          isLocationVerified: loanAmountVer.isLocationVerified,
+          locationStatus: loanAmountVer.locationStatus,
+          locationDetails: loanAmountVer.locationDetails,
         },
         interestRate: {
           value: parsedData.fields?.interestRate?.value ?? null,
@@ -438,6 +453,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: interestRateVer.isVerified,
           verificationLevel: interestRateVer.verificationLevel,
           verificationDetails: interestRateVer.details || interestRateVer.reason,
+          isLocationVerified: interestRateVer.isLocationVerified,
+          locationStatus: interestRateVer.locationStatus,
+          locationDetails: interestRateVer.locationDetails,
         },
         apr: {
           value: parsedData.fields?.apr?.value ?? null,
@@ -447,6 +465,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: aprVer.isVerified,
           verificationLevel: aprVer.verificationLevel,
           verificationDetails: aprVer.details || aprVer.reason,
+          isLocationVerified: aprVer.isLocationVerified,
+          locationStatus: aprVer.locationStatus,
+          locationDetails: aprVer.locationDetails,
         },
         tenureMonths: {
           value: parsedData.fields?.tenureMonths?.value ?? null,
@@ -456,6 +477,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: tenureVer.isVerified,
           verificationLevel: tenureVer.verificationLevel,
           verificationDetails: tenureVer.details || tenureVer.reason,
+          isLocationVerified: tenureVer.isLocationVerified,
+          locationStatus: tenureVer.locationStatus,
+          locationDetails: tenureVer.locationDetails,
         },
         emi: {
           value: parsedData.fields?.emi?.value ?? null,
@@ -465,6 +489,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: emiVer.isVerified,
           verificationLevel: emiVer.verificationLevel,
           verificationDetails: emiVer.details || emiVer.reason,
+          isLocationVerified: emiVer.isLocationVerified,
+          locationStatus: emiVer.locationStatus,
+          locationDetails: emiVer.locationDetails,
         },
         processingFees: {
           value: parsedData.fields?.processingFees?.value ?? null,
@@ -476,6 +503,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: feesVer.isVerified,
           verificationLevel: feesVer.verificationLevel,
           verificationDetails: feesVer.details || feesVer.reason,
+          isLocationVerified: feesVer.isLocationVerified,
+          locationStatus: feesVer.locationStatus,
+          locationDetails: feesVer.locationDetails,
         },
         insurance: {
           value: parsedData.fields?.insurance?.value ?? null,
@@ -487,6 +517,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: insuranceVer.isVerified,
           verificationLevel: insuranceVer.verificationLevel,
           verificationDetails: insuranceVer.details || insuranceVer.reason,
+          isLocationVerified: insuranceVer.isLocationVerified,
+          locationStatus: insuranceVer.locationStatus,
+          locationDetails: insuranceVer.locationDetails,
         },
         penalCharges: {
           value: parsedData.fields?.penalCharges?.value || 'Not specified in document',
@@ -504,6 +537,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: penalVer.isVerified,
           verificationLevel: penalVer.verificationLevel,
           verificationDetails: penalVer.details || penalVer.reason,
+          isLocationVerified: penalVer.isLocationVerified,
+          locationStatus: penalVer.locationStatus,
+          locationDetails: penalVer.locationDetails,
         },
         prepaymentCharges: {
           value: parsedData.fields?.prepaymentCharges?.value || 'Not specified in document',
@@ -521,6 +557,9 @@ CRITICAL VERIFICATION INSTRUCTIONS:
           isVerifiedInSource: prepayVer.isVerified,
           verificationLevel: prepayVer.verificationLevel,
           verificationDetails: prepayVer.details || prepayVer.reason,
+          isLocationVerified: prepayVer.isLocationVerified,
+          locationStatus: prepayVer.locationStatus,
+          locationDetails: prepayVer.locationDetails,
         },
       },
     };

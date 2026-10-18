@@ -31,6 +31,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.loanAmount.pageClauseRef,
       isVerified: document.fields.loanAmount.isVerifiedInSource,
       verificationLevel: document.fields.loanAmount.verificationLevel,
+      isLocationVerified: document.fields.loanAmount.isLocationVerified,
+      locationStatus: document.fields.loanAmount.locationStatus,
+      locationDetails: document.fields.loanAmount.locationDetails,
       notes: document.fields.loanAmount.notes,
     },
     {
@@ -40,6 +43,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.interestRate.pageClauseRef,
       isVerified: document.fields.interestRate.isVerifiedInSource,
       verificationLevel: document.fields.interestRate.verificationLevel,
+      isLocationVerified: document.fields.interestRate.isLocationVerified,
+      locationStatus: document.fields.interestRate.locationStatus,
+      locationDetails: document.fields.interestRate.locationDetails,
       notes: document.fields.interestRate.benchmark || document.fields.interestRate.notes,
     },
     {
@@ -49,6 +55,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.apr.pageClauseRef,
       isVerified: document.fields.apr.isVerifiedInSource,
       verificationLevel: document.fields.apr.verificationLevel,
+      isLocationVerified: document.fields.apr.isLocationVerified,
+      locationStatus: document.fields.apr.locationStatus,
+      locationDetails: document.fields.apr.locationDetails,
       notes: document.fields.apr.notes,
     },
     {
@@ -58,6 +67,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.tenureMonths.pageClauseRef,
       isVerified: document.fields.tenureMonths.isVerifiedInSource,
       verificationLevel: document.fields.tenureMonths.verificationLevel,
+      isLocationVerified: document.fields.tenureMonths.isLocationVerified,
+      locationStatus: document.fields.tenureMonths.locationStatus,
+      locationDetails: document.fields.tenureMonths.locationDetails,
       notes: document.fields.tenureMonths.notes,
     },
     {
@@ -67,6 +79,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.emi.pageClauseRef,
       isVerified: document.fields.emi.isVerifiedInSource,
       verificationLevel: document.fields.emi.verificationLevel,
+      isLocationVerified: document.fields.emi.isLocationVerified,
+      locationStatus: document.fields.emi.locationStatus,
+      locationDetails: document.fields.emi.locationDetails,
       notes: document.fields.emi.notes,
     },
     {
@@ -76,6 +91,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.processingFees.pageClauseRef,
       isVerified: document.fields.processingFees.isVerifiedInSource,
       verificationLevel: document.fields.processingFees.verificationLevel,
+      isLocationVerified: document.fields.processingFees.isLocationVerified,
+      locationStatus: document.fields.processingFees.locationStatus,
+      locationDetails: document.fields.processingFees.locationDetails,
       notes: document.fields.processingFees.gstDetails,
     },
     {
@@ -85,6 +103,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.insurance.pageClauseRef,
       isVerified: document.fields.insurance.isVerifiedInSource,
       verificationLevel: document.fields.insurance.verificationLevel,
+      isLocationVerified: document.fields.insurance.isLocationVerified,
+      locationStatus: document.fields.insurance.locationStatus,
+      locationDetails: document.fields.insurance.locationDetails,
       notes: document.fields.insurance.policyName,
     },
     {
@@ -94,6 +115,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.penalCharges.pageClauseRef,
       isVerified: document.fields.penalCharges.isVerifiedInSource,
       verificationLevel: document.fields.penalCharges.verificationLevel,
+      isLocationVerified: document.fields.penalCharges.isLocationVerified,
+      locationStatus: document.fields.penalCharges.locationStatus,
+      locationDetails: document.fields.penalCharges.locationDetails,
       notes: document.fields.penalCharges.isCompoundedInterest ? 'Clause specifies compounded penal interest' : 'Flat penal charge structure',
     },
     {
@@ -103,6 +127,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
       ref: document.fields.prepaymentCharges.pageClauseRef,
       isVerified: document.fields.prepaymentCharges.isVerifiedInSource,
       verificationLevel: document.fields.prepaymentCharges.verificationLevel,
+      isLocationVerified: document.fields.prepaymentCharges.isLocationVerified,
+      locationStatus: document.fields.prepaymentCharges.locationStatus,
+      locationDetails: document.fields.prepaymentCharges.locationDetails,
       notes: document.fields.prepaymentCharges.hasPenalty ? 'Foreclosure fee referenced in schedule' : 'Zero foreclosure fee',
     },
   ];
@@ -204,9 +231,16 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                         <div className="space-y-1">
                           <span className="font-mono block">{row.ref}</span>
                           {row.verificationLevel === 'source_verified' || row.isVerified ? (
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                              Source Verified
-                            </span>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                Source Verified
+                              </span>
+                              {row.locationStatus === 'unpaginated_source' && (
+                                <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200" title="Document is unpaginated plain text; page number is AI-reported">
+                                  Unpaginated Text
+                                </span>
+                              )}
+                            </div>
                           ) : row.verificationLevel === 'excerpt_corroborated' ? (
                             <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
                               Excerpt Corroborated

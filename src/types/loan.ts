@@ -6,6 +6,13 @@ export type SourceVerificationLevel =
   | 'ai_extracted'
   | 'unverified';
 
+export type LocationVerificationStatus =
+  | 'verified'
+  | 'unverified'
+  | 'unpaginated_source'
+  | 'ai_reported'
+  | 'not_cited';
+
 export interface FieldExtraction<T = any> {
   value: T;
   rawText: string;
@@ -14,6 +21,9 @@ export interface FieldExtraction<T = any> {
   isVerifiedInSource?: boolean;
   verificationLevel?: SourceVerificationLevel;
   verificationDetails?: string;
+  isLocationVerified?: boolean;
+  locationStatus?: LocationVerificationStatus;
+  locationDetails?: string;
 }
 
 export interface InterestRateField extends FieldExtraction<number | null> {
@@ -103,6 +113,9 @@ export interface FieldComparison {
       isVerifiedInSource?: boolean;
       verificationLevel?: SourceVerificationLevel;
       verificationDetails?: string;
+      isLocationVerified?: boolean;
+      locationStatus?: LocationVerificationStatus;
+      locationDetails?: string;
     };
     sanctionLetter?: {
       display: string;
@@ -112,6 +125,9 @@ export interface FieldComparison {
       isVerifiedInSource?: boolean;
       verificationLevel?: SourceVerificationLevel;
       verificationDetails?: string;
+      isLocationVerified?: boolean;
+      locationStatus?: LocationVerificationStatus;
+      locationDetails?: string;
     };
     loanAgreement?: {
       display: string;
@@ -121,6 +137,9 @@ export interface FieldComparison {
       isVerifiedInSource?: boolean;
       verificationLevel?: SourceVerificationLevel;
       verificationDetails?: string;
+      isLocationVerified?: boolean;
+      locationStatus?: LocationVerificationStatus;
+      locationDetails?: string;
     };
   };
   summary: string;

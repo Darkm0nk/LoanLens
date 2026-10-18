@@ -167,6 +167,9 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     isVerifiedInSource?: boolean;
     verificationLevel?: string;
     verificationDetails?: string;
+    isLocationVerified?: boolean;
+    locationStatus?: string;
+    locationDetails?: string;
   }) {
     if (!val?.pageClauseRef || val.pageClauseRef === 'Not cited' || val.pageClauseRef.includes('not detected')) {
       return (
@@ -193,15 +196,23 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
       );
     }
     if (val.verificationLevel === 'source_verified' || val.isVerifiedInSource === true) {
+      const locNotice = val.locationDetails;
       return (
         <div className="mt-0.5 space-y-1">
           <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>{val.pageClauseRef}</span>
+            <span title={locNotice || val.pageClauseRef}>{val.pageClauseRef}</span>
           </div>
-          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
-            Source Text Verified
-          </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+              Source Text Verified
+            </span>
+            {val.locationStatus === 'unpaginated_source' && (
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200" title="Document text is unpaginated; page number is AI-reported">
+                Unpaginated Text
+              </span>
+            )}
+          </div>
         </div>
       );
     }

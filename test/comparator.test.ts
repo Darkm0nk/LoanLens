@@ -19,6 +19,7 @@ import {
   verifySourceSubstantiation,
   matchesNumericToken,
   verifyExcerptInSourceText,
+  verifyCitationLocation,
 } from '../src/utils/sourceVerifier';
 
 console.log('--- Starting LoanLens Quality & Audit Comprehensive Test Suite ---');
@@ -1085,6 +1086,311 @@ runTest('Scanned or unavailable source text returns explicit unverified-source s
   assert.strictEqual(result.details, 'Excerpt corroborated — source document text not independently verified');
 });
 
+// ---------------------------------------------------------
+// 12. EVIDENCE VERIFICATION HARDENING & ADVERSARIAL REGRESSION AUDIT
+// ---------------------------------------------------------
+console.log('\n[12] Evidence Verification Hardening & Adversarial Regression Audit:');
+
+runTest('1. Fabricated long excerpt with matching 40-char prefix fails source verification', () => {
+  const sourceText = 'Applicable rate of interest shall be floating rate of 8.75% per annum based on 3-month EBLR.';
+  const fabricatedLongExcerpt = 'Applicable rate of interest shall be floating rate of 8.75% with promotional lifetime zero percent interest waiver.';
+
+  // verifyExcerptInSourceText must reject fabricated continuation despite matching prefix
+  assert.strictEqual(verifyExcerptInSourceText(fabricatedLongExcerpt, sourceText), false);
+
+  // verifySourceSubstantiation must downgrade to ai_extracted and fail isVerified
+  const result = verifySourceSubstantiation(8.75, fabricatedLongExcerpt, 'Page 1, Clause 2', 'interestRate', sourceText);
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'ai_extracted');
+  assert.ok(result.reason?.includes('does not exist in provided document text'));
+});
+
+runTest('2. Truncated excerpt whose continuation is not present in the source fails verification', () => {
+  const sourceText = 'Applicable rate of interest shall be floating rate of 8.75% per annum based on 3-month EBLR.';
+  const fabricatedEllipsisExcerpt = 'Applicable rate of interest shall be floating rate of 8.75% ... with zero interest forever';
+
+  // verifyExcerptInSourceText must reject because second segment is missing
+  assert.strictEqual(verifyExcerptInSourceText(fabricatedEllipsisExcerpt, sourceText), false);
+
+  const result = verifySourceSubstantiation(8.75, fabricatedEllipsisExcerpt, 'Page 1, Clause 2', 'interestRate', sourceText);
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'ai_extracted');
+});
+
+runTest('3. Complete source excerpt with harmless formatting differences passes verification', () => {
+  const sourceText = 'KEY FACTS STATEMENT:\n\t“Applicable Rate of Interest” – 8.75% p.a. (floating rate).';
+  const excerpt = '"Applicable Rate of Interest" - 8.75% p.a. (floating rate).';
+
+  assert.strictEqual(verifyExcerptInSourceText(excerpt, sourceText), true);
+
+  const result = verifySourceSubstantiation(8.75, excerpt, 'Page 1, Clause 2', 'interestRate', sourceText);
+  assert.strictEqual(result.isVerified, true);
+  assert.strictEqual(result.verificationLevel, 'source_verified');
+});
+
+runTest('4. Plausible but nonexistent page or clause reference fails location verification', () => {
+  const sourceWithPagesAndClauses = `
+    Page 1
+    Clause 1. Loan Facility
+    Sanctioned loan amount of INR 42,00,000/-.
+
+    Page 2
+    Clause 2. Interest Rate
+    Applicable interest rate shall be 8.75% per annum.
+  `;
+
+  // Clause 42 does not exist in source text
+  const locClauseFail = verifyCitationLocation('Page 2, Clause 42', sourceWithPagesAndClauses);
+  assert.strictEqual(locClauseFail.isLocationVerified, false);
+  assert.strictEqual(locClauseFail.locationStatus, 'unverified');
+  assert.ok(locClauseFail.details.includes('Cited Clause 42 was not found'));
+
+  // Page 99 does not exist in source text
+  const locPageFail = verifyCitationLocation('Page 99, Clause 2', sourceWithPagesAndClauses);
+  assert.strictEqual(locPageFail.isLocationVerified, false);
+  assert.strictEqual(locPageFail.locationStatus, 'unverified');
+  assert.ok(locPageFail.details.includes('Cited Page 99 does not exist'));
+});
+
+runTest('5. Page reference unverified (unpaginated text) while excerpt itself is present', () => {
+  const unpaginatedSource = 'Clause 2. Applicable interest rate shall be 8.75% per annum for retail loan.';
+  const excerpt = 'Applicable interest rate shall be 8.75% per annum for retail loan.';
+
+  const locResult = verifyCitationLocation('Page 4', unpaginatedSource);
+  assert.strictEqual(locResult.isLocationVerified, false);
+  assert.strictEqual(locResult.locationStatus, 'unpaginated_source');
+  assert.ok(locResult.details.includes('Document text is unpaginated'));
+
+  const substantiation = verifySourceSubstantiation(8.75, excerpt, 'Page 4', 'interestRate', unpaginatedSource);
+  assert.strictEqual(substantiation.isVerified, true);
+  assert.strictEqual(substantiation.verificationLevel, 'source_verified');
+  assert.strictEqual(substantiation.isLocationVerified, false);
+  assert.strictEqual(substantiation.locationStatus, 'unpaginated_source');
+});
+
+runTest('6. Correct processing-fee percentage with proper context passes fee corroboration', () => {
+  const sourceText = 'The Borrower shall pay upfront processing fee of 0.50% of the sanctioned loan amount plus GST.';
+  const excerpt = 'upfront processing fee of 0.50% of the sanctioned loan amount';
+
+  const result = verifySourceSubstantiation(
+    5000,
+    excerpt,
+    'Page 2, Schedule A',
+    'processingFees',
+    sourceText,
+    { percentage: 0.50 }
+  );
+  assert.strictEqual(result.isVerified, true);
+  assert.strictEqual(result.verificationLevel, 'source_verified');
+});
+
+runTest('7. Unrelated percentage in an interest-rate sentence fails fee corroboration', () => {
+  const excerpt = 'The applicable rate of interest shall be floating rate of 8.75% p.a. with standard fee schedule.';
+
+  const result = verifySourceSubstantiation(
+    5000,
+    excerpt,
+    'Page 1, Clause 2',
+    'processingFees',
+    null,
+    { percentage: 8.75 }
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'unverified');
+  assert.ok(result.reason?.includes('does not substantiate'));
+});
+
+runTest('8. Mismatched percentage in a processing-fee sentence fails fee corroboration', () => {
+  const excerpt = 'Processing charges shall be levied at 1.50% of the sanctioned loan amount.';
+
+  const result = verifySourceSubstantiation(
+    5000,
+    excerpt,
+    'Page 2, Clause 4',
+    'processingFees',
+    null,
+    { percentage: 0.50 }
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'unverified');
+});
+
+runTest('9. Insurance keyword without support for extracted amount or mandatory status fails', () => {
+  const excerpt = 'Insurance coverage may be availed through the lender’s preferred insurance partner.';
+
+  // Claiming specific premium of 78,000 without numeric support in excerpt
+  const resAmount = verifySourceSubstantiation(
+    78000,
+    excerpt,
+    'Page 3, Clause 6',
+    'insurance',
+    null,
+    { isMandatory: false }
+  );
+  assert.strictEqual(resAmount.isVerified, false);
+  assert.strictEqual(resAmount.verificationLevel, 'unverified');
+  assert.ok(resAmount.reason?.includes('does not substantiate the extracted premium amount'));
+
+  // Claiming insurance is mandatory when excerpt specifies voluntary/optional status
+  const excerptOptional = 'Insurance coverage is optional with zero premium charged on loan.';
+  const resMandatory = verifySourceSubstantiation(
+    0,
+    excerptOptional,
+    'Page 3, Clause 6',
+    'insurance',
+    null,
+    { isMandatory: true }
+  );
+  assert.strictEqual(resMandatory.isVerified, false);
+  assert.strictEqual(resMandatory.verificationLevel, 'unverified');
+  assert.ok(resMandatory.reason?.includes('does not substantiate claim that insurance is mandatory'));
+});
+
+runTest('10. Penal-charge keyword without support for claimed charge or compliance assertion fails', () => {
+  const excerpt = 'Default in repayment shall attract penal charges as determined by the lender from time to time.';
+
+  // Claiming specific charge of ₹500 per month without numeric support
+  const resCharge = verifySourceSubstantiation(
+    '₹500 per month',
+    excerpt,
+    'Page 3, Clause 8',
+    'penalCharges',
+    null,
+    { isRbiCompliant: false }
+  );
+  assert.strictEqual(resCharge.isVerified, false);
+  assert.strictEqual(resCharge.verificationLevel, 'unverified');
+
+  // Claiming verified RBI compliance (simple flat fee) without evidence of flat structure in excerpt
+  const resCompliance = verifySourceSubstantiation(
+    'As per bank policy',
+    excerpt,
+    'Page 3, Clause 8',
+    'penalCharges',
+    null,
+    { isRbiCompliant: true }
+  );
+  assert.strictEqual(resCompliance.isVerified, false);
+  assert.strictEqual(resCompliance.verificationLevel, 'unverified');
+  assert.ok(resCompliance.reason?.includes('does not provide evidence of RBI-compliant'));
+});
+
+runTest('11. Prepayment keyword without support for claimed penalty or waiver fails', () => {
+  const excerpt = 'Prepayment of the loan facility is subject to standard bank rules and procedures.';
+
+  // Claiming penalty of 2% when excerpt has no penalty rate
+  const resPenalty = verifySourceSubstantiation(
+    '2% penalty',
+    excerpt,
+    'Page 4, Clause 11',
+    'prepaymentCharges',
+    null,
+    { hasPenalty: true }
+  );
+  assert.strictEqual(resPenalty.isVerified, false);
+  assert.strictEqual(resPenalty.verificationLevel, 'unverified');
+
+  // Claiming nil prepayment waiver when excerpt has no waiver terms
+  const resWaiver = verifySourceSubstantiation(
+    'Nil / Zero',
+    excerpt,
+    'Page 4, Clause 11',
+    'prepaymentCharges',
+    null,
+    { hasPenalty: false, isFloatingNilExempt: true }
+  );
+  assert.strictEqual(resWaiver.isVerified, false);
+  assert.strictEqual(resWaiver.verificationLevel, 'unverified');
+});
+
+runTest('12. Source text unavailable for a scanned PDF or image stays excerpt_corroborated and isVerified: false', () => {
+  const result = verifySourceSubstantiation(
+    5000,
+    'The borrower shall pay upfront processing fee of Rs. 5,000/- plus applicable GST.',
+    'Page 2, Schedule A',
+    'processingFees',
+    undefined // Scanned/binary PDF without local OCR
+  );
+  assert.strictEqual(result.isVerified, false);
+  assert.strictEqual(result.verificationLevel, 'excerpt_corroborated');
+  assert.strictEqual(result.isLocationVerified, false);
+  assert.strictEqual(result.locationStatus, 'ai_reported');
+  assert.ok(result.details?.includes('source document text not independently verified'));
+});
+
+runTest('13. Existing comparator behavior remains conservative when verification data is missing', () => {
+  const docMissingVer: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      loanAmount: {
+        value: 4200000,
+        rawText: 'Loan amount Rs 42 Lakhs',
+        pageClauseRef: 'Page reference not detected in document text',
+        isVerifiedInSource: false,
+        verificationLevel: 'unverified',
+      },
+    },
+  };
+  const doc2: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      loanAmount: {
+        value: 4500000,
+        rawText: 'Loan amount Rs 45 Lakhs',
+        pageClauseRef: 'Page 1, Clause 1',
+        isVerifiedInSource: true,
+        verificationLevel: 'source_verified',
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(docMissingVer, null, doc2);
+  const amountComp = report.comparisons.find((c) => c.fieldKey === 'loanAmount');
+  assert.strictEqual(amountComp?.status, 'mismatch');
+  assert.strictEqual(amountComp?.classification, 'Needs manual verification');
+});
+
+runTest('14. Demo-data isolation remains strictly intact', () => {
+  const realDoc: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    id: 'real-user-doc-1',
+    isDemo: false,
+  };
+  const demoDoc: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    id: 'demo-doc-1',
+    isDemo: true,
+  };
+
+  // Cross-audit between real and demo doc must throw
+  assert.throws(
+    () => compareLoanDocuments(realDoc, null, demoDoc),
+    /Data Isolation Violation/
+  );
+
+  // Single real document must throw
+  assert.throws(
+    () => compareLoanDocuments(realDoc, null, null),
+    /Insufficient Real Documents/
+  );
+});
+
+runTest('15. Very short or generic excerpts do not independently establish a source match', () => {
+  const sourceText = 'Sanction letter for home loan. Interest rate is 8.75% per annum. Processing fee is 5000.';
+
+  // Generic phrase in GENERIC_EXCERPT_PATTERNS
+  assert.strictEqual(verifyExcerptInSourceText('interest rate', sourceText), false);
+  assert.strictEqual(verifyExcerptInSourceText('processing fee', sourceText), false);
+  assert.strictEqual(verifyExcerptInSourceText('loan amount', sourceText), false);
+
+  // Excerpt shorter than 10 characters
+  assert.strictEqual(verifyExcerptInSourceText('8.75%', sourceText), false);
+  assert.strictEqual(verifyExcerptInSourceText('5000', sourceText), false);
+});
+
 console.log(`\n========================================`);
 console.log(`All ${passedTests} of ${totalTests} Comprehensive Quality & Audit Tests Passed!`);
 console.log(`========================================\n`);
+

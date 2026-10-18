@@ -8,6 +8,7 @@ import {
   ReviewRecommendation,
   FindingClassification,
   SourceVerificationLevel,
+  LocationVerificationStatus,
 } from '../types/loan';
 import { compareLifetimeImpact } from './financialMath';
 import { REGULATORY_RULES } from './regulatoryRules';
@@ -42,6 +43,9 @@ interface DocValues {
     isVerifiedInSource?: boolean;
     verificationLevel?: SourceVerificationLevel;
     verificationDetails?: string;
+    isLocationVerified?: boolean;
+    locationStatus?: LocationVerificationStatus;
+    locationDetails?: string;
   };
   sanctionLetter?: {
     display: string;
@@ -51,6 +55,9 @@ interface DocValues {
     isVerifiedInSource?: boolean;
     verificationLevel?: SourceVerificationLevel;
     verificationDetails?: string;
+    isLocationVerified?: boolean;
+    locationStatus?: LocationVerificationStatus;
+    locationDetails?: string;
   };
   loanAgreement?: {
     display: string;
@@ -60,6 +67,9 @@ interface DocValues {
     isVerifiedInSource?: boolean;
     verificationLevel?: SourceVerificationLevel;
     verificationDetails?: string;
+    isLocationVerified?: boolean;
+    locationStatus?: LocationVerificationStatus;
+    locationDetails?: string;
   };
 }
 
@@ -84,9 +94,12 @@ export function deriveFindingClassification(
   const hasUnverified = valList.some(
       (v) =>
           v?.isVerifiedInSource === false ||
+          v?.verificationLevel === 'unverified' ||
+          v?.verificationLevel === 'ai_extracted' ||
           !v?.pageClauseRef ||
           v.pageClauseRef.toLowerCase().includes('not detected') ||
-          v.pageClauseRef.toLowerCase().includes('not cited')
+          v.pageClauseRef.toLowerCase().includes('not cited') ||
+          v.pageClauseRef.toLowerCase().includes('evidence not verified')
   );
   if (hasUnverified && status === 'mismatch') {
     return 'Needs manual verification';
@@ -196,17 +209,27 @@ export function compareLoanDocuments(
         isVerifiedInSource?: boolean;
         verificationLevel?: SourceVerificationLevel;
         verificationDetails?: string;
+        isLocationVerified?: boolean;
+        locationStatus?: LocationVerificationStatus;
+        locationDetails?: string;
+        [k: string]: any;
       }
     ): {
       isVerified: boolean;
       verificationLevel: SourceVerificationLevel;
       details?: string;
+      isLocationVerified?: boolean;
+      locationStatus?: LocationVerificationStatus;
+      locationDetails?: string;
     } => {
       if (!field || checkIsMissing(field.value)) {
         return {
           isVerified: false,
           verificationLevel: 'unverified',
           details: 'No value extracted',
+          isLocationVerified: false,
+          locationStatus: 'unverified',
+          locationDetails: 'No value extracted',
         };
       }
 
@@ -216,6 +239,9 @@ export function compareLoanDocuments(
           isVerified: false,
           verificationLevel: 'unverified',
           details: 'Evidence not verified',
+          isLocationVerified: false,
+          locationStatus: 'unverified',
+          locationDetails: 'Evidence not verified',
         };
       }
 
@@ -225,15 +251,29 @@ export function compareLoanDocuments(
           isVerified: field.isVerifiedInSource === true,
           verificationLevel: field.verificationLevel || (field.isVerifiedInSource ? 'source_verified' : 'unverified'),
           details: field.verificationDetails || (field.isVerifiedInSource ? 'Synthetic benchmark verified' : 'Evidence not verified'),
+          isLocationVerified: field.isLocationVerified ?? (field.isVerifiedInSource === true),
+          locationStatus: field.locationStatus ?? (field.isVerifiedInSource ? 'verified' : 'unverified'),
+          locationDetails: field.locationDetails ?? (field.isVerifiedInSource ? 'Synthetic benchmark location verified' : 'Location unverified'),
         };
       }
+
+      const metadata = {
+        percentage: (field as any)?.percentage,
+        isMandatory: (field as any)?.isMandatory,
+        isCompoundedInterest: (field as any)?.isCompoundedInterest,
+        isRbiCompliant: (field as any)?.isRbiCompliant,
+        hasPenalty: (field as any)?.hasPenalty,
+        isFloatingNilExempt: (field as any)?.isFloatingNilExempt,
+        rateType: (field as any)?.rateType,
+      };
 
       const res = verifySourceSubstantiation(
         field.value,
         field.rawText,
         field.pageClauseRef,
         key,
-        doc?.sourceText
+        doc?.sourceText,
+        metadata
       );
 
       // If field already has an explicit verificationLevel from server/client and no new sourceText was provided
@@ -242,6 +282,9 @@ export function compareLoanDocuments(
           isVerified: field.verificationLevel === 'source_verified',
           verificationLevel: field.verificationLevel,
           details: field.verificationDetails || res.details || res.reason,
+          isLocationVerified: field.isLocationVerified ?? res.isLocationVerified,
+          locationStatus: field.locationStatus ?? res.locationStatus,
+          locationDetails: field.locationDetails ?? res.locationDetails,
         };
       }
 
@@ -249,6 +292,9 @@ export function compareLoanDocuments(
         isVerified: res.isVerified,
         verificationLevel: res.verificationLevel,
         details: res.details || res.reason,
+        isLocationVerified: res.isLocationVerified,
+        locationStatus: res.locationStatus,
+        locationDetails: res.locationDetails,
       };
     };
 
@@ -281,6 +327,9 @@ export function compareLoanDocuments(
         isVerifiedInSource: evalRes.isVerified,
         verificationLevel: evalRes.verificationLevel,
         verificationDetails: evalRes.details,
+        isLocationVerified: evalRes.isLocationVerified,
+        locationStatus: evalRes.locationStatus,
+        locationDetails: evalRes.locationDetails,
       };
     }
     if (sanctionDoc && sanctionField) {
@@ -312,6 +361,9 @@ export function compareLoanDocuments(
         isVerifiedInSource: evalRes.isVerified,
         verificationLevel: evalRes.verificationLevel,
         verificationDetails: evalRes.details,
+        isLocationVerified: evalRes.isLocationVerified,
+        locationStatus: evalRes.locationStatus,
+        locationDetails: evalRes.locationDetails,
       };
     }
     if (agreementDoc && agreeField) {
@@ -343,6 +395,9 @@ export function compareLoanDocuments(
         isVerifiedInSource: evalRes.isVerified,
         verificationLevel: evalRes.verificationLevel,
         verificationDetails: evalRes.details,
+        isLocationVerified: evalRes.isLocationVerified,
+        locationStatus: evalRes.locationStatus,
+        locationDetails: evalRes.locationDetails,
       };
     }
     return values;
