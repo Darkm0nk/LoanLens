@@ -14,6 +14,7 @@ import {
 import { LoanComparisonReport, DiscrepancyStatus, FieldComparison } from '../types/loan';
 import { TermComparisonCard } from './TermComparisonCard';
 import { SideBySideEvidenceModal } from './SideBySideEvidenceModal';
+import { generateDraftAuditLetter, printAuditLetter } from '../utils/auditLetterGenerator';
 
 interface ComparisonDashboardProps {
   report: LoanComparisonReport | null;
@@ -32,6 +33,12 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
                                                                         }) => {
   const [filter, setFilter] = useState<'all' | DiscrepancyStatus>('all');
   const [selectedEvidenceComparison, setSelectedEvidenceComparison] = useState<FieldComparison | null>(null);
+
+  const handlePrintAudit = () => {
+    if (!report) return;
+    const letter = generateDraftAuditLetter(report);
+    printAuditLetter(letter.subject, letter.body);
+  };
 
   if (!report) {
     const isSingleDoc = loadedDocCount === 1;
@@ -205,8 +212,9 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
                 <span>Draft Clarification Notice</span>
               </button>
               <button
-                  onClick={() => window.print()}
+                  onClick={handlePrintAudit}
                   className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  title="Print audit letter"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Audit</span>
