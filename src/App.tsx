@@ -290,7 +290,19 @@ export default function App() {
   }
 
   function handleLoadSingleSample(docType: LoanDocumentType) {
-    const scenario = DEMO_SCENARIO_DISCREPANCY;
+    // If any real document exists, purge real documents to maintain strict data isolation
+    if (kfsDoc && !kfsDoc.isDemo) setKfsDoc(null);
+    if (sanctionDoc && !sanctionDoc.isDemo) setSanctionDoc(null);
+    if (agreementDoc && !agreementDoc.isDemo) setAgreementDoc(null);
+
+    // Context-aware scenario selection: match existing demo borrower if present
+    const isCleanScenario =
+      activeScenarioId === 'personal_loan_clean' ||
+      [kfsDoc, sanctionDoc, agreementDoc].some(
+        (d) => d?.isDemo && d.borrowerName?.includes('Pooja Iyer')
+      );
+
+    const scenario = isCleanScenario ? DEMO_SCENARIO_CLEAN : DEMO_SCENARIO_DISCREPANCY;
     if (docType === 'kfs') setKfsDoc(scenario.kfsDoc);
     else if (docType === 'sanction_letter') setSanctionDoc(scenario.sanctionDoc);
     else if (docType === 'loan_agreement') setAgreementDoc(scenario.agreementDoc);

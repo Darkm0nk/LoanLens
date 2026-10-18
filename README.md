@@ -123,11 +123,11 @@ npm start
 
 The LoanLens codebase is covered by deterministic unit, integration, and browser test suites:
 
-### 1. Quality & Audit Test Suite (74 Tests)
+### 1. Quality, Data-Isolation & Audit Report Test Suite (90 Tests)
 ```bash
 npm test
 ```
-Executes two comprehensive offline test suites without consuming Gemini API tokens:
+Executes three comprehensive offline test suites without consuming Gemini API tokens:
 - **`test/comparator.test.ts` (63 Tests):**
   - Financial math: reducing-balance EMI, zero-percent interest, missing input rejection, lifetime impact.
   - Matching & mismatch detection: 9 core terms, unit reconciliation (years vs. months, % p.m. to % p.a., Lakhs/Crores).
@@ -137,12 +137,18 @@ Executes two comprehensive offline test suites without consuming Gemini API toke
   - Regulatory status regression: `isRbiCompliant: null` and `isFloatingNilExempt: null` producing explicit `not_assessed` states, contradictory penal/prepayment clause detection.
   - Multi-tier source verification: token boundaries, contextual processing fee corroboration, full-substring/ellipsis-segment matching, location provenance decoupling.
   - Adversarial checks: fabricated prefix rejection, truncated excerpt failure, unrelated percentage rejection.
-- **`test/data-isolation.test.ts` (11 Tests):**
+- **`test/data-isolation.test.ts` (13 Tests):**
   - Data isolation guards: throws on demo/real mixing.
   - Minimum 2-real-document requirement.
   - Demo-to-real purge simulation.
   - Replacement integrity and stale report invalidation on document clearing.
   - ₹0 missing value formatting prevention.
+  - Single-sample loading & mixed-state prevention guards.
+- **`test/audit-report-printer.test.ts` (14 Tests):**
+  - Report structure: headers, synthetic demo banners vs. confidential client badges.
+  - 9-term audit matrix generation with value tables, clause citations, and evidence badges.
+  - Financial impact calculations, calculation assumptions, and regulatory directives.
+  - HTML escaping, injection prevention, and non-browser safe execution.
 
 ### 2. TypeScript Lint & Typecheck
 ```bash
@@ -156,16 +162,17 @@ npm run build
 ```
 Executes Vite production build and assets packaging.
 
-### 4. End-to-End Headless Browser UI Tests (Playwright)
+### 4. End-to-End Headless Browser UI Tests (Playwright - 6 Tests)
 ```bash
 npm run test:ui
 ```
-Executes 5 automated browser journeys in headless Chromium:
+Executes 6 automated browser journeys in headless Chromium:
 1. Navigation across Overview, Intake & Comparison, and RBI Guide tabs.
 2. Dynamic borrower avatar derivation and Sample Data Mode header pill.
 3. Upload error notification handling and dismiss button action.
 4. Aligned term verification with emerald status badges and Aligned modal header.
 5. Single-document intake guard: resetting and loading 1 document displays awaiting notice.
+6. Print Audit Report vs Clarification Notice separation and isolated iframe printing.
 
 ### 5. Optional Live Gemini API Integration Test
 ```bash

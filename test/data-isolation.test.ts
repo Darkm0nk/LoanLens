@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { compareLoanDocuments, formatINR, formatPercent } from '../src/utils/comparator';
 import { ExtractedLoanDocument, LoanComparisonReport } from '../src/types/loan';
-import { DEMO_SCENARIO_DISCREPANCY } from '../src/data/demoData';
+import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from '../src/data/demoData';
 
 console.log('========================================================');
 console.log('   LOANLENS DATA-ISOLATION & CONTAMINATION TEST SUITE');
@@ -383,6 +383,66 @@ runTest('Documents extracted from single combined package are clearly flagged wi
   assert.strictEqual(report.combinedFileName, 'My_Combined_Loan_Package.pdf');
   assert.ok(report.singleSourceNotice?.includes('Single uploaded file'));
   assert.ok(report.singleSourceNotice?.includes('My_Combined_Loan_Package.pdf'));
+});
+
+// -------------------------------------------------------------
+// 9. SINGLE-SAMPLE LOADING & MIXED-STATE PREVENTION GUARD
+// -------------------------------------------------------------
+console.log('\n[9] Single-Sample Loading & Mixed-State Prevention Guard:');
+
+runTest('Loading a sample into a slot when a real document is present purges the real document', () => {
+  // Simulate App.tsx slots with 1 real document present
+  let kfsSlot: ExtractedLoanDocument | null = createRealDocument({ documentType: 'kfs' });
+  let sanctionSlot: ExtractedLoanDocument | null = null;
+  let agreementSlot: ExtractedLoanDocument | null = null;
+
+  assert.strictEqual(kfsSlot.isDemo, false);
+
+  // Simulating handleLoadSingleSample('sanction_letter') logic:
+  const purgeReal = (doc: ExtractedLoanDocument | null) => (doc && !doc.isDemo ? null : doc);
+  kfsSlot = purgeReal(kfsSlot);
+  sanctionSlot = purgeReal(sanctionSlot);
+  agreementSlot = purgeReal(agreementSlot);
+
+  sanctionSlot = DEMO_SCENARIO_DISCREPANCY.sanctionDoc;
+
+  // Verify real document was safely purged and no mixed real/demo state exists
+  assert.strictEqual(kfsSlot, null, 'Real KFS must be purged when loading a sample document');
+  assert.strictEqual(sanctionSlot.isDemo, true);
+  assert.strictEqual(agreementSlot, null);
+
+  const realDocs = [kfsSlot, sanctionSlot, agreementSlot].filter(d => Boolean(d && !d.isDemo));
+  const demoDocs = [kfsSlot, sanctionSlot, agreementSlot].filter(d => Boolean(d && d.isDemo));
+  assert.strictEqual(realDocs.length, 0, 'Zero real documents must remain');
+  assert.strictEqual(demoDocs.length, 1, 'Only the single sample document is active');
+});
+
+runTest('Loading a sample into a cleared slot preserves scenario borrower consistency', () => {
+  // User is on Scenario B (Pooja Iyer, Personal Loan Clean) and clears KFS
+  let activeScenarioId: string | null = null; // Cleared doc drops scenario ID
+  let kfsSlot: ExtractedLoanDocument | null = null;
+  let sanctionSlot: ExtractedLoanDocument | null = DEMO_SCENARIO_CLEAN.sanctionDoc;
+  let agreementSlot: ExtractedLoanDocument | null = DEMO_SCENARIO_CLEAN.agreementDoc;
+
+  // User clicks "Load Sample KFS"
+  const isCleanScenario =
+    activeScenarioId === 'personal_loan_clean' ||
+    [kfsSlot, sanctionSlot, agreementSlot].some(
+      (d) => d?.isDemo && d.borrowerName?.includes('Pooja Iyer')
+    );
+
+  const scenario = isCleanScenario ? DEMO_SCENARIO_CLEAN : DEMO_SCENARIO_DISCREPANCY;
+  kfsSlot = scenario.kfsDoc;
+
+  // Assert all 3 documents consistently belong to Pooja Iyer (Personal Loan)
+  assert.strictEqual(kfsSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(sanctionSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(agreementSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+
+  // Compare report - should evaluate cleanly as 100% matched, zero discrepancies
+  const report = compareLoanDocuments(kfsSlot, sanctionSlot, agreementSlot);
+  assert.strictEqual(report.mismatchCount, 0, 'Clean scenario must have 0 mismatches');
+  assert.strictEqual(report.borrowerName, 'Pooja Iyer [Synthetic Profile]');
 });
 
 console.log(`\n========================================================`);

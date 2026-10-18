@@ -77,8 +77,11 @@ export function printAuditLetter(subject: string, body: string) {
   document.body.appendChild(iframe);
 
   const doc = iframe.contentWindow?.document;
-  if (!doc) {
-    window.print();
+  if (!doc || !iframe.contentWindow) {
+    console.error('LoanLens Print Letter: Unable to access iframe document. Print aborted.');
+    if (document.body.contains(iframe)) {
+      document.body.removeChild(iframe);
+    }
     return;
   }
 

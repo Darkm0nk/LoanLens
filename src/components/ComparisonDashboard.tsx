@@ -14,7 +14,7 @@ import {
 import { LoanComparisonReport, DiscrepancyStatus, FieldComparison } from '../types/loan';
 import { TermComparisonCard } from './TermComparisonCard';
 import { SideBySideEvidenceModal } from './SideBySideEvidenceModal';
-import { generateDraftAuditLetter, printAuditLetter } from '../utils/auditLetterGenerator';
+import { printAuditReport } from '../utils/auditReportPrinter';
 
 interface ComparisonDashboardProps {
   report: LoanComparisonReport | null;
@@ -36,8 +36,7 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
 
   const handlePrintAudit = () => {
     if (!report) return;
-    const letter = generateDraftAuditLetter(report);
-    printAuditLetter(letter.subject, letter.body);
+    printAuditReport(report);
   };
 
   if (!report) {
@@ -214,9 +213,10 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
               <button
                   onClick={handlePrintAudit}
                   className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-                  title="Print audit letter"
+                  title="Print complete contract audit report (A4 / PDF)"
+                  aria-label="Print Audit"
               >
-                <Printer className="w-4 h-4" />
+                <Printer className="w-4 h-4 text-teal-700" />
                 <span>Print Audit</span>
               </button>
             </div>

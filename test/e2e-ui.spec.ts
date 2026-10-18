@@ -120,4 +120,42 @@ test.describe('LoanLens End-to-End Headless Browser Tests', () => {
     await expect(page.getByText(/Upload at least two loan documents above/i)).toBeVisible();
   });
 
+  test('6. Print Audit Report vs Clarification Notice Separation', async ({ page }) => {
+    await page.getByRole('button', { name: 'Intake & Comparison', exact: true }).click();
+
+    // Verify main window.print is NOT called (isolated iframe printing)
+    await page.evaluate(() => {
+      (window as any).__mainPrintCalled = false;
+      window.print = () => {
+        (window as any).__mainPrintCalled = true;
+      };
+    });
+
+    // 1. Test "Print Audit" button
+    const printAuditBtn = page.getByRole('button', { name: 'Print Audit' });
+    await expect(printAuditBtn).toBeVisible();
+
+    // Click Print Audit
+    await printAuditBtn.click();
+
+    // Ensure the main window.print was NEVER called (application dashboard not printed)
+    const mainPrintCalled = await page.evaluate(() => (window as any).__mainPrintCalled);
+    expect(mainPrintCalled).toBe(false);
+
+    // 2. Test "Draft Clarification Notice" button opens modal
+    const draftNoticeBtn = page.getByRole('button', { name: 'Draft Clarification Notice' });
+    await draftNoticeBtn.click();
+
+    const disputeModal = page.locator('div.fixed.inset-0').filter({ hasText: 'Lender Clarification & Rectification Request' }).first();
+    await expect(disputeModal).toBeVisible();
+
+    // Assert "Print Letter" button exists inside the modal
+    const printLetterBtn = disputeModal.getByRole('button', { name: 'Print Letter' });
+    await expect(printLetterBtn).toBeVisible();
+
+    // Close the modal
+    await disputeModal.getByRole('button', { name: 'Close' }).click();
+    await expect(disputeModal).not.toBeVisible();
+  });
+
 });
