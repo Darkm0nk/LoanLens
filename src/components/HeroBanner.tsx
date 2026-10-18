@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, AlertTriangle, CheckCircle2, ArrowDown, FileSearch, Sparkles, UploadCloud } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, CheckCircle2, Sparkles, UploadCloud } from 'lucide-react';
 
 interface HeroBannerProps {
   onLoadScenario: (scenarioId: string) => void;
@@ -41,7 +41,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </p>
 
           {/* Primary Action Button */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="pt-1">
             <button
               type="button"
               onClick={onStartUpload || onScrollToUpload}
@@ -49,13 +49,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             >
               <UploadCloud className="w-4 h-4" />
               <span>Upload Loan Documents</span>
-            </button>
-            <button
-              type="button"
-              onClick={onScrollToUpload}
-              className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium text-xs sm:text-sm rounded-lg transition-colors cursor-pointer"
-            >
-              <span>View Intake Workspace</span>
             </button>
           </div>
 
@@ -166,17 +159,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 </p>
               </div>
             </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={onScrollToUpload}
-              className="w-full py-2.5 px-4 bg-teal-800 hover:bg-teal-900 active:bg-teal-950 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs"
-            >
-              <FileSearch className="w-4 h-4" />
-              <span>Start Contract Audit</span>
-              <ArrowDown className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
       </div>

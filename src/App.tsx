@@ -19,7 +19,7 @@ import {
 } from './types/loan';
 import { compareLoanDocuments } from './utils/comparator';
 import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from './data/demoData';
-import { ArrowRight, UploadCloud, Sparkles, FileText, Scale, ShieldCheck, Mail } from 'lucide-react';
+import { ArrowRight, UploadCloud, Sparkles, FileText, ShieldCheck, Mail } from 'lucide-react';
 
 export default function App() {
   // Document states
@@ -46,7 +46,7 @@ export default function App() {
 
   // Active Demo Scenario
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>('home_loan_discrepancy');
-  const [currentSection, setCurrentSection] = useState<'dashboard' | 'audit' | 'compare' | 'rbi'>('audit');
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'audit' | 'compare' | 'rbi'>('dashboard');
 
   // Modals
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
@@ -354,8 +354,6 @@ export default function App() {
           currentSection={currentSection}
           onNavigate={(sec) => setCurrentSection(sec)}
           onReset={handleResetAll}
-          onOpenDisputeLetter={() => setIsDisputeModalOpen(true)}
-          onOpenRbiGuide={() => setIsRbiModalOpen(true)}
       >
         {/* ================= SECTION 1: DASHBOARD OVERVIEW ================= */}
         {currentSection === 'dashboard' && (
@@ -370,7 +368,7 @@ export default function App() {
                   }}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div
                     onClick={() => setCurrentSection('audit')}
                     className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-teal-500 transition-all cursor-pointer group"
@@ -379,15 +377,20 @@ export default function App() {
                     <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 flex items-center justify-center font-bold">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <span className="text-xs font-semibold text-teal-800 bg-teal-50 px-2 py-0.5 rounded">
-                  {docCount} / 3 Loaded
-                </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-teal-800 bg-teal-50 px-2 py-0.5 rounded">
+                        {docCount} / 3 Loaded
+                      </span>
+                      <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">
+                        {report ? `${report.mismatchCount} Variances` : 'Pending'}
+                      </span>
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">
                     Combined Intake & Audit Workspace
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Upload your Key Facts Statement, Sanction Letter, or Loan Agreement and instantly view side-by-side comparison matrices.
+                    Upload your Key Facts Statement, Sanction Letter, or Loan Agreement to run the deterministic 9-term audit matrix with clause-level evidence.
                   </p>
                   <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-teal-800">
                     <span>Open Combined Workspace</span>
@@ -396,34 +399,7 @@ export default function App() {
                 </div>
 
                 <div
-                    onClick={() => setCurrentSection('compare')}
-                    className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-teal-500 transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center font-bold">
-                      <Scale className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">
-                  {report ? `${report.mismatchCount} Variances` : 'Pending'}
-                </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">
-                    Comparison Matrix Report
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Inspect 9 core loan terms, deterministic financial impact calculations, and clause evidence.
-                  </p>
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-teal-800">
-                    <span>View Comparison Report</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-
-                <div
-                    onClick={() => {
-                      setCurrentSection('rbi');
-                      setIsRbiModalOpen(true);
-                    }}
+                    onClick={() => setCurrentSection('rbi')}
                     className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-teal-500 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center justify-between mb-4">

@@ -438,20 +438,8 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         </div>
       )}
 
-      {/* Verbatim Excerpts Accordion & Side-by-Side Inspect */}
-      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-        {onInspectEvidence ? (
-          <button
-            type="button"
-            onClick={() => onInspectEvidence(comparison)}
-            className="text-[11px] text-teal-800 hover:text-teal-950 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer group"
-          >
-            <FileText className="w-3.5 h-3.5 text-teal-700 group-hover:scale-110 transition-transform" />
-            <span className="hover:underline">Compare Excerpts Side-by-Side</span>
-          </button>
-        ) : (
-          <div />
-        )}
+      {/* Verbatim Excerpts Accordion */}
+      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-end">
         <button
           type="button"
           onClick={() => setShowRawExcerpts(!showRawExcerpts)}

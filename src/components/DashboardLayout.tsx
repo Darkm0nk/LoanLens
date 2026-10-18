@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Sun, Moon, LayoutGrid, FileSearch, Mail, ShieldCheck,
-    RefreshCw, Sparkles
-} from 'lucide-react';
+import { Sun, Moon, RefreshCw, Sparkles } from 'lucide-react';
 import { LoanComparisonReport, ExtractedLoanDocument } from '../types/loan';
 
 interface DashboardLayoutProps {
@@ -14,8 +11,6 @@ interface DashboardLayoutProps {
     currentSection: 'dashboard' | 'audit' | 'compare' | 'rbi';
     onNavigate: (section: 'dashboard' | 'audit' | 'compare' | 'rbi') => void;
     onReset: () => void;
-    onOpenDisputeLetter: () => void;
-    onOpenRbiGuide: () => void;
     children: React.ReactNode;
 }
 
@@ -28,8 +23,6 @@ export default function DashboardLayout({
                                             currentSection,
                                             onNavigate,
                                             onReset,
-                                            onOpenDisputeLetter,
-                                            onOpenRbiGuide,
                                             children,
                                         }: DashboardLayoutProps) {
     const [darkMode, setDarkMode] = useState(false);
@@ -80,40 +73,15 @@ export default function DashboardLayout({
                             <Moon className="w-4 h-4" />
                         </button>
                     </div>
-
-                    {/* Sidebar Navigation */}
-                    <nav className="flex flex-col gap-3">
-                        {[
-                            { id: 'dashboard', icon: LayoutGrid, label: 'Dashboard Overview' },
-                            { id: 'audit', icon: FileSearch, label: 'Document Intake & Comparison' },
-                            { id: 'rbi', icon: ShieldCheck, label: 'RBI Rights & Guide' },
-                        ].map((item) => {
-                            const Icon = item.icon;
-                            const isActive = safeSection === item.id || (item.id === 'audit' && safeSection === 'compare');
-                            return (
-                                <button
-                                    key={item.id}
-                                    onClick={() => onNavigate(item.id as any)}
-                                    className={`p-3 rounded-2xl transition-all relative group cursor-pointer ${
-                                        isActive
-                                            ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30'
-                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                    }`}
-                                    title={item.label}
-                                >
-                                    <Icon className="w-5 h-5" />
-                                </button>
-                            );
-                        })}
-                    </nav>
                 </div>
 
-                {/* Bottom Actions */}
+                {/* Bottom Utility Actions */}
                 <div className="flex flex-col items-center gap-4">
                     <button
                         onClick={onReset}
                         className="p-3 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-2xl transition-colors cursor-pointer"
                         title="Reset All Data"
+                        aria-label="Reset All Data"
                     >
                         <RefreshCw className="w-5 h-5" />
                     </button>
@@ -155,14 +123,6 @@ export default function DashboardLayout({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={onOpenDisputeLetter}
-                            className="flex items-center gap-2 bg-linear-to-r from-teal-700 to-emerald-700 text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-md shadow-teal-700/20 hover:opacity-90 transition-opacity cursor-pointer"
-                        >
-                            <Mail className="w-3.5 h-3.5 text-amber-300" />
-                            <span>Draft Clarification Notice</span>
-                        </button>
-
                         <div className={`flex items-center gap-3 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100/80 border-slate-200/60'} p-1.5 pr-4 rounded-2xl border`}>
                             <div className="w-8 h-8 rounded-xl bg-teal-800 flex items-center justify-center text-white font-semibold text-xs tracking-wider">
                                 {borrowerInitials}
@@ -194,10 +154,7 @@ export default function DashboardLayout({
                                 Intake & Comparison
                             </button>
                             <button
-                                onClick={() => {
-                                    onNavigate('rbi');
-                                    onOpenRbiGuide();
-                                }}
+                                onClick={() => onNavigate('rbi')}
                                 className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${safeSection === 'rbi' ? 'bg-slate-900 text-white font-semibold' : 'text-slate-600 hover:bg-slate-200/60'}`}
                             >
                                 RBI Guide
