@@ -111,38 +111,3 @@
 .dark .bg-amber-50 {
   background-color: rgba(78, 67, 32, 0.5) !important;
 }
-
-.dark .bg-teal-50 {
-  background-color: rgba(15, 76, 83, 0.5) !important;
-}
-
-.dark .bg-emerald-50 {
-  background-color: rgba(13, 79, 57, 0.5) !important;
-}
-
-.dark .bg-blue-50 {
-  background-color: rgba(15, 53, 89, 0.5) !important;
-}
-
-.dark .bg-indigo-50 {
-  background-color: rgba(22, 42, 96, 0.5) !important;
-}
-
-.dark .bg-amber-100 {
-  background-color: #374151 !important;
-}
-
-.dark .bg-teal-100 {
-  background-color: #374151 !important;
-}
-
-.dark .bg-emerald-100 {
-  background-color: #374151 !important;
-}
-
-.dark .bg-blue-100 {
-  background-color: #374151 !important;
-}
-
-
-

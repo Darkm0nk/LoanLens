@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, Download, Mail, Sparkles, Loader2 } from 'lucide-react';
+import { X, Copy, Check, Download, Mail, Sparkles, Loader2, Printer } from 'lucide-react';
 import { LoanComparisonReport } from '../types/loan';
+import { printAuditLetter } from '../utils/auditLetterGenerator';
 
 interface LenderDisputeModalProps {
   isOpen: boolean;
@@ -197,10 +198,18 @@ Contact: [Insert Phone / Email]`;
             </button>
             <button
               onClick={handleDownload}
-              className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-md flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-md flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download .txt</span>
+            </button>
+            <button
+              onClick={() => printAuditLetter(subject, body)}
+              className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-md flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              title="Print clarification letter"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Letter</span>
             </button>
           </div>
         </div>

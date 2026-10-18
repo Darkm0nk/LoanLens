@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx test/comparator.test.ts && tsx test/data-isolation.test.ts",
+    "test": "tsx test/comparator.test.ts && tsx test/data-isolation.test.ts && tsx test/audit-report-printer.test.ts",
     "test:ui": "playwright test",
     "test:e2e": "tsx test/e2e-api-test.ts"
   },
