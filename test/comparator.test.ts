@@ -1390,6 +1390,204 @@ runTest('15. Very short or generic excerpts do not independently establish a sou
   assert.strictEqual(verifyExcerptInSourceText('5000', sourceText), false);
 });
 
+// -------------------------------------------------------------
+// 13. FINANCIAL CALCULATIONS, BOUNDARY TOLERANCES & FORMATTING EDGE CASES
+// -------------------------------------------------------------
+console.log('\n[13] Financial Calculations, Boundary Tolerances & Formatting Edge Cases:');
+
+runTest('1. Missing numeric values (loanAmount 0 or null) are categorized as missing, not formatted as ₹0', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      loanAmount: {
+        value: null as any,
+        rawText: 'Amount not specified',
+        pageClauseRef: 'Page 1, Item 1',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      loanAmount: {
+        value: 0 as any,
+        rawText: 'Amount: ₹0',
+        pageClauseRef: 'Page 1, Clause 1',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const amountComp = report.comparisons.find((c) => c.fieldKey === 'loanAmount');
+  assert.ok(amountComp);
+  assert.strictEqual(amountComp.status, 'missing');
+  assert.strictEqual(amountComp.values.kfs?.display, 'Not extracted');
+  assert.strictEqual(amountComp.values.loanAgreement?.display, 'Not extracted');
+});
+
+runTest('2. Valid zero values for insurance and processing fees format as waived/voluntary and match', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      processingFees: {
+        value: 0,
+        rawText: 'Processing fee: Nil (Festival waiver)',
+        pageClauseRef: 'Page 1, Fee Schedule',
+        isVerifiedInSource: true,
+      },
+      insurance: {
+        value: 0,
+        isMandatory: false,
+        rawText: 'Insurance: Optional / None opted',
+        pageClauseRef: 'Page 2, Item 7',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      processingFees: {
+        value: 0,
+        rawText: 'Processing fee: Waived',
+        pageClauseRef: 'Page 2, Clause 4',
+        isVerifiedInSource: true,
+      },
+      insurance: {
+        value: 0,
+        isMandatory: false,
+        rawText: 'Insurance: ₹0',
+        pageClauseRef: 'Page 3, Clause 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const feeComp = report.comparisons.find((c) => c.fieldKey === 'processingFees');
+  const insComp = report.comparisons.find((c) => c.fieldKey === 'insurance');
+
+  assert.ok(feeComp);
+  assert.strictEqual(feeComp.status, 'match');
+  assert.strictEqual(feeComp.values.kfs?.display, '₹0 (Nil / Waived)');
+  assert.strictEqual(feeComp.values.loanAgreement?.display, '₹0 (Nil / Waived)');
+
+  assert.ok(insComp);
+  assert.strictEqual(insComp.status, 'match');
+  assert.strictEqual(insComp.values.kfs?.display, '₹0 (None / Voluntary)');
+  assert.strictEqual(insComp.values.loanAgreement?.display, '₹0 (None / Voluntary)');
+});
+
+runTest('3. Interest rate tolerance boundary: diff <= 0.05% matches, diff > 0.05% mismatches', () => {
+  const baseKfs = DEMO_SCENARIO_CLEAN.kfsDoc; // Rate = 11.50%
+
+  // Case A: 11.50% vs 11.53% (0.03% difference -> within 0.05% tolerance)
+  const agreementWithinTol: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.interestRate,
+        value: 11.53,
+      },
+    },
+  };
+  const reportWithin = compareLoanDocuments(baseKfs, null, agreementWithinTol);
+  const rateWithin = reportWithin.comparisons.find((c) => c.fieldKey === 'interestRate');
+  assert.strictEqual(rateWithin?.status, 'match', 'Difference <= 0.05% must match within tolerance');
+
+  // Case B: 11.50% vs 11.58% (0.08% difference -> exceeds tolerance)
+  const agreementExceedsTol: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.interestRate,
+        value: 11.58,
+      },
+    },
+  };
+  const reportExceeds = compareLoanDocuments(baseKfs, null, agreementExceedsTol);
+  const rateExceeds = reportExceeds.comparisons.find((c) => c.fieldKey === 'interestRate');
+  assert.strictEqual(rateExceeds?.status, 'mismatch', 'Difference > 0.05% must flag mismatch');
+  assert.strictEqual(rateExceeds?.severity, 'critical');
+});
+
+runTest('4. EMI tolerance boundary: diff <= ₹50 matches, diff > ₹50 mismatches', () => {
+  const baseKfs = DEMO_SCENARIO_CLEAN.kfsDoc; // EMI = 16,490
+
+  // Case A: 16,490 vs 16,520 (₹30 difference -> within ₹50 tolerance)
+  const agreementWithinTol: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      emi: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.emi,
+        value: 16520,
+      },
+    },
+  };
+  const reportWithin = compareLoanDocuments(baseKfs, null, agreementWithinTol);
+  const emiWithin = reportWithin.comparisons.find((c) => c.fieldKey === 'emi');
+  assert.strictEqual(emiWithin?.status, 'match', 'EMI diff <= ₹50 must match within rounding tolerance');
+
+  // Case B: 16,490 vs 16,580 (₹90 difference -> exceeds tolerance)
+  const agreementExceedsTol: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      emi: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.emi,
+        value: 16580,
+      },
+    },
+  };
+  const reportExceeds = compareLoanDocuments(baseKfs, null, agreementExceedsTol);
+  const emiExceeds = reportExceeds.comparisons.find((c) => c.fieldKey === 'emi');
+  assert.strictEqual(emiExceeds?.status, 'mismatch', 'EMI diff > ₹50 must flag mismatch');
+  assert.strictEqual(emiExceeds?.severity, 'critical');
+  assert.ok(emiExceeds?.financialImpact?.includes('totals ₹3,240'));
+});
+
+runTest('5. Lifetime financial calculation yields explicit limitation when tenure is missing', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_DISCREPANCY.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_DISCREPANCY.kfsDoc.fields,
+      tenureMonths: {
+        value: null as any,
+        rawText: 'Tenure not stated',
+        pageClauseRef: 'Page 1, Clause 3',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_DISCREPANCY.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_DISCREPANCY.agreementDoc.fields,
+      tenureMonths: {
+        value: 0 as any,
+        rawText: 'Tenure: 0',
+        pageClauseRef: 'Page 2, Clause 5',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const emiComp = report.comparisons.find((c) => c.fieldKey === 'emi');
+  assert.ok(emiComp);
+  assert.strictEqual(emiComp.financialImpact, 'Insufficient information to estimate');
+  assert.ok(emiComp.calculationAssumptions?.[0].includes('Tenure is required'));
+});
+
 console.log(`\n========================================`);
 console.log(`All ${passedTests} of ${totalTests} Comprehensive Quality & Audit Tests Passed!`);
 console.log(`========================================\n`);

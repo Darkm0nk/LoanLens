@@ -247,13 +247,15 @@ export function compareLoanDocuments(
 
       // If document is a synthetic demo benchmark, keep its preset verification level if present
       if (doc?.isDemo && (field.verificationLevel || field.isVerifiedInSource === true)) {
+        const resolvedLevel = field.verificationLevel || (field.isVerifiedInSource ? 'source_verified' : 'unverified');
+        const isActuallyVerified = resolvedLevel === 'source_verified' && field.isVerifiedInSource !== false;
         return {
-          isVerified: field.isVerifiedInSource === true,
-          verificationLevel: field.verificationLevel || (field.isVerifiedInSource ? 'source_verified' : 'unverified'),
-          details: field.verificationDetails || (field.isVerifiedInSource ? 'Synthetic benchmark verified' : 'Evidence not verified'),
-          isLocationVerified: field.isLocationVerified ?? (field.isVerifiedInSource === true),
-          locationStatus: field.locationStatus ?? (field.isVerifiedInSource ? 'verified' : 'unverified'),
-          locationDetails: field.locationDetails ?? (field.isVerifiedInSource ? 'Synthetic benchmark location verified' : 'Location unverified'),
+          isVerified: isActuallyVerified,
+          verificationLevel: resolvedLevel,
+          details: field.verificationDetails || (isActuallyVerified ? 'Synthetic benchmark verified' : 'Evidence not verified'),
+          isLocationVerified: field.isLocationVerified ?? isActuallyVerified,
+          locationStatus: field.locationStatus ?? (isActuallyVerified ? 'verified' : 'unverified'),
+          locationDetails: field.locationDetails ?? (isActuallyVerified ? 'Synthetic benchmark location verified' : 'Location unverified'),
         };
       }
 
@@ -454,9 +456,10 @@ export function compareLoanDocuments(
           `Assumed Minimum Principal: ${formatINR(minVal)}`,
           `Assumed Maximum Principal: ${formatINR(maxVal)}`,
           `Computed Difference: ${formatINR(maxVal)} - ${formatINR(minVal)} = ${formatINR(diff)}`,
-          'Verify whether third-party administrative charges, insurance premiums, or documentation fees have been added to the principal balance.',
+          'Source reconciliation: Check whether single-premium credit life insurance, third-party administrative charges, or documentation fees (e.g. ₹78,000) have been capitalized into the principal debt instead of paid upfront.',
+          'Mathematical projection: Any monthly installment or lifetime cost variance calculated from principal variance represents an amortization projection under constant spread, not a guaranteed final outflow.',
         ];
-        lenderQuestion = `The loan amount is stated as ${formatINR(agreeField?.value ?? maxVal)} in the Loan Agreement, whereas earlier communications stated ${formatINR(kfsField?.value ?? minVal)}. Could you clarify if any fees or ancillary products have been capitalized into the principal debt?`;
+        lenderQuestion = `The loan amount is stated as ${formatINR(agreeField?.value ?? maxVal)} in the Loan Agreement, whereas earlier communications stated ${formatINR(kfsField?.value ?? minVal)}. Could you clarify if any fees or ancillary products (such as insurance premiums) have been capitalized into the principal debt?`;
       } else if (nums.length === docs.length) {
         status = 'match';
         severity = 'clean';
@@ -859,7 +862,7 @@ export function compareLoanDocuments(
             `Assumed Tenure: ${tenureM} months`,
             `Repayment Method: Equated Monthly Installment (reducing balance amortization)`,
             `Deterministic calculation: ${formatINR(diff)} difference * ${tenureM} months = ${formatINR(lifetimeEmiDiff)}.`,
-            'Assumes the EMI remains unchanged over the entire duration without prepayments or benchmark adjustments.',
+            'Mathematical projection: Monthly installment and lifetime figures are mathematical projections under constant spread and reducing-balance amortization, not guaranteed final outflows. Floating-rate facilities adjust periodically with benchmark resets.',
           ];
         }
 
@@ -1215,15 +1218,15 @@ export function compareLoanDocuments(
       regulatoryAssessment = isFloating ? 'has_penalty' : 'not_assessed';
       summary =
         'Contradictory prepayment terms: Pre-contract disclosure indicates zero/nil foreclosure penalty, but loan agreement draft specifies prepayment charges.';
-      lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} specifies prepayment or foreclosure charges, contradicting the nil fee disclosure in pre-contract terms. Under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14, foreclosure penalties are prohibited on floating-rate term loans to individual borrowers. Could you confirm zero charges apply?`;
+      lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} specifies prepayment or foreclosure charges, contradicting the nil fee disclosure in pre-contract terms. Under the Reserve Bank of India (Pre-payment Charges on Loans) Directions, 2025 (effective Jan 1, 2026) and foundational Circular DBOD.Dir.BC.115/13.03.00/2013-14, foreclosure penalties and lock-in periods are prohibited on floating-rate term loans to individual borrowers for non-business purposes. Could you confirm zero charges apply?`;
     } else if (isFloating && hasAnyPenalty) {
       status = 'mismatch';
       severity = 'warning';
       classification = 'Possible regulatory concern';
       regulatoryAssessment = 'has_penalty';
       summary =
-        'Prepayment charge clause noted on floating-rate facility. Needs verification under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14 for individual floating-rate loans.';
-      lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} references a prepayment or foreclosure fee. Under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14, foreclosure penalties are prohibited on floating-rate term loans to individual borrowers. If this facility is sanctioned to an individual on a floating rate, could you confirm that zero foreclosure charges apply?`;
+        'Prepayment charge clause noted on floating-rate facility. Needs verification under the Reserve Bank of India (Pre-payment Charges on Loans) Directions, 2025 and Circular DBOD.Dir.BC.115/13.03.00/2013-14 for individual floating-rate loans.';
+      lenderQuestion = `Clause ${agreeField?.pageClauseRef || 'in the agreement'} references a prepayment or foreclosure fee. Under the Reserve Bank of India (Pre-payment Charges on Loans) Directions, 2025 (effective Jan 1, 2026) and Circular DBOD.Dir.BC.115/13.03.00/2013-14, foreclosure penalties and lock-in periods are prohibited on floating-rate term loans to individual borrowers. If this facility is sanctioned to an individual on a floating rate for non-business purposes, could you confirm that zero foreclosure charges apply?`;
     } else if (prepayDocsCount < presentDocsCount) {
       status = 'missing';
       severity = 'info';
@@ -1264,7 +1267,7 @@ export function compareLoanDocuments(
       summary =
         'Prepayment and foreclosure provisions require verification. Insufficient evidence in submitted documents to confirm rate type or foreclosure fee exemption under RBI norms.';
       lenderQuestion =
-        'Please confirm whether prepayment or foreclosure penalties apply to this loan under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14.';
+        'Please confirm whether prepayment or foreclosure penalties apply to this loan under RBI Directions 2025 / Circular DBOD.Dir.BC.115/13.03.00/2013-14.';
     } else {
       status = 'match';
       severity = 'clean';

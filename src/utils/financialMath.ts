@@ -152,7 +152,7 @@ export function compareLifetimeImpact(
       `Repayment Method: Equated Monthly Installment (standard monthly-rest reducing balance amortization)`,
       `Monthly Outflow: ₹${baseResult.monthlyEmi.toLocaleString('en-IN')}/month (Base) vs ₹${compResult.monthlyEmi.toLocaleString('en-IN')}/month (Comparison) [Difference: ₹${Math.abs(emiDifferenceMonthly).toLocaleString('en-IN')}/month]`,
       `Lifetime Cost: ₹${baseResult.totalPayment.toLocaleString('en-IN')} (Base) vs ₹${compResult.totalPayment.toLocaleString('en-IN')} (Comparison) [Variance: ~₹${Math.abs(lifetimeCostDifference).toLocaleString('en-IN')}]`,
-      'Constant benchmark spread assumed throughout full tenure with zero prepayments. Floating-rate facilities adjust with external benchmark resets.',
+      'Mathematical projection: Constant benchmark spread assumed throughout full tenure with zero prepayments. Monthly installments and lifetime figures are mathematical projections under constant spread and reducing-balance amortization, not guaranteed final outflows; floating-rate facilities adjust periodically with benchmark resets.',
     ],
   };
 }

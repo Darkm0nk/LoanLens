@@ -18,6 +18,7 @@ import {
   UploadProcessingStage,
 } from './types/loan';
 import { compareLoanDocuments } from './utils/comparator';
+import { loadSingleSampleDocument } from './utils/dataIsolation';
 import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from './data/demoData';
 import { ArrowRight, UploadCloud, Sparkles, FileText, ShieldCheck, Mail } from 'lucide-react';
 
@@ -290,22 +291,16 @@ export default function App() {
   }
 
   function handleLoadSingleSample(docType: LoanDocumentType) {
-    // If any real document exists, purge real documents to maintain strict data isolation
-    if (kfsDoc && !kfsDoc.isDemo) setKfsDoc(null);
-    if (sanctionDoc && !sanctionDoc.isDemo) setSanctionDoc(null);
-    if (agreementDoc && !agreementDoc.isDemo) setAgreementDoc(null);
-
-    // Context-aware scenario selection: match existing demo borrower if present
-    const isCleanScenario =
-      activeScenarioId === 'personal_loan_clean' ||
-      [kfsDoc, sanctionDoc, agreementDoc].some(
-        (d) => d?.isDemo && d.borrowerName?.includes('Pooja Iyer')
-      );
-
-    const scenario = isCleanScenario ? DEMO_SCENARIO_CLEAN : DEMO_SCENARIO_DISCREPANCY;
-    if (docType === 'kfs') setKfsDoc(scenario.kfsDoc);
-    else if (docType === 'sanction_letter') setSanctionDoc(scenario.sanctionDoc);
-    else if (docType === 'loan_agreement') setAgreementDoc(scenario.agreementDoc);
+    const nextState = loadSingleSampleDocument(
+      { kfsDoc, sanctionDoc, agreementDoc, activeScenarioId },
+      docType
+    );
+    setKfsDoc(nextState.kfsDoc);
+    setSanctionDoc(nextState.sanctionDoc);
+    setAgreementDoc(nextState.agreementDoc);
+    if (nextState.activeScenarioId) {
+      setActiveScenarioId(nextState.activeScenarioId);
+    }
     setErrorMap((prev) => ({ ...prev, [docType]: null }));
     setStageMap((prev) => ({ ...prev, [docType]: 'completed' }));
   }

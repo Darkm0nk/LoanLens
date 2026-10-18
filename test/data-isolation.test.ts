@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import { compareLoanDocuments, formatINR, formatPercent } from '../src/utils/comparator';
 import { ExtractedLoanDocument, LoanComparisonReport } from '../src/types/loan';
 import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from '../src/data/demoData';
+import { loadSingleSampleDocument, resetAllLoanState, setDocumentSlot } from '../src/utils/dataIsolation';
 
 console.log('========================================================');
 console.log('   LOANLENS DATA-ISOLATION & CONTAMINATION TEST SUITE');
@@ -386,63 +387,109 @@ runTest('Documents extracted from single combined package are clearly flagged wi
 });
 
 // -------------------------------------------------------------
-// 9. SINGLE-SAMPLE LOADING & MIXED-STATE PREVENTION GUARD
+// 9. PRODUCTION DATA-ISOLATION & STATE MANAGEMENT (dataIsolation.ts)
 // -------------------------------------------------------------
-console.log('\n[9] Single-Sample Loading & Mixed-State Prevention Guard:');
+console.log('\n[9] Production Data-Isolation & State Management (dataIsolation.ts):');
 
-runTest('Loading a sample into a slot when a real document is present purges the real document', () => {
-  // Simulate App.tsx slots with 1 real document present
-  let kfsSlot: ExtractedLoanDocument | null = createRealDocument({ documentType: 'kfs' });
-  let sanctionSlot: ExtractedLoanDocument | null = null;
-  let agreementSlot: ExtractedLoanDocument | null = null;
+runTest('loadSingleSampleDocument purges single real document when loading sample', () => {
+  const realKfs = createRealDocument({ documentType: 'kfs' });
+  assert.strictEqual(realKfs.isDemo, false);
 
-  assert.strictEqual(kfsSlot.isDemo, false);
+  const initial = {
+    kfsDoc: realKfs,
+    sanctionDoc: null,
+    agreementDoc: null,
+  };
 
-  // Simulating handleLoadSingleSample('sanction_letter') logic:
-  const purgeReal = (doc: ExtractedLoanDocument | null) => (doc && !doc.isDemo ? null : doc);
-  kfsSlot = purgeReal(kfsSlot);
-  sanctionSlot = purgeReal(sanctionSlot);
-  agreementSlot = purgeReal(agreementSlot);
+  const next = loadSingleSampleDocument(initial, 'sanction_letter');
 
-  sanctionSlot = DEMO_SCENARIO_DISCREPANCY.sanctionDoc;
+  assert.strictEqual(next.kfsDoc, null, 'Real KFS must be purged upon loading sample sanction letter');
+  assert.strictEqual(next.sanctionDoc?.isDemo, true);
+  assert.strictEqual(next.agreementDoc, null);
 
-  // Verify real document was safely purged and no mixed real/demo state exists
-  assert.strictEqual(kfsSlot, null, 'Real KFS must be purged when loading a sample document');
-  assert.strictEqual(sanctionSlot.isDemo, true);
-  assert.strictEqual(agreementSlot, null);
-
-  const realDocs = [kfsSlot, sanctionSlot, agreementSlot].filter(d => Boolean(d && !d.isDemo));
-  const demoDocs = [kfsSlot, sanctionSlot, agreementSlot].filter(d => Boolean(d && d.isDemo));
-  assert.strictEqual(realDocs.length, 0, 'Zero real documents must remain');
-  assert.strictEqual(demoDocs.length, 1, 'Only the single sample document is active');
+  const realDocs = [next.kfsDoc, next.sanctionDoc, next.agreementDoc].filter(d => Boolean(d && !d.isDemo));
+  assert.strictEqual(realDocs.length, 0, 'Zero real documents must remain in state');
 });
 
-runTest('Loading a sample into a cleared slot preserves scenario borrower consistency', () => {
-  // User is on Scenario B (Pooja Iyer, Personal Loan Clean) and clears KFS
-  let activeScenarioId: string | null = null; // Cleared doc drops scenario ID
-  let kfsSlot: ExtractedLoanDocument | null = null;
-  let sanctionSlot: ExtractedLoanDocument | null = DEMO_SCENARIO_CLEAN.sanctionDoc;
-  let agreementSlot: ExtractedLoanDocument | null = DEMO_SCENARIO_CLEAN.agreementDoc;
+runTest('loadSingleSampleDocument purges multiple real documents across slots', () => {
+  const realKfs = createRealDocument({ documentType: 'kfs' });
+  const realAgreement = createRealDocument({ documentType: 'loan_agreement' });
 
-  // User clicks "Load Sample KFS"
-  const isCleanScenario =
-    activeScenarioId === 'personal_loan_clean' ||
-    [kfsSlot, sanctionSlot, agreementSlot].some(
-      (d) => d?.isDemo && d.borrowerName?.includes('Pooja Iyer')
-    );
+  const initial = {
+    kfsDoc: realKfs,
+    sanctionDoc: null,
+    agreementDoc: realAgreement,
+  };
 
-  const scenario = isCleanScenario ? DEMO_SCENARIO_CLEAN : DEMO_SCENARIO_DISCREPANCY;
-  kfsSlot = scenario.kfsDoc;
+  const next = loadSingleSampleDocument(initial, 'sanction_letter');
 
-  // Assert all 3 documents consistently belong to Pooja Iyer (Personal Loan)
-  assert.strictEqual(kfsSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
-  assert.strictEqual(sanctionSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
-  assert.strictEqual(agreementSlot.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(next.kfsDoc, null, 'Real KFS must be purged');
+  assert.strictEqual(next.agreementDoc, null, 'Real Agreement must be purged');
+  assert.strictEqual(next.sanctionDoc?.isDemo, true);
 
-  // Compare report - should evaluate cleanly as 100% matched, zero discrepancies
-  const report = compareLoanDocuments(kfsSlot, sanctionSlot, agreementSlot);
+  const realDocs = [next.kfsDoc, next.sanctionDoc, next.agreementDoc].filter(d => Boolean(d && !d.isDemo));
+  assert.strictEqual(realDocs.length, 0, 'All real documents must be purged');
+});
+
+runTest('loadSingleSampleDocument preserves scenario borrower consistency', () => {
+  const initial = {
+    kfsDoc: null,
+    sanctionDoc: DEMO_SCENARIO_CLEAN.sanctionDoc,
+    agreementDoc: DEMO_SCENARIO_CLEAN.agreementDoc,
+    activeScenarioId: 'personal_loan_clean',
+  };
+
+  const next = loadSingleSampleDocument(initial, 'kfs');
+
+  assert.strictEqual(next.kfsDoc?.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(next.sanctionDoc?.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(next.agreementDoc?.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+  assert.strictEqual(next.activeScenarioId, 'personal_loan_clean');
+
+  const report = compareLoanDocuments(next.kfsDoc, next.sanctionDoc, next.agreementDoc);
   assert.strictEqual(report.mismatchCount, 0, 'Clean scenario must have 0 mismatches');
-  assert.strictEqual(report.borrowerName, 'Pooja Iyer [Synthetic Profile]');
+});
+
+runTest('loadSingleSampleDocument prevents combining incompatible synthetic scenarios', () => {
+  // Scenario: slot has Pooja Iyer (clean), but state requests sample from discrepancy scenario
+  const initial = {
+    kfsDoc: DEMO_SCENARIO_CLEAN.kfsDoc, // Pooja Iyer
+    sanctionDoc: null,
+    agreementDoc: null,
+    activeScenarioId: 'home_loan_discrepancy', // conflicting scenario ID
+  };
+
+  const next = loadSingleSampleDocument(initial, 'sanction_letter');
+
+  // Must not combine Pooja Iyer KFS with Vikramaditya Sharma Sanction Letter
+  assert.strictEqual(next.sanctionDoc?.borrowerName, 'Vikramaditya Sharma [Synthetic Profile]');
+  assert.strictEqual(next.kfsDoc, null, 'Incompatible Pooja Iyer KFS must be purged to prevent scenario cross-contamination');
+  assert.strictEqual(next.agreementDoc, null);
+});
+
+runTest('setDocumentSlot with real document purges all demo documents across all slots', () => {
+  const initial = {
+    kfsDoc: DEMO_SCENARIO_DISCREPANCY.kfsDoc,
+    sanctionDoc: DEMO_SCENARIO_DISCREPANCY.sanctionDoc,
+    agreementDoc: DEMO_SCENARIO_DISCREPANCY.agreementDoc,
+    activeScenarioId: 'home_loan_discrepancy',
+  };
+
+  const realSanction = createRealDocument({ documentType: 'sanction_letter' });
+  const next = setDocumentSlot(initial, 'sanction_letter', realSanction);
+
+  assert.strictEqual(next.kfsDoc, null, 'Demo KFS must be purged when uploading real document');
+  assert.strictEqual(next.agreementDoc, null, 'Demo Agreement must be purged when uploading real document');
+  assert.strictEqual(next.sanctionDoc?.isDemo, false, 'Uploaded document must be real');
+  assert.strictEqual(next.activeScenarioId, null, 'activeScenarioId must be reset');
+});
+
+runTest('resetAllLoanState clears all slots and active scenario ID', () => {
+  const reset = resetAllLoanState();
+  assert.strictEqual(reset.kfsDoc, null);
+  assert.strictEqual(reset.sanctionDoc, null);
+  assert.strictEqual(reset.agreementDoc, null);
+  assert.strictEqual(reset.activeScenarioId, null);
 });
 
 console.log(`\n========================================================`);

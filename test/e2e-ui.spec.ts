@@ -120,42 +120,233 @@ test.describe('LoanLens End-to-End Headless Browser Tests', () => {
     await expect(page.getByText(/Upload at least two loan documents above/i)).toBeVisible();
   });
 
-  test('6. Print Audit Report vs Clarification Notice Separation', async ({ page }) => {
+  test('6. Print Audit Report vs Clarification Notice Separation & Verification', async ({ page }) => {
     await page.getByRole('button', { name: 'Intake & Comparison', exact: true }).click();
 
-    // Verify main window.print is NOT called (isolated iframe printing)
+    // Instrument window.print and iframe contentWindow.print to monitor execution
     await page.evaluate(() => {
-      (window as any).__mainPrintCalled = false;
+      (window as any).__mainPrintCalls = 0;
+      (window as any).__iframePrintCalls = [];
+
       window.print = () => {
-        (window as any).__mainPrintCalled = true;
+        (window as any).__mainPrintCalls += 1;
+      };
+
+      const originalAppendChild = document.body.appendChild.bind(document.body);
+      document.body.appendChild = function <T extends Node>(node: T): T {
+        if (node instanceof HTMLIFrameElement) {
+          const iframe = node;
+          setTimeout(() => {
+            try {
+              if (iframe.contentWindow) {
+                const cw = iframe.contentWindow;
+                const origCwPrint = cw.print.bind(cw);
+                cw.print = () => {
+                  (window as any).__iframePrintCalls.push({
+                    title: iframe.getAttribute('title') || '',
+                    html: cw.document?.documentElement?.innerHTML || '',
+                  });
+                  return origCwPrint();
+                };
+              }
+            } catch {
+              // ignore
+            }
+          }, 10);
+        }
+        return originalAppendChild(node);
       };
     });
 
-    // 1. Test "Print Audit" button
+    // -------------------------------------------------------------
+    // PART 1: Test "Print Audit" workflow (Full Audit Report)
+    // -------------------------------------------------------------
     const printAuditBtn = page.getByRole('button', { name: 'Print Audit' });
     await expect(printAuditBtn).toBeVisible();
 
-    // Click Print Audit
+    // Trigger Print Audit
     await printAuditBtn.click();
 
-    // Ensure the main window.print was NEVER called (application dashboard not printed)
-    const mainPrintCalled = await page.evaluate(() => (window as any).__mainPrintCalled);
-    expect(mainPrintCalled).toBe(false);
+    // Verify audit report iframe is created and attached to DOM
+    const auditIframe = page.locator('iframe[title="LoanLens Audit Print Document"]');
+    await expect(auditIframe).toBeAttached();
 
-    // 2. Test "Draft Clarification Notice" button opens modal
+    // Inspect content inside the audit report iframe
+    const auditFrame = page.frameLocator('iframe[title="LoanLens Audit Print Document"]');
+    await expect(auditFrame.locator('.brand-title')).toContainText('LoanLens');
+    await expect(auditFrame.locator('.brand-subtitle')).toContainText('Loan Contract Audit');
+
+    // Verify prominent synthetic demo warning banner is displayed
+    const demoBanner = auditFrame.locator('.demo-banner');
+    await expect(demoBanner).toBeAttached();
+    await expect(demoBanner).toContainText('SYNTHETIC DEMONSTRATION AUDIT');
+
+    // Verify full audit matrix table and sections are present
+    await expect(auditFrame.locator('.values-table').first()).toBeAttached();
+    await expect(auditFrame.locator('.stats-strip')).toBeAttached();
+    await expect(auditFrame.locator('.disclaimer-box')).toBeAttached();
+
+    // Ensure main window.print was NEVER called
+    const mainPrintCountAfterAudit = await page.evaluate(() => (window as any).__mainPrintCalls);
+    expect(mainPrintCountAfterAudit).toBe(0);
+
+    // Verify iframe is cleanly removed from DOM after print lifecycle cleanup
+    await expect(auditIframe).toHaveCount(0, { timeout: 6000 });
+
+    // -------------------------------------------------------------
+    // PART 2: Test "Draft Clarification Notice" workflow (Lender Letter)
+    // -------------------------------------------------------------
     const draftNoticeBtn = page.getByRole('button', { name: 'Draft Clarification Notice' });
     await draftNoticeBtn.click();
 
     const disputeModal = page.locator('div.fixed.inset-0').filter({ hasText: 'Lender Clarification & Rectification Request' }).first();
     await expect(disputeModal).toBeVisible();
 
-    // Assert "Print Letter" button exists inside the modal
+    // Locate "Print Letter" button inside modal
     const printLetterBtn = disputeModal.getByRole('button', { name: 'Print Letter' });
     await expect(printLetterBtn).toBeVisible();
 
-    // Close the modal
+    // Trigger Print Letter
+    await printLetterBtn.click();
+
+    // Verify clarification letter iframe is created and attached to DOM
+    const letterIframe = page.locator('iframe[title="LoanLens Clarification Letter Print Document"]');
+    await expect(letterIframe).toBeAttached();
+
+    // Inspect content inside the letter iframe
+    const letterFrame = page.frameLocator('iframe[title="LoanLens Clarification Letter Print Document"]');
+    await expect(letterFrame.locator('.header h1')).toContainText('LoanLens - Lender Clarification & Rectification Request');
+    await expect(letterFrame.locator('.subject-line')).toContainText('Subject:');
+    await expect(letterFrame.locator('.body-text')).toBeAttached();
+
+    // Strictly verify letter does NOT contain the audit matrix or demo banner
+    await expect(letterFrame.locator('.values-table')).toHaveCount(0);
+    await expect(letterFrame.locator('.demo-banner')).toHaveCount(0);
+
+    // Verify letter iframe is cleanly removed after lifecycle cleanup
+    await expect(letterIframe).toHaveCount(0, { timeout: 6000 });
+
+    // Close the clarification modal
     await disputeModal.getByRole('button', { name: 'Close' }).click();
     await expect(disputeModal).not.toBeVisible();
+
+    // -------------------------------------------------------------
+    // PART 3: Verify Isolated Print Invocations
+    // -------------------------------------------------------------
+    const printSummary = await page.evaluate(() => ({
+      mainCalls: (window as any).__mainPrintCalls,
+      iframeCalls: (window as any).__iframePrintCalls.map((c: any) => c.title),
+    }));
+
+    // Main window.print must NEVER have been called
+    expect(printSummary.mainCalls).toBe(0);
+
+    // Both isolated iframes must have invoked contentWindow.print()
+    expect(printSummary.iframeCalls).toContain('LoanLens Audit Print Document');
+    expect(printSummary.iframeCalls).toContain('LoanLens Clarification Letter Print Document');
   });
 
+  test('7. Truthful Evidence Verification: demo benchmarks display Sample Benchmark Citation and never claim Source Verified', async ({ page }) => {
+    await page.getByRole('button', { name: 'Intake & Comparison', exact: true }).click();
+
+    // Verify comparison cards display "Sample Benchmark Citation"
+    const benchmarkBadges = page.getByText('Sample Benchmark Citation');
+    await expect(benchmarkBadges.first()).toBeVisible();
+
+    // Verify "✓ Source Verified" or "Source Verified" is NOT claimed on demo benchmark cards
+    await expect(page.getByText('✓ Source Verified')).toHaveCount(0);
+
+    // Inspect an evidence modal
+    const inspectBtn = page.getByRole('button', { name: 'Inspect Evidence' }).first();
+    await inspectBtn.click();
+
+    const modal = page.locator('div.fixed.inset-0').first();
+    await expect(modal).toBeVisible();
+
+    // Verify modal also displays Sample Benchmark Citation and not real source verification
+    await expect(modal.getByText('Sample Benchmark Citation').first()).toBeVisible();
+    await expect(modal.getByText('✓ Source Verified')).toHaveCount(0);
+
+    // Close modal
+    await page.keyboard.press('Escape');
+    await expect(modal).not.toBeVisible();
+  });
+
+  test('8. RBI Prepayment Directions Grounding: modal displays Directions 2025 and Circular 2014', async ({ page }) => {
+    // Navigate to RBI Guide tab
+    await page.getByRole('button', { name: 'RBI Guide', exact: true }).click();
+    await expect(page.getByText('Summary of Key Borrower Protections')).toBeVisible();
+
+    // Click "Open Regulatory Guide"
+    const openGuideBtn = page.getByRole('button', { name: 'Open Regulatory Guide' });
+    await openGuideBtn.click();
+
+    const rbiModal = page.locator('div.fixed.inset-0').filter({ hasText: 'RBI Borrower Safeguards & Regulatory Citations' }).first();
+    await expect(rbiModal).toBeVisible();
+
+    // Verify the latest Directions 2025 reference is cited
+    await expect(rbiModal.getByText(/Reserve Bank of India \(Pre-payment Charges on Loans\) Directions, 2025/i)).toBeVisible();
+    await expect(rbiModal.getByText(/RBI\/2025-26\/64 DoR\.MCS\.REC\.38\/01\.01\.001\/2025-26/i)).toBeVisible();
+    await expect(rbiModal.getByText(/January 1, 2026/i)).toBeVisible();
+    await expect(rbiModal.getByText(/DBOD\.Dir\.BC\.115\/13\.03\.00\/2013-14/i)).toBeVisible();
+
+    // Close modal
+    const closeBtn = rbiModal.getByRole('button', { name: 'Close' });
+    await closeBtn.click();
+    await expect(rbiModal).not.toBeVisible();
+  });
+
+  test('9. Dark Mode Contrast & Visual Quality Verification', async ({ page }) => {
+    const screenshotDir = '/Users/pansheriya.vishal/.gemini/antigravity/brain/1f8c9e47-e69f-461c-bdb2-5b85a187eb6e/screenshots';
+
+    // In Light Mode: capture discrepancy dashboard
+    await page.getByRole('button', { name: 'Intake & Comparison', exact: true }).click();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${screenshotDir}/01_scenario_a_discrepancy.png`, fullPage: false });
+
+    // Open Inspect Evidence in Light Mode
+    const inspectBtn = page.getByRole('button', { name: 'Inspect Evidence' }).first();
+    await inspectBtn.click();
+    const evidenceModal = page.locator('div.fixed.inset-0').first();
+    await expect(evidenceModal).toBeVisible();
+    await page.screenshot({ path: `${screenshotDir}/04_evidence_modal.png` });
+    await page.keyboard.press('Escape');
+
+    // Toggle to Dark Mode
+    const darkModeBtn = page.getByTitle('Dark Mode');
+    await darkModeBtn.click();
+
+    // Verify html element has 'dark' class
+    const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+    expect(isDark).toBe(true);
+
+    // Verify body background color is dark
+    const bodyBg = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
+    expect(bodyBg).toBe('rgb(5, 8, 17)');
+
+    // Capture Dark Mode discrepancy view
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${screenshotDir}/07_dark_mode_discrepancy.png`, fullPage: false });
+
+    // Open Inspect Evidence in Dark Mode
+    await inspectBtn.click();
+    await expect(evidenceModal).toBeVisible();
+    await page.screenshot({ path: `${screenshotDir}/08_dark_mode_evidence_modal.png` });
+    await page.keyboard.press('Escape');
+
+    // Open RBI Guide in Dark Mode
+    await page.getByRole('button', { name: 'RBI Guide', exact: true }).click();
+    const openGuideBtn = page.getByRole('button', { name: 'Open Regulatory Guide' });
+    await openGuideBtn.click();
+    const rbiModal = page.locator('div.fixed.inset-0').filter({ hasText: 'RBI Borrower Safeguards & Regulatory Citations' }).first();
+    await expect(rbiModal).toBeVisible();
+    await page.screenshot({ path: `${screenshotDir}/09_dark_mode_rbi_modal.png` });
+    await rbiModal.getByRole('button', { name: 'Close' }).click();
+
+    // Switch back to Light Mode
+    const lightModeBtn = page.getByTitle('Light Mode');
+    await lightModeBtn.click();
+    const isLight = await page.evaluate(() => !document.documentElement.classList.contains('dark'));
+    expect(isLight).toBe(true);
+  });
 });

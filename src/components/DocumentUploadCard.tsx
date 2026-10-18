@@ -103,8 +103,8 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
         isDragOver
           ? 'ring-2 ring-teal-500 border-teal-500 bg-teal-50/50'
           : isDemo
-          ? 'bg-[#FCFCFA] border-amber-200/90'
-          : 'bg-white border-slate-200/90 hover:border-slate-300'
+          ? 'bg-[#FCFCFA] dark:bg-slate-900 border-amber-200/90 dark:border-amber-800/60'
+          : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       {/* Hidden file input always mounted and ready */}
@@ -123,26 +123,26 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
       {/* Header Info */}
       <div>
         <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="text-xs font-semibold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200/60">
+          <span className="text-xs font-semibold text-teal-800 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 px-2 py-0.5 rounded border border-teal-200/60 dark:border-teal-800/60">
             {badge}
           </span>
           {extractedDoc && (
             isDemo ? (
-              <span className="text-[11px] font-semibold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-700" />
+              <span className="text-[11px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-700 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                 <span>Synthetic Sample</span>
               </span>
             ) : (
-              <span className="text-xs font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 <span>Live Upload Extracted</span>
               </span>
             )
           )}
         </div>
 
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">{title}</h3>
-        <p className="text-xs text-slate-500 mt-1 line-clamp-2">{description}</p>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">{title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{description}</p>
       </div>
 
       {/* Main Body State: Loading, Extracted, or Input Form */}
@@ -193,53 +193,55 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
           /* Extracted Summary Card with direct upload / replace action */
           <div
             className={`p-3.5 rounded-lg border space-y-2.5 transition-all ${
-              isDemo ? 'bg-amber-50/40 border-amber-200/80' : 'bg-slate-50/70 border-slate-200'
+              isDemo
+                ? 'bg-amber-50/40 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-800/50'
+                : 'bg-slate-50/70 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 overflow-hidden">
-                <FileCheck className={`w-4 h-4 shrink-0 ${isDemo ? 'text-amber-700' : 'text-teal-700'}`} />
-                <span className="text-xs font-semibold text-slate-900 truncate" title={extractedDoc.documentName}>
+                <FileCheck className={`w-4 h-4 shrink-0 ${isDemo ? 'text-amber-700 dark:text-amber-400' : 'text-teal-700 dark:text-teal-400'}`} />
+                <span className="text-xs font-semibold text-slate-900 dark:text-white truncate" title={extractedDoc.documentName}>
                   {extractedDoc.documentName}
                 </span>
               </div>
               {isDemo ? (
-                <span className="text-[10px] font-bold text-amber-900 bg-amber-200/70 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 bg-amber-200/70 dark:bg-amber-900/60 px-1.5 py-0.5 rounded uppercase tracking-wider">
                   Sample Data
                 </span>
               ) : (
-                <span className="text-[10px] font-medium text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-medium text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
                   Live Upload
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/70">
+            <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/70 dark:border-slate-700/70">
               <div>
-                <span className="text-[11px] text-slate-500 block">Lender</span>
-                <span className="font-semibold text-slate-800 truncate block">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Lender</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
                   {extractedDoc.lenderName || 'Not identified'}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-500 block">Principal</span>
-                <span className="font-semibold text-slate-900 font-mono">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Principal</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {extractedDoc.fields.loanAmount?.value && extractedDoc.fields.loanAmount.value > 0
                     ? formatINR(extractedDoc.fields.loanAmount.value, false)
                     : 'Not extracted'}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-500 block">Interest Rate</span>
-                <span className="font-semibold text-slate-900 font-mono">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Interest Rate</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {extractedDoc.fields.interestRate?.value && extractedDoc.fields.interestRate.value > 0
                     ? formatPercent(extractedDoc.fields.interestRate.value)
                     : 'Not extracted'}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-500 block">Monthly EMI</span>
-                <span className="font-semibold text-slate-900 font-mono">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Monthly EMI</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {extractedDoc.fields.emi?.value && extractedDoc.fields.emi.value > 0
                     ? formatINR(extractedDoc.fields.emi.value, false)
                     : 'Not extracted'}
@@ -247,17 +249,17 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
               </div>
             </div>
             {extractedDoc.originSection && (
-              <div className="text-[10px] text-teal-800 bg-teal-50 border border-teal-200/80 px-2 py-1 rounded">
+              <div className="text-[10px] text-teal-800 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 border border-teal-200/80 dark:border-teal-800 px-2 py-1 rounded">
                 <strong>Source Section:</strong> {extractedDoc.originSection}
               </div>
             )}
 
             {/* Direct Upload / Replace Action */}
-            <div className="pt-2 border-t border-slate-200/70 space-y-2">
+            <div className="pt-2 border-t border-slate-200/70 dark:border-slate-700/70 space-y-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 px-3 bg-teal-800 hover:bg-teal-900 text-white font-semibold text-xs rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 bg-teal-800 hover:bg-teal-900 dark:bg-teal-700 dark:hover:bg-teal-600 text-white font-semibold text-xs rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 title="Select a real PDF, image, or TXT file to analyze"
               >
                 <UploadCloud className="w-4 h-4" />
@@ -268,7 +270,7 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                 <button
                   type="button"
                   onClick={onInspect}
-                  className="text-xs text-teal-800 hover:text-teal-950 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-xs text-teal-800 dark:text-teal-300 hover:text-teal-950 dark:hover:text-teal-100 font-medium flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>View Extracted Terms</span>
@@ -276,7 +278,7 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                 <button
                   type="button"
                   onClick={onClear}
-                  className="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-200 font-medium flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Clear</span>
@@ -288,12 +290,12 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
           /* Empty / Input Form with prominent dropzone */
           <div className="space-y-3">
             {/* Mode Selector */}
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
               <button
                 type="button"
                 onClick={() => setMode('upload')}
                 className={`flex-1 py-1 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                  mode === 'upload' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  mode === 'upload' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Upload File (PDF/Scan)
@@ -302,7 +304,7 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                 type="button"
                 onClick={() => setMode('paste')}
                 className={`flex-1 py-1 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                  mode === 'paste' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  mode === 'paste' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Paste Text / Clauses
@@ -314,18 +316,18 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
                   isDragOver
-                    ? 'border-teal-500 bg-teal-50/70'
-                    : 'border-slate-300 hover:border-teal-600 bg-slate-50/50 hover:bg-teal-50/20'
+                    ? 'border-teal-500 bg-teal-50/70 dark:bg-teal-950/40'
+                    : 'border-slate-300 dark:border-slate-700 hover:border-teal-600 dark:hover:border-teal-400 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-teal-50/20 dark:hover:bg-teal-950/20'
                 }`}
               >
-                <UploadCloud className="w-10 h-10 text-teal-700 mx-auto mb-2.5" />
-                <p className="text-xs font-bold text-slate-900">
+                <UploadCloud className="w-10 h-10 text-teal-700 dark:text-teal-400 mx-auto mb-2.5" />
+                <p className="text-xs font-bold text-slate-900 dark:text-white">
                   Drop {title} here or browse
                 </p>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                   Supports PDF, images (PNG/JPG), or TXT (Max 25MB)
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded-md text-[11px] font-semibold text-teal-800 shadow-2xs">
+                <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[11px] font-semibold text-teal-800 dark:text-teal-300 shadow-2xs">
                   <ArrowUpCircle className="w-3.5 h-3.5" />
                   <span>Select File</span>
                 </div>
@@ -337,20 +339,20 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
                   placeholder="Document label (e.g. Sanction Letter v1)"
                   value={docName}
                   onChange={(e) => setDocName(e.target.value)}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-md border border-slate-300 bg-white focus:outline-hidden focus:ring-1 focus:ring-teal-700"
+                  className="w-full text-xs px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-teal-700"
                 />
                 <textarea
                   rows={4}
                   placeholder={`Paste ${title} text, rate schedules, or clause excerpts here...`}
                   value={pastedText}
                   onChange={(e) => setPastedText(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-md border border-slate-300 bg-white focus:outline-hidden focus:ring-1 focus:ring-teal-700 font-mono text-[11px]"
+                  className="w-full text-xs p-2.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-teal-700 font-mono text-[11px]"
                   required
                 />
                 <button
                   type="submit"
                   disabled={!pastedText.trim()}
-                  className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                 >
                   Analyze Pasted Text with Gemini
                 </button>
@@ -361,14 +363,14 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
       </div>
 
       {/* Footer helper action */}
-      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span className="text-[11px] text-slate-400">Want to test without files?</span>
+      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+        <span className="text-[11px] text-slate-400 dark:text-slate-500">Want to test without files?</span>
         <button
           type="button"
           onClick={onLoadSampleDoc}
-          className="text-[11px] font-semibold text-teal-800 hover:text-teal-950 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+          className="text-[11px] font-semibold text-teal-800 dark:text-teal-300 hover:text-teal-950 dark:hover:text-teal-100 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
         >
-          <Sparkles className="w-3 h-3 text-teal-700" />
+          <Sparkles className="w-3 h-3 text-teal-700 dark:text-teal-400" />
           <span>{sampleButtonLabel}</span>
         </button>
       </div>

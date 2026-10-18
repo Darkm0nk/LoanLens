@@ -70,25 +70,25 @@ export default function DashboardLayout({
                         <div className="w-8 h-8 rounded-xl bg-teal-800 flex items-center justify-center text-white font-bold text-sm">LL</div>
                         <div className="flex flex-col leading-none">
                             <span className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-slate-900'} tracking-tight`}>LoanLens</span>
-                            <span className="text-[10px] text-slate-400 font-medium">Check Before You Sign</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Check Before You Sign</span>
                         </div>
                     </div>
                     {isDemoActive ? (
-                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 rounded-md">
-                            <Sparkles className="w-3 h-3 text-amber-700" />
+                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 rounded-md">
+                            <Sparkles className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                             <span>Sample Data Mode</span>
                         </span>
                     ) : realDocCount >= 2 ? (
-                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-md">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-900 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-700 rounded-md">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
                             <span>Live Audit Active</span>
                         </span>
                     ) : realDocCount === 1 ? (
-                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 rounded-md">
+                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 rounded-md">
                             <span>Waiting for 2nd Document</span>
                         </span>
                     ) : (
-                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-teal-900 bg-teal-50 border border-teal-200 rounded-md">
+                        <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-teal-900 dark:text-teal-200 bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-700 rounded-md">
                             <span>Ready for Documents</span>
                         </span>
                     )}

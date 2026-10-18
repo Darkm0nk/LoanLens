@@ -62,30 +62,57 @@ Contact: [Insert Phone / Email]`;
   return { subject, body };
 }
 
-/**
- * Opens print dialog with the audit letter formatted for printing
- */
-export function printAuditLetter(subject: string, body: string) {
-  const iframe = document.createElement('iframe');
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = 'none';
-  iframe.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(iframe);
+function escapeHtml(str?: string | null): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  const doc = iframe.contentWindow?.document;
-  if (!doc || !iframe.contentWindow) {
-    console.error('LoanLens Print Letter: Unable to access iframe document. Print aborted.');
-    if (document.body.contains(iframe)) {
-      document.body.removeChild(iframe);
-    }
-    return;
+/**
+ * Opens print dialog with the audit letter formatted for printing.
+ * Uses an isolated iframe with complete HTML escaping and safe lifecycle cleanup.
+ */
+export function printAuditLetter(subject: string, body: string): boolean {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return false;
   }
 
-  const letterContent = `<!DOCTYPE html>
+  let iframe: HTMLIFrameElement | null = null;
+  const cleanupIframe = () => {
+    try {
+      if (iframe && iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    } catch {
+      // Safe cleanup suppression
+    }
+  };
+
+  try {
+    iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('title', 'LoanLens Clarification Letter Print Document');
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    const win = iframe.contentWindow;
+    if (!doc || !win) {
+      console.error('LoanLens Print Letter: Unable to access iframe document. Print aborted.');
+      cleanupIframe();
+      return false;
+    }
+
+    const letterContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -143,23 +170,31 @@ export function printAuditLetter(subject: string, body: string) {
     <h1>LoanLens - Lender Clarification & Rectification Request</h1>
     <p>Formal clarification letter grounded in RBI circulars and contract analysis</p>
   </div>
-  <div class="subject-line">Subject: ${subject.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-  <div class="body-text">${body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+  <div class="subject-line">Subject: ${escapeHtml(subject)}</div>
+  <div class="body-text">${escapeHtml(body)}</div>
 </body>
 </html>`;
 
-  doc.open();
-  doc.write(letterContent);
-  doc.close();
+    doc.open();
+    doc.write(letterContent);
+    doc.close();
 
-  iframe.contentWindow?.focus();
-  setTimeout(() => {
-    iframe.contentWindow?.print();
+    win.focus();
     setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
+      try {
+        win.print();
+      } catch (printErr) {
+        console.error('LoanLens Print Letter: Error during iframe print:', printErr);
+      } finally {
+        setTimeout(cleanupIframe, 1200);
       }
-    }, 1000);
-  }, 100);
+    }, 150);
+
+    return true;
+  } catch (err) {
+    console.error('LoanLens Print Letter: Failed to initialize printable document:', err);
+    cleanupIframe();
+    return false;
+  }
 }
 

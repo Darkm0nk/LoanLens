@@ -70,39 +70,39 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
   > = {
     'Confirmed discrepancy': {
       label: 'Confirmed Discrepancy',
-      badge: 'bg-rose-100 text-rose-900 border-rose-300',
-      bg: 'bg-rose-50/70 border-rose-200',
-      icon: <AlertTriangle className="w-4 h-4 text-rose-700 shrink-0" />,
+      badge: 'bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-700',
+      bg: 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60',
+      icon: <AlertTriangle className="w-4 h-4 text-rose-700 dark:text-rose-400 shrink-0" />,
       desc: 'Extracted values directly conflict between the submitted contract documents.',
     },
     'Missing information': {
       label: 'Missing Information',
-      badge: 'bg-sky-100 text-sky-900 border-sky-300',
-      bg: 'bg-sky-50/70 border-sky-200',
-      icon: <Info className="w-4 h-4 text-sky-700 shrink-0" />,
+      badge: 'bg-sky-100 dark:bg-sky-950/60 text-sky-900 dark:text-sky-200 border-sky-300 dark:border-sky-700',
+      bg: 'bg-sky-50/70 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800/60',
+      icon: <Info className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />,
       desc: 'This term is omitted or not disclosed across all submitted document copies.',
     },
     'Possible regulatory concern': {
       label: 'Possible Regulatory Concern',
-      badge: 'bg-amber-100 text-amber-950 border-amber-300',
-      bg: 'bg-amber-50/70 border-amber-200',
-      icon: <Scale className="w-4 h-4 text-amber-800 shrink-0" />,
+      badge: 'bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-700',
+      bg: 'bg-amber-50/70 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60',
+      icon: <Scale className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />,
       desc: 'Contract clause provisions may diverge from RBI retail lending circular mandates.',
     },
     'Needs manual verification': {
       label: 'Needs Manual Verification',
-      badge: 'bg-amber-100 text-amber-900 border-amber-300',
-      bg: 'bg-amber-50/70 border-amber-200',
-      icon: <FileSearch className="w-4 h-4 text-amber-700 shrink-0" />,
+      badge: 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700',
+      bg: 'bg-amber-50/70 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60',
+      icon: <FileSearch className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />,
       desc: 'Clause citation or benchmark wording requires physical inspection of original execution papers.',
     },
   };
 
   const matchConfig = {
     label: 'Terms Aligned (Match)',
-    badge: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-    bg: 'bg-emerald-50/70 border-emerald-200',
-    icon: <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />,
+    badge: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700',
+    bg: 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60',
+    icon: <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />,
     desc: 'Extracted terms and source references align consistently across all submitted contract documents.',
   };
 
@@ -173,8 +173,21 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
   }) {
     if (!val?.pageClauseRef || val.pageClauseRef === 'Not cited' || val.pageClauseRef.includes('not detected')) {
       return (
-        <div className="flex items-center gap-1 text-slate-400 text-[11px] mt-0.5 italic">
+        <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-[11px] mt-0.5 italic">
           <span>Page reference not detected in document text</span>
+        </div>
+      );
+    }
+    if (comparison?.isSampleData) {
+      return (
+        <div className="mt-0.5 space-y-1">
+          <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200 font-medium text-xs">
+            <Info className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+            <span>{val.pageClauseRef}</span>
+          </div>
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-100 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
+            Sample Benchmark Citation
+          </span>
         </div>
       );
     }
@@ -185,30 +198,30 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     ) {
       return (
         <div className="mt-0.5 space-y-1">
-          <div className="flex items-center gap-1 text-amber-800 text-xs font-medium">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <div className="flex items-center gap-1 text-amber-800 dark:text-amber-300 text-xs font-medium">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>{val.pageClauseRef}</span>
           </div>
-          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800">
             Evidence Not Verified
           </span>
         </div>
       );
     }
-    if (val.verificationLevel === 'source_verified' || val.isVerifiedInSource === true) {
+    if (val.verificationLevel === 'source_verified' && val.isVerifiedInSource !== false) {
       const locNotice = val.locationDetails;
       return (
         <div className="mt-0.5 space-y-1">
-          <div className="flex items-center gap-1 text-emerald-800 font-medium text-xs">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <div className="flex items-center gap-1 text-emerald-800 dark:text-emerald-300 font-medium text-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span title={locNotice || val.pageClauseRef}>{val.pageClauseRef}</span>
           </div>
           <div className="flex items-center gap-1 flex-wrap">
-            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
               Source Text Verified
             </span>
             {val.locationStatus === 'unpaginated_source' && (
-              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200" title="Document text is unpaginated; page number is AI-reported">
+              <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="Document text is unpaginated; page number is AI-reported">
                 Unpaginated Text
               </span>
             )}
@@ -219,11 +232,11 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     if (val.verificationLevel === 'excerpt_corroborated') {
       return (
         <div className="mt-0.5 space-y-1">
-          <div className="flex items-center gap-1 text-slate-800 font-medium text-xs">
-            <Info className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+          <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200 font-medium text-xs">
+            <Info className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
             <span>{val.pageClauseRef}</span>
           </div>
-          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-100 text-sky-900 border border-sky-300">
+          <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-100 dark:bg-sky-950/40 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
             Excerpt Corroborated (Source Unverified)
           </span>
         </div>
@@ -231,11 +244,11 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
     }
     return (
       <div className="mt-0.5 space-y-1">
-        <div className="flex items-center gap-1 text-slate-700 font-medium text-xs">
-          <FileText className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+        <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-medium text-xs">
+          <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
           <span>{val.pageClauseRef}</span>
         </div>
-        <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-300">
+        <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
           AI-Extracted (Source Not Verified)
         </span>
       </div>
@@ -249,9 +262,9 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
       aria-labelledby="side-by-side-title"
       className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5"
     >
-      <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 bg-slate-50/80 flex items-start justify-between gap-4">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-start justify-between gap-4">
           <div className="space-y-1.5 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span
@@ -261,65 +274,65 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
                 <span>{currentClass.label}</span>
               </span>
               {comparison.regulatoryAssessment === 'compliant' && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 text-emerald-900 border-emerald-300">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700">
                   Confirmed RBI Compliant
                 </span>
               )}
               {comparison.regulatoryAssessment === 'exempt' && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 text-emerald-900 border-emerald-300">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700">
                   Nil Foreclosure Aligned
                 </span>
               )}
               {comparison.regulatoryAssessment === 'non_compliant' && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-rose-100 text-rose-900 border-rose-300">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-700">
                   Regulatory Variance Noted
                 </span>
               )}
               {comparison.regulatoryAssessment === 'has_penalty' && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-amber-100 text-amber-950 border-amber-300">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-700">
                   Foreclosure Fee Noted
                 </span>
               )}
               {comparison.regulatoryAssessment === 'not_assessed' && (
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-slate-100 text-slate-800 border-slate-300">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700">
                   Compliance Not Assessed
                 </span>
               )}
               {comparison.isSampleData && (
-                <span className="text-[10px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-700" />
+                <span className="text-[10px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                   <span>Synthetic Sample Benchmark</span>
                 </span>
               )}
             </div>
 
-            <h2 id="side-by-side-title" className="text-xl font-bold text-slate-900">
+            <h2 id="side-by-side-title" className="text-xl font-bold text-slate-900 dark:text-white">
               {comparison.label}
             </h2>
-            <p className="text-xs text-slate-600">{currentClass.desc}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400">{currentClass.desc}</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             {/* Quick Pagination across findings */}
             {allComparisons.length > 1 && (
-              <div className="flex items-center gap-1 bg-slate-200/60 p-1 rounded-lg">
+              <div className="flex items-center gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-lg">
                 <button
                   type="button"
                   disabled={!hasPrev}
                   onClick={() => hasPrev && onSelectComparison?.(allComparisons[currentIndex - 1])}
-                  className="p-1 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  className="p-1 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                   title="Previous term"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-[11px] font-mono px-1 font-semibold text-slate-700">
+                <span className="text-[11px] font-mono px-1 font-semibold text-slate-700 dark:text-slate-300">
                   {currentIndex + 1} / {allComparisons.length}
                 </span>
                 <button
                   type="button"
                   disabled={!hasNext}
                   onClick={() => hasNext && onSelectComparison?.(allComparisons[currentIndex + 1])}
-                  className="p-1 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  className="p-1 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                   title="Next term"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -330,7 +343,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
               title="Close modal (Esc)"
             >
               <X className="w-5 h-5" />
@@ -345,10 +358,10 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
             <div className="flex items-start gap-2.5">
               <div className="mt-0.5">{currentClass.icon}</div>
               <div className="flex-1">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                   Variance Assessment
                 </h3>
-                <p className="text-sm text-slate-800 leading-relaxed font-medium mt-0.5">
+                <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium mt-0.5">
                   {comparison.summary}
                 </p>
               </div>
@@ -356,14 +369,14 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
             {/* Financial Impact if present */}
             {comparison.financialImpact && (
-              <div className="mt-3 p-3 bg-white/90 rounded-lg border border-slate-200/90 text-xs">
-                <span className="font-semibold text-rose-900 block mb-0.5">
+              <div className="mt-3 p-3 bg-white/90 dark:bg-slate-900/90 rounded-lg border border-slate-200/90 dark:border-slate-800 text-xs">
+                <span className="font-semibold text-rose-900 dark:text-rose-300 block mb-0.5">
                   Calculated Deterministic Financial Impact:
                 </span>
-                <p className="text-slate-800 leading-snug">{comparison.financialImpact}</p>
+                <p className="text-slate-800 dark:text-slate-200 leading-snug">{comparison.financialImpact}</p>
                 {comparison.calculationAssumptions && comparison.calculationAssumptions.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                    <span className="font-semibold text-slate-700">Stated Assumptions: </span>
+                  <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">Stated Assumptions: </span>
                     <span>{comparison.calculationAssumptions.join(' • ')}</span>
                   </div>
                 )}
@@ -374,39 +387,39 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
           {/* 3-Way Side-by-Side Document Contract Excerpt Grid */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-teal-700" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-teal-700 dark:text-teal-400" />
                 <span>Side-by-Side Contract Evidence & Clause Excerpts</span>
               </h3>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 Key figures and differing terms highlighted in teal
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 1. KFS Column */}
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-bold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
                     1. Key Facts Statement
                   </span>
-                  <span className="text-[10px] font-mono text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
+                  <span className="text-[10px] font-mono text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 px-1.5 py-0.5 rounded border border-teal-200 dark:border-teal-800">
                     RBI Mandatory
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                     Extracted Value
                   </span>
-                  <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  <div className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5">
                     {comparison.values.kfs?.display || 'Not Provided / Missing'}
                   </div>
                 </div>
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
                   {renderEvidenceReference(comparison.values.kfs)}
@@ -414,7 +427,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Verbatim Excerpt */}
                 <div className="flex-1 space-y-1">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block">
                     Verbatim Document Excerpt
                   </span>
                   {renderHighlightedExcerpt(
@@ -425,28 +438,28 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
               </div>
 
               {/* 2. Sanction Letter Column */}
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-bold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
                     2. Sanction Letter
                   </span>
-                  <span className="text-[10px] font-mono text-slate-600 bg-slate-200/70 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] font-mono text-slate-600 dark:text-slate-300 bg-slate-200/70 dark:bg-slate-700 px-1.5 py-0.5 rounded">
                     Lender Approval
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                     Extracted Value
                   </span>
-                  <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  <div className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5">
                     {comparison.values.sanctionLetter?.display || 'Not Provided / Missing'}
                   </div>
                 </div>
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
                   {renderEvidenceReference(comparison.values.sanctionLetter)}
@@ -454,7 +467,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Verbatim Excerpt */}
                 <div className="flex-1 space-y-1">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block">
                     Verbatim Document Excerpt
                   </span>
                   {renderHighlightedExcerpt(
@@ -466,28 +479,28 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
               </div>
 
               {/* 3. Loan Agreement Column */}
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-bold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
                     3. Loan Agreement
                   </span>
-                  <span className="text-[10px] font-mono text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+                  <span className="text-[10px] font-mono text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
                     Binding Contract
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                     Extracted Value
                   </span>
-                  <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  <div className="text-base font-bold text-slate-900 dark:text-white font-mono mt-0.5">
                     {comparison.values.loanAgreement?.display || 'Not Provided / Missing'}
                   </div>
                 </div>
 
                 {/* Page / Clause Citation */}
                 <div className="text-xs">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block mb-0.5">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block mb-0.5">
                     Source Reference
                   </span>
                   {renderEvidenceReference(comparison.values.loanAgreement)}
@@ -495,7 +508,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
                 {/* Verbatim Excerpt */}
                 <div className="flex-1 space-y-1">
-                  <span className="text-[11px] text-slate-500 uppercase font-semibold block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold block">
                     Verbatim Document Excerpt
                   </span>
                   {renderHighlightedExcerpt(
@@ -510,50 +523,50 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
 
           {/* Actionable Clarification Question */}
           {comparison.lenderQuestion && (
-            <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-200/90 space-y-2">
+            <div className="p-4 rounded-xl bg-teal-50/60 dark:bg-teal-950/40 border border-teal-200/90 dark:border-teal-800 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-teal-900 flex items-center gap-1.5">
-                  <Copy className="w-3.5 h-3.5 text-teal-700" />
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 flex items-center gap-1.5">
+                  <Copy className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" />
                   <span>Clarification Question for Loan Officer</span>
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyQuestion}
-                  className="px-2.5 py-1 rounded bg-white hover:bg-teal-100 text-teal-900 text-xs font-semibold border border-teal-300 flex items-center gap-1 shadow-2xs transition-colors"
+                  className="px-2.5 py-1 rounded bg-white dark:bg-slate-800 hover:bg-teal-100 dark:hover:bg-slate-700 text-teal-900 dark:text-teal-300 text-xs font-semibold border border-teal-300 dark:border-teal-700 flex items-center gap-1 shadow-2xs transition-colors"
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>Copied to Clipboard</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-teal-700" />
+                      <Copy className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" />
                       <span>Copy Question</span>
                     </>
                   )}
                 </button>
               </div>
-              <p className="text-xs text-slate-800 font-medium bg-white p-3 rounded-lg border border-teal-200 leading-relaxed italic">
+              <p className="text-xs text-slate-800 dark:text-slate-200 font-medium bg-white dark:bg-slate-900 p-3 rounded-lg border border-teal-200 dark:border-teal-800 leading-relaxed italic">
                 "{comparison.lenderQuestion}"
               </p>
             </div>
           )}
 
           {/* Official RBI Regulatory Authority Framework */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
             <div className="flex items-start gap-2">
-              <Scale className="w-4 h-4 text-teal-800 shrink-0 mt-0.5" />
+              <Scale className="w-4 h-4 text-teal-800 dark:text-teal-400 shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1">
-                <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px] block">
+                <span className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] block">
                   Applicable Regulatory Requirement & Official Authority
                 </span>
-                <p className="text-slate-700 leading-relaxed">{comparison.rbiGuideline}</p>
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{comparison.rbiGuideline}</p>
 
                 {comparison.circularReference && (
                   <div className="flex items-center gap-2 pt-1 flex-wrap">
-                    <span className="font-semibold text-slate-800">Circular Reference:</span>
-                    <span className="font-mono text-[11px] bg-slate-200/80 px-1.5 py-0.5 rounded text-slate-800">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">Circular Reference:</span>
+                    <span className="font-mono text-[11px] bg-slate-200/80 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-800 dark:text-slate-200">
                       {comparison.circularReference}
                     </span>
                     {comparison.sourceUrl && (
@@ -561,7 +574,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
                         href={comparison.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-teal-700 hover:text-teal-900 hover:underline inline-flex items-center gap-1 font-semibold ml-2"
+                        className="text-teal-700 dark:text-teal-400 hover:text-teal-900 dark:hover:text-teal-300 hover:underline inline-flex items-center gap-1 font-semibold ml-2"
                       >
                         <span>Official RBI Source</span>
                         <ExternalLink className="w-3 h-3" />
@@ -575,8 +588,8 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="text-slate-500 text-[11px]">
+        <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="text-slate-500 dark:text-slate-400 text-[11px]">
             <strong>Responsible Audit Notice:</strong> Evidence extracted directly from provided documents. No legal conclusions are implied.
           </div>
 
@@ -588,7 +601,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
                   onClose();
                   onOpenDisputeLetter();
                 }}
-                className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-xs transition-colors"
+                className="px-3.5 py-2 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 text-white font-semibold rounded-lg shadow-xs transition-colors"
               >
                 Include in Clarification Notice
               </button>
@@ -596,7 +609,7 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-medium rounded-lg transition-colors"
+              className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-medium rounded-lg transition-colors"
             >
               Done
             </button>

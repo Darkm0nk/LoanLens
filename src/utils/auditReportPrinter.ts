@@ -15,8 +15,27 @@ function escapeHtml(str?: string | null): string {
     .replace(/'/g, '&#039;');
 }
 
-function formatVerificationBadge(level?: SourceVerificationLevel, isVerified?: boolean): string {
-  if (level === 'source_verified' || isVerified) {
+/**
+ * Resolves user-facing verification badge according to strict evidence hierarchy.
+ *
+ * Rules:
+ * 1. source_verified: Requires BOTH level === 'source_verified' AND isVerified !== false.
+ *    If isVerified is explicitly false, it is a contradictory/failed state and must not receive verified badge.
+ * 2. excerpt_corroborated: Excerpt substantiates value, but document text was not independently verified.
+ *    Never upgraded to source_verified even if a boolean flag is true.
+ * 3. ai_extracted: Returned by AI model without independent corroboration.
+ *    Never upgraded to source_verified.
+ * 4. unverified / undefined / contradictory: Labeled as unverified.
+ */
+export function formatVerificationBadge(
+  level?: SourceVerificationLevel,
+  isVerified?: boolean,
+  isDemo?: boolean
+): string {
+  if (isDemo) {
+    return '<span class="badge badge-corroborated">Sample Benchmark Citation</span>';
+  }
+  if (level === 'source_verified' && isVerified !== false) {
     return '<span class="badge badge-verified">✓ Source Verified</span>';
   }
   if (level === 'excerpt_corroborated') {
@@ -133,19 +152,19 @@ export function generateAuditReportHtml(report: LoanComparisonReport): string {
               <td><strong>Key Facts Statement</strong></td>
               <td>${escapeHtml(kfsVal?.display || 'Not extracted')}</td>
               <td class="citation">${escapeHtml(kfsVal?.pageClauseRef || '—')}</td>
-              <td>${kfsVal ? formatVerificationBadge(kfsVal.verificationLevel, kfsVal.isVerifiedInSource) : '—'}</td>
+              <td>${kfsVal ? formatVerificationBadge(kfsVal.verificationLevel, kfsVal.isVerifiedInSource, report.isDemo || comp.isSampleData) : '—'}</td>
             </tr>
             <tr>
               <td><strong>Sanction Letter</strong></td>
               <td>${escapeHtml(sanctionVal?.display || 'Not extracted')}</td>
               <td class="citation">${escapeHtml(sanctionVal?.pageClauseRef || '—')}</td>
-              <td>${sanctionVal ? formatVerificationBadge(sanctionVal.verificationLevel, sanctionVal.isVerifiedInSource) : '—'}</td>
+              <td>${sanctionVal ? formatVerificationBadge(sanctionVal.verificationLevel, sanctionVal.isVerifiedInSource, report.isDemo || comp.isSampleData) : '—'}</td>
             </tr>
             <tr>
               <td><strong>Loan Agreement</strong></td>
               <td>${escapeHtml(agreementVal?.display || 'Not extracted')}</td>
               <td class="citation">${escapeHtml(agreementVal?.pageClauseRef || '—')}</td>
-              <td>${agreementVal ? formatVerificationBadge(agreementVal.verificationLevel, agreementVal.isVerifiedInSource) : '—'}</td>
+              <td>${agreementVal ? formatVerificationBadge(agreementVal.verificationLevel, agreementVal.isVerifiedInSource, report.isDemo || comp.isSampleData) : '—'}</td>
             </tr>
           </tbody>
         </table>
@@ -648,14 +667,26 @@ export function generateAuditReportHtml(report: LoanComparisonReport): string {
 /**
  * Triggers browser print dialog for the complete audit report using an isolated iframe.
  * Never silently calls window.print() if iframe setup fails.
+ * Guarantees cleanup of temporary DOM elements even if errors occur during report write or rendering.
  */
 export function printAuditReport(report: LoanComparisonReport): boolean {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return false;
   }
 
+  let iframe: HTMLIFrameElement | null = null;
+  const cleanupIframe = () => {
+    try {
+      if (iframe && iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    } catch {
+      // Safe cleanup suppression
+    }
+  };
+
   try {
-    const iframe = document.createElement('iframe');
+    iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
     iframe.style.bottom = '0';
@@ -667,11 +698,10 @@ export function printAuditReport(report: LoanComparisonReport): boolean {
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow?.document;
-    if (!doc || !iframe.contentWindow) {
+    const win = iframe.contentWindow;
+    if (!doc || !win) {
       console.error('LoanLens Print Audit: Unable to access iframe document. Print aborted.');
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
+      cleanupIframe();
       return false;
     }
 
@@ -681,26 +711,23 @@ export function printAuditReport(report: LoanComparisonReport): boolean {
     doc.write(reportHtml);
     doc.close();
 
-    iframe.contentWindow.focus();
+    win.focus();
 
     // Trigger print after rendering
     setTimeout(() => {
       try {
-        iframe.contentWindow?.print();
+        win.print();
       } catch (printErr) {
         console.error('LoanLens Print Audit: Error during iframe print:', printErr);
       } finally {
-        setTimeout(() => {
-          if (document.body.contains(iframe)) {
-            document.body.removeChild(iframe);
-          }
-        }, 1500);
+        setTimeout(cleanupIframe, 1500);
       }
     }, 150);
 
     return true;
   } catch (err) {
     console.error('LoanLens Print Audit: Failed to initialize printable document:', err);
+    cleanupIframe();
     return false;
   }
 }

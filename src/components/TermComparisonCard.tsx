@@ -156,8 +156,23 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
   ) => {
     if (!ref || ref === 'Not cited' || ref === 'Not specified' || ref.includes('not detected')) {
       return (
-        <span className="text-slate-400 italic text-[11px]">
+        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
           Page reference not detected in document text
+        </span>
+      );
+    }
+    if (comparison.isSampleData) {
+      return (
+        <span className="inline-flex items-center gap-1.5 flex-wrap">
+          <span className="text-slate-700 dark:text-slate-300 font-medium truncate" title={`${ref} (Sample Benchmark Citation)`}>
+            {ref}
+          </span>
+          <span
+            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 shrink-0"
+            title="Sample Benchmark Citation: synthetic evaluation scenario (not verified against an uploaded document)"
+          >
+            Sample Benchmark Citation
+          </span>
         </span>
       );
     }
@@ -169,20 +184,20 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     ) {
       return (
         <span
-          className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium border border-amber-200"
+          className="text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded text-[11px] font-medium border border-amber-200 dark:border-amber-800"
           title={details || ref}
         >
           Evidence not verified: excerpt does not substantiate value
         </span>
       );
     }
-    if (verificationLevel === 'source_verified' || isVerifiedInSource === true) {
+    if (verificationLevel === 'source_verified' && isVerifiedInSource !== false) {
       const locationTooltip = locationDetails || (isLocationVerified ? 'Location verified' : 'Location AI-reported');
       return (
         <span className="inline-flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-700 font-medium truncate" title={`${ref} (${locationTooltip})`}>{ref}</span>
+          <span className="text-slate-700 dark:text-slate-300 font-medium truncate" title={`${ref} (${locationTooltip})`}>{ref}</span>
           <span
-            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0"
+            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0"
             title={details || `Excerpt verified in document text. ${locationTooltip}`}
           >
             Source Verified
@@ -193,9 +208,9 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     if (verificationLevel === 'excerpt_corroborated') {
       return (
         <span className="inline-flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-700 font-medium truncate" title={`${ref} (Source unverified)`}>{ref}</span>
+          <span className="text-slate-700 dark:text-slate-300 font-medium truncate" title={`${ref} (Source unverified)`}>{ref}</span>
           <span
-            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 shrink-0"
+            className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 shrink-0"
             title={details || 'Excerpt corroborated — source document text not independently verified'}
           >
             Excerpt Corroborated (Source Unverified)
@@ -206,9 +221,9 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     // ai_extracted
     return (
       <span className="inline-flex items-center gap-1.5 flex-wrap">
-        <span className="text-slate-700 font-medium truncate" title={`${ref} (Uncorroborated)`}>{ref}</span>
+        <span className="text-slate-700 dark:text-slate-300 font-medium truncate" title={`${ref} (Uncorroborated)`}>{ref}</span>
         <span
-          className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0"
+          className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0"
           title={details || 'AI-extracted — source not independently verified'}
         >
           AI-Extracted (Source Not Verified)
@@ -219,19 +234,19 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
 
   return (
     <div
-      className={`rounded-xl border bg-white shadow-xs p-5 transition-all ${
+      className={`rounded-xl border bg-white dark:bg-slate-900 shadow-xs p-5 transition-all ${
         isMismatch
-          ? 'border-rose-200/90 ring-1 ring-rose-100 hover:border-rose-300'
-          : 'border-slate-200/80 hover:border-slate-300'
+          ? 'border-rose-200/90 dark:border-rose-900/60 ring-1 ring-rose-100 dark:ring-rose-950/40 hover:border-rose-300 dark:hover:border-rose-800'
+          : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       {/* Top Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2 flex-wrap">
-          <h4 className="text-base font-bold text-slate-900 tracking-tight">{comparison.label}</h4>
+          <h4 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">{comparison.label}</h4>
           {comparison.isSampleData && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-900 bg-amber-100/80 border border-amber-300 px-1.5 py-0.2 rounded">
-              <Sparkles className="w-2.5 h-2.5 text-amber-700" />
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 px-1.5 py-0.2 rounded">
+              <Sparkles className="w-2.5 h-2.5 text-amber-700 dark:text-amber-400" />
               <span>Synthetic Sample</span>
             </span>
           )}
@@ -243,31 +258,31 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             <button
               type="button"
               onClick={() => onInspectEvidence(comparison)}
-              className="text-xs bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/90 font-medium px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+              className="text-xs bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 text-teal-800 dark:text-teal-300 border border-teal-200/90 dark:border-teal-800 font-medium px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
               title="Inspect side-by-side contract excerpts and evidence citations"
             >
-              <FileText className="w-3.5 h-3.5 text-teal-700" />
+              <FileText className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400" />
               <span>Inspect Evidence</span>
             </button>
           )}
         </div>
       </div>
 
-      <p className="text-xs text-slate-600 mt-2 mb-3 leading-relaxed">{comparison.summary}</p>
+      <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 mb-3 leading-relaxed">{comparison.summary}</p>
 
       {/* 3-Column Comparative Data Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-3">
         {/* Column 1: KFS */}
-        <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/70">
-          <div className="text-[11px] font-semibold text-teal-800 uppercase tracking-wider mb-1 flex items-center justify-between">
+        <div className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
+          <div className="text-[11px] font-semibold text-teal-800 dark:text-teal-400 uppercase tracking-wider mb-1 flex items-center justify-between">
             <span>Key Facts Statement (KFS)</span>
-            <span className="text-[10px] text-slate-400 font-normal">Pre-Contract</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Pre-Contract</span>
           </div>
-          <div className="text-sm font-bold text-slate-900 font-mono">
+          <div className="text-sm font-bold text-slate-900 dark:text-white font-mono">
             {comparison.values.kfs?.display || 'Not submitted'}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
-            <span className="font-semibold text-slate-600 shrink-0">Source:</span>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-start gap-1">
+            <span className="font-semibold text-slate-600 dark:text-slate-300 shrink-0">Source:</span>
             {renderSourceRef(
               comparison.values.kfs?.pageClauseRef,
               comparison.values.kfs?.isVerifiedInSource,
@@ -281,16 +296,16 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         </div>
 
         {/* Column 2: Sanction Letter */}
-        <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/70">
-          <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
+        <div className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
+          <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
             <span>Sanction Letter</span>
-            <span className="text-[10px] text-slate-400 font-normal">Offer</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Offer</span>
           </div>
-          <div className="text-sm font-bold text-slate-900 font-mono">
+          <div className="text-sm font-bold text-slate-900 dark:text-white font-mono">
             {comparison.values.sanctionLetter?.display || 'Not submitted'}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
-            <span className="font-semibold text-slate-600 shrink-0">Source:</span>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-start gap-1">
+            <span className="font-semibold text-slate-600 dark:text-slate-300 shrink-0">Source:</span>
             {renderSourceRef(
               comparison.values.sanctionLetter?.pageClauseRef,
               comparison.values.sanctionLetter?.isVerifiedInSource,
@@ -307,23 +322,23 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         <div
           className={`p-3 rounded-lg border ${
             isMismatch
-              ? 'border-rose-200 bg-rose-50/30'
-              : 'border-slate-100 bg-slate-50/70'
+              ? 'border-rose-200 dark:border-rose-900/60 bg-rose-50/30 dark:bg-rose-950/30'
+              : 'border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50'
           }`}
         >
-          <div className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+          <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
             <span>Loan Agreement</span>
-            <span className="text-[10px] text-slate-400 font-normal">Execution Draft</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Execution Draft</span>
           </div>
           <div
             className={`text-sm font-bold font-mono ${
-              isMismatch ? 'text-rose-950 font-extrabold' : 'text-slate-900'
+              isMismatch ? 'text-rose-950 dark:text-rose-200 font-extrabold' : 'text-slate-900 dark:text-white'
             }`}
           >
             {comparison.values.loanAgreement?.display || 'Not submitted'}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
-            <span className="font-semibold text-slate-600 shrink-0">Source:</span>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-start gap-1">
+            <span className="font-semibold text-slate-600 dark:text-slate-300 shrink-0">Source:</span>
             {renderSourceRef(
               comparison.values.loanAgreement?.pageClauseRef,
               comparison.values.loanAgreement?.isVerifiedInSource,
@@ -339,7 +354,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
 
       {/* Financial Impact Banner with Deterministic Math Assumptions */}
       {comparison.financialImpact && (
-        <div className="mb-3 p-3 rounded-lg bg-amber-50/70 border border-amber-200 text-amber-950 text-xs space-y-1.5">
+        <div className="mb-3 p-3 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-950 dark:text-amber-100 text-xs space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="font-medium">
               Financial Variance:{' '}
@@ -349,7 +364,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAssumptions(!showAssumptions)}
-                className="text-[11px] font-semibold text-amber-900 hover:text-amber-950 underline transition-colors"
+                className="text-[11px] font-semibold text-amber-900 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-200 underline transition-colors"
               >
                 {showAssumptions ? 'Hide Assumptions' : 'View Assumptions'}
               </button>
@@ -357,7 +372,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
 
           {showAssumptions && comparison.calculationAssumptions && (
-            <div className="pt-2 border-t border-amber-200/80 text-[11px] text-amber-900 space-y-1 font-mono">
+            <div className="pt-2 border-t border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 space-y-1 font-mono">
               <span className="font-bold block">Calculation Parameters & Assumptions:</span>
               <ul className="list-disc pl-4 space-y-0.5">
                 {comparison.calculationAssumptions.map((asm, i) => (
@@ -371,47 +386,47 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
 
       {/* Practical Question to Ask Lender (Discrepancy Action) */}
       {comparison.lenderQuestion && (
-        <div className="mt-3 p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-2">
+        <div className="mt-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-400">
               Clarification Question for Loan Officer
             </span>
             <button
               type="button"
               onClick={handleCopyQuestion}
-              className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 transition-colors px-2 py-0.5 rounded hover:bg-slate-200/70 cursor-pointer"
+              className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium flex items-center gap-1 transition-colors px-2 py-0.5 rounded hover:bg-slate-200/70 dark:hover:bg-slate-700 cursor-pointer"
               title="Copy question text to clipboard"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-700 font-semibold">Copied!</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Copied!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-slate-500" />
+                  <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Copy Question</span>
                 </>
               )}
             </button>
           </div>
-          <p className="text-xs text-slate-800 font-medium leading-relaxed italic bg-white p-2.5 rounded border border-slate-200/60">
+          <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed italic bg-white dark:bg-slate-900 p-2.5 rounded border border-slate-200/60 dark:border-slate-700/60">
             "{comparison.lenderQuestion}"
           </p>
 
           {/* RBI Regulatory Grounding with Verified Circular and URL */}
-          <div className="pt-2 border-t border-slate-200/60 space-y-1 text-[11px] text-slate-600">
+          <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
             <div className="flex items-start gap-1.5">
-              <Scale className="w-3.5 h-3.5 text-teal-700 shrink-0 mt-0.5" />
+              <Scale className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <span className="font-semibold text-slate-800">Regulatory Framework: </span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Regulatory Framework: </span>
                 <span>{comparison.rbiGuideline}</span>
               </div>
             </div>
 
             {comparison.circularReference && (
-              <div className="flex items-center gap-2 pl-5 text-[10px] text-slate-500 flex-wrap">
-                <span className="font-mono bg-slate-200/70 px-1.5 py-0.2 rounded">
+              <div className="flex items-center gap-2 pl-5 text-[10px] text-slate-500 dark:text-slate-400 flex-wrap">
+                <span className="font-mono bg-slate-200/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 px-1.5 py-0.2 rounded">
                   Circular: {comparison.circularReference}
                 </span>
                 {comparison.sourceUrl && (
@@ -419,7 +434,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
                     href={comparison.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-teal-800 hover:underline flex items-center gap-0.5 font-medium"
+                    className="text-teal-800 dark:text-teal-400 hover:underline flex items-center gap-0.5 font-medium"
                   >
                     <span>View Official Notification</span>
                     <ExternalLink className="w-2.5 h-2.5" />
@@ -429,8 +444,8 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             )}
 
             {comparison.verificationNotice && (
-              <div className="flex items-start gap-1 pl-5 pt-1 text-[10px] text-amber-800">
-                <Info className="w-3 h-3 text-amber-600 shrink-0 mt-0.2" />
+              <div className="flex items-start gap-1 pl-5 pt-1 text-[10px] text-amber-800 dark:text-amber-300">
+                <Info className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0 mt-0.2" />
                 <span>{comparison.verificationNotice}</span>
               </div>
             )}

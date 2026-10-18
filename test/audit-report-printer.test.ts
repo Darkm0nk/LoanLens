@@ -4,7 +4,8 @@
  */
 
 import { strict as assert } from 'node:assert';
-import { generateAuditReportHtml, printAuditReport } from '../src/utils/auditReportPrinter';
+import { generateAuditReportHtml, printAuditReport, formatVerificationBadge } from '../src/utils/auditReportPrinter';
+import { printAuditLetter } from '../src/utils/auditLetterGenerator';
 import { compareLoanDocuments } from '../src/utils/comparator';
 import { DEMO_SCENARIO_DISCREPANCY, DEMO_SCENARIO_CLEAN } from '../src/data/demoData';
 import { ExtractedLoanDocument, LoanComparisonReport } from '../src/types/loan';
@@ -92,9 +93,10 @@ runTest('Renders all 9 evaluated terms with status badges and value tables', () 
   }
 });
 
-runTest('Displays source verification and location evidence tiers without hallucination', () => {
+runTest('Displays truthful Sample Benchmark Citation on demo reports without claiming source verification', () => {
   const html = generateAuditReportHtml(discrepancyReport);
-  assert.ok(html.includes('✓ Source Verified'));
+  assert.ok(html.includes('Sample Benchmark Citation'));
+  assert.ok(!html.includes('✓ Source Verified'));
   assert.ok(html.includes('Clause / Page Citation'));
   assert.ok(html.includes('Evidence Status'));
 });
@@ -198,6 +200,120 @@ console.log('\n[6] Safe Execution & Error Handling:');
 runTest('printAuditReport safely returns false in non-browser Node environment without crashing', () => {
   const result = printAuditReport(discrepancyReport);
   assert.strictEqual(result, false, 'Must return false when window/document is undefined');
+});
+
+runTest('printAuditLetter safely returns false in non-browser Node environment without crashing', () => {
+  const result = printAuditLetter('Subject: Clarification', 'Body: Please confirm terms.');
+  assert.strictEqual(result, false, 'Must return false when window/document is undefined');
+});
+
+// -------------------------------------------------------------
+// 7. SOURCE-VERIFICATION SEMANTICS & EVIDENCE HIERARCHY
+// -------------------------------------------------------------
+console.log('\n[7] Source-Verification Semantics & Evidence Hierarchy:');
+
+runTest('source_verified with isVerified: true produces Source Verified badge', () => {
+  const badge = formatVerificationBadge('source_verified', true);
+  assert.ok(badge.includes('badge-verified'));
+  assert.ok(badge.includes('✓ Source Verified'));
+});
+
+runTest('source_verified with isVerified: undefined produces Source Verified badge', () => {
+  const badge = formatVerificationBadge('source_verified', undefined);
+  assert.ok(badge.includes('badge-verified'));
+  assert.ok(badge.includes('✓ Source Verified'));
+});
+
+runTest('source_verified with isVerified: false is contradictory/failed and NEVER receives verified badge', () => {
+  const badge = formatVerificationBadge('source_verified', false);
+  assert.ok(!badge.includes('badge-verified'), 'Failed verification must not receive verified badge');
+  assert.ok(badge.includes('badge-unverified'));
+  assert.ok(badge.includes('Unverified Citation'));
+});
+
+runTest('excerpt_corroborated is NEVER upgraded to source_verified even if isVerified is true', () => {
+  const badge = formatVerificationBadge('excerpt_corroborated', true);
+  assert.ok(!badge.includes('badge-verified'), 'Weaker level must never be upgraded');
+  assert.ok(badge.includes('badge-corroborated'));
+  assert.ok(badge.includes('Excerpt Corroborated'));
+});
+
+runTest('excerpt_corroborated with isVerified: false retains Excerpt Corroborated badge', () => {
+  const badge = formatVerificationBadge('excerpt_corroborated', false);
+  assert.ok(badge.includes('badge-corroborated'));
+  assert.ok(badge.includes('Excerpt Corroborated'));
+});
+
+runTest('ai_extracted is NEVER upgraded to source_verified even if isVerified is true', () => {
+  const badge = formatVerificationBadge('ai_extracted', true);
+  assert.ok(!badge.includes('badge-verified'), 'AI-extracted must not be upgraded to source verified');
+  assert.ok(badge.includes('badge-unverified'));
+  assert.ok(badge.includes('AI Extracted (Unverified)'));
+});
+
+runTest('unverified with isVerified: true is NEVER upgraded to source_verified', () => {
+  const badge = formatVerificationBadge('unverified', true);
+  assert.ok(!badge.includes('badge-verified'));
+  assert.ok(badge.includes('badge-unverified'));
+  assert.ok(badge.includes('Unverified Citation'));
+});
+
+runTest('undefined or missing verification level NEVER produces Source Verified badge', () => {
+  const badge1 = formatVerificationBadge(undefined, true);
+  assert.ok(!badge1.includes('badge-verified'), 'Undefined level must not become verified even with true');
+  assert.ok(badge1.includes('Unverified Citation'));
+
+  const badge2 = formatVerificationBadge(undefined, false);
+  assert.ok(badge2.includes('Unverified Citation'));
+
+  const badge3 = formatVerificationBadge(undefined, undefined);
+  assert.ok(badge3.includes('Unverified Citation'));
+});
+
+runTest('formatVerificationBadge with isDemo: true produces Sample Benchmark Citation', () => {
+  const badge = formatVerificationBadge('source_verified', true, true);
+  assert.ok(badge.includes('badge-corroborated'));
+  assert.ok(badge.includes('Sample Benchmark Citation'));
+  assert.ok(!badge.includes('✓ Source Verified'));
+});
+
+runTest('Real uploaded document report displays ✓ Source Verified when substantiated', () => {
+  const realVerifiedReport: LoanComparisonReport = {
+    ...cleanReport,
+    isDemo: false,
+    comparisons: cleanReport.comparisons.map((c) => ({
+      ...c,
+      isSampleData: false,
+    })),
+  };
+  const html = generateAuditReportHtml(realVerifiedReport);
+  assert.ok(html.includes('✓ Source Verified'));
+});
+
+runTest('Report table HTML correctly preserves weaker verification level without false upgrade', () => {
+  const reportWithWeakerLevel: LoanComparisonReport = {
+    ...cleanReport,
+    isDemo: false,
+    comparisons: [
+      {
+        ...cleanReport.comparisons[0],
+        isSampleData: false,
+        values: {
+          kfs: {
+            display: '₹50,00,000',
+            rawText: 'Rs 50 Lakhs',
+            pageClauseRef: 'Page 1, Clause 1',
+            verificationLevel: 'excerpt_corroborated',
+            isVerifiedInSource: true, // Should not cause upgrade
+          },
+        },
+      },
+    ],
+  };
+
+  const html = generateAuditReportHtml(reportWithWeakerLevel);
+  assert.ok(html.includes('Excerpt Corroborated'), 'Must render Excerpt Corroborated');
+  assert.ok(!html.includes('✓ Source Verified'), 'Must not upgrade to Source Verified');
 });
 
 console.log(`\n========================================================`);

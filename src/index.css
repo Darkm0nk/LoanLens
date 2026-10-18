@@ -2,7 +2,10 @@
 
 @layer base {
   body {
-    @apply bg-[#0b132b] text-slate-800 antialiased font-sans selection:bg-teal-500 selection:text-white;
+    @apply bg-slate-50 text-slate-900 antialiased font-sans selection:bg-teal-500 selection:text-white;
+  }
+  html.dark body {
+    @apply bg-[#050811] text-slate-100;
   }
 }
 

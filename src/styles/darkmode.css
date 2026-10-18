@@ -1,192 +1,309 @@
-/* Dark Mode Global Styles */
+/* ==========================================================================
+   LoanLens Dark Mode Stylesheet
+   - Clean, high-contrast dark theme preserving semantic badges and borders
+   - Maintains WCAG AA accessibility contrast for all text and status labels
+   - Accurately targets cards with slashed opacities (bg-amber-50/90, etc.)
+   - Avoids destructive blanket inheritance (*, transparent borders, uniform text)
+   ========================================================================== */
 
-.dark {
+/* Root Dark Theme */
+html.dark,
+html.dark body,
+.dark,
+.dark body {
   color-scheme: dark;
   background-color: #050811 !important;
   color: #f1f5f9 !important;
 }
 
-/* Force light text on all dark mode elements */
-.dark * {
-  background-color: inherit;
-  color: inherit;
-}
-
-/* Specific text element overrides */
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+/* Base Headings & High-Emphasis Text */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
   color: #ffffff !important;
 }
 
-.dark p, .dark label, .dark li, .dark td, .dark th, .dark dt, .dark dd, .dark span {
-  color: #e2e8f0 !important;
+/* Text Hierarchy */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: #f8fafc !important;
 }
 
-/* Tailwind color overrides */
-.dark [class*="text-slate"], .dark [class*="text-gray"], .dark [class*="text-blue"],
-.dark [class*="text-amber"], .dark [class*="text-teal"], .dark [class*="text-emerald"],
-.dark [class*="text-red"], .dark [class*="text-green"], .dark [class*="text-yellow"] {
-  color: #e2e8f0 !important;
-}
-
-.dark .text-slate-900, .dark .text-gray-900, .dark .text-slate-800, .dark .text-gray-800 {
-  color: #f1f5f9 !important;
-}
-
-.dark .text-slate-700, .dark .text-gray-700 {
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-gray-700,
+.dark .text-gray-600 {
   color: #cbd5e1 !important;
 }
 
-.dark .text-slate-600, .dark .text-gray-600 {
-  color: #cbd5e1 !important;
-}
-
-.dark .text-slate-500, .dark .text-gray-500 {
+html.dark .text-slate-500,
+html.dark .text-gray-500,
+.dark .text-slate-500,
+.dark .text-gray-500 {
   color: #94a3b8 !important;
 }
 
-.dark .text-slate-400, .dark .text-gray-400 {
+html.dark .text-slate-400,
+html.dark .text-gray-400,
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-300,
+html.dark .text-gray-300,
+.dark .text-slate-300,
+.dark .text-gray-300 {
   color: #64748b !important;
 }
 
-.dark .text-slate-300, .dark .text-gray-300 {
-  color: #475569 !important;
-}
+/* ==========================================================================
+   Card Surfaces & Containers (Including Slashed Opacities)
+   ========================================================================== */
 
-/* Deep color text overrides - muted versions */
-.dark .text-amber-950, .dark .text-amber-900,
-.dark .text-teal-950, .dark .text-teal-900,
-.dark .text-emerald-950, .dark .text-emerald-900,
-.dark .text-blue-950, .dark .text-blue-900,
-.dark .text-slate-900, .dark .text-slate-800 {
-  color: #cbd5e1 !important;
-}
-
-/* Form Elements */
-.dark input, .dark textarea, .dark select {
-  background-color: #1e293b !important;
-  color: #f1f5f9 !important;
-  border-color: #475569 !important;
-}
-
-.dark input::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Links */
-.dark a {
-  color: #94a3b8 !important;
-}
-
-.dark a:hover {
-  color: #cbd5e1 !important;
-}
-
-/* Backgrounds - convert light to dark */
-.dark .bg-white {
-  background-color: #1e293b !important;
-}
-
-.dark .bg-slate-50 {
+/* Neutral Surfaces */
+html.dark .bg-white,
+html.dark [class*="bg-white"],
+.dark .bg-white,
+.dark [class*="bg-white"] {
   background-color: #0f172a !important;
 }
 
-.dark .bg-slate-100 {
+html.dark .bg-slate-50,
+html.dark [class*="bg-slate-50"],
+.dark .bg-slate-50,
+.dark [class*="bg-slate-50"] {
+  background-color: #0b1320 !important;
+}
+
+html.dark .bg-slate-100,
+html.dark [class*="bg-slate-100"],
+.dark .bg-slate-100,
+.dark [class*="bg-slate-100"] {
   background-color: #1e293b !important;
 }
 
-.dark .bg-slate-200 {
-  background-color: #334155 !important;
+html.dark .bg-slate-200,
+html.dark [class*="bg-slate-200"],
+.dark .bg-slate-200,
+.dark [class*="bg-slate-200"] {
+  background-color: #1e293b !important;
 }
 
-/* Borders - remove most borders in dark mode for cleaner look */
-.dark .border-slate-200 {
-  border-color: transparent !important;
+html.dark [class*="FCFCFA"],
+.dark [class*="FCFCFA"] {
+  background-color: #0b1320 !important;
 }
 
-.dark .border-slate-300 {
-  border-color: transparent !important;
+/* Form Inputs & Textareas */
+html.dark input,
+html.dark textarea,
+html.dark select,
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
-.dark .border-amber-200 {
-  border-color: transparent !important;
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
 }
 
-.dark .border-teal-200 {
-  border-color: transparent !important;
+/* Crisp Structural Borders */
+html.dark [class*="border-slate-"],
+.dark [class*="border-slate-"] {
+  border-color: #334155 !important;
 }
 
-.dark .border-emerald-200 {
-  border-color: transparent !important;
+html.dark .border-t,
+html.dark .border-b,
+html.dark .border-l,
+html.dark .border-r,
+.dark .border-t,
+.dark .border-b,
+.dark .border-l,
+.dark .border-r {
+  border-color: #334155 !important;
 }
 
-.dark .border-blue-200 {
-  border-color: transparent !important;
+/* ==========================================================================
+   Semantic Status Containers & Badges (Preserves Audit Meaning & Contrast)
+   ========================================================================== */
+
+/* 1. Compliant / Aligned / Match (Emerald) */
+html.dark [class*="text-emerald-"],
+html.dark [class*="text-green-"],
+.dark [class*="text-emerald-"],
+.dark [class*="text-green-"] {
+  color: #6ee7b7 !important;
 }
 
-.dark .border-amber-300 {
-  border-color: transparent !important;
+html.dark [class*="bg-emerald-"]:not(body),
+html.dark [class*="bg-green-"]:not(body),
+.dark [class*="bg-emerald-"]:not(body),
+.dark [class*="bg-green-"]:not(body) {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
 }
 
-.dark .border-teal-300 {
-  border-color: transparent !important;
+html.dark [class*="border-emerald-"],
+.dark [class*="border-emerald-"] {
+  border-color: rgba(16, 185, 129, 0.45) !important;
 }
 
-/* Colored badge backgrounds to dark versions - muted and subtle */
-.dark .bg-amber-50 {
-  background-color: rgba(120, 53, 15, 0.3) !important;
+/* 2. Discrepancy / Variance / Warning (Amber) */
+html.dark [class*="text-amber-"],
+html.dark [class*="text-yellow-"],
+.dark [class*="text-amber-"],
+.dark [class*="text-yellow-"] {
+  color: #fde047 !important;
 }
 
-.dark .bg-teal-50 {
-  background-color: rgba(45, 85, 89, 0.3) !important;
+html.dark [class*="bg-amber-"]:not(body),
+html.dark [class*="bg-yellow-"]:not(body),
+.dark [class*="bg-amber-"]:not(body),
+.dark [class*="bg-yellow-"]:not(body) {
+  background-color: rgba(69, 26, 3, 0.55) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
 }
 
-.dark .bg-emerald-50 {
-  background-color: rgba(20, 83, 62, 0.3) !important;
+html.dark [class*="border-amber-"],
+.dark [class*="border-amber-"] {
+  border-color: rgba(245, 158, 11, 0.45) !important;
 }
 
-.dark .bg-blue-50 {
-  background-color: rgba(30, 58, 138, 0.3) !important;
+/* 3. Critical / Missing / Error (Rose / Red) */
+html.dark [class*="text-rose-"],
+html.dark [class*="text-red-"],
+.dark [class*="text-rose-"],
+.dark [class*="text-red-"] {
+  color: #fca5a5 !important;
 }
 
-.dark .bg-indigo-50 {
-  background-color: rgba(55, 48, 163, 0.3) !important;
+html.dark [class*="bg-rose-"]:not(body),
+html.dark [class*="bg-red-"]:not(body),
+.dark [class*="bg-rose-"]:not(body),
+.dark [class*="bg-red-"]:not(body) {
+  background-color: rgba(136, 19, 55, 0.45) !important;
+  border-color: rgba(244, 63, 94, 0.45) !important;
 }
 
-.dark .bg-amber-100 {
-  background-color: rgba(120, 53, 15, 0.4) !important;
+html.dark [class*="border-rose-"],
+.dark [class*="border-rose-"] {
+  border-color: rgba(244, 63, 94, 0.45) !important;
 }
 
-.dark .bg-teal-100 {
-  background-color: rgba(45, 85, 89, 0.4) !important;
+/* 4. Info / Unverified / Location (Sky / Blue / Indigo) */
+html.dark [class*="text-sky-"],
+html.dark [class*="text-blue-"],
+html.dark [class*="text-indigo-"],
+.dark [class*="text-sky-"],
+.dark [class*="text-blue-"],
+.dark [class*="text-indigo-"] {
+  color: #7dd3fc !important;
 }
 
-.dark .bg-emerald-100 {
-  background-color: rgba(20, 83, 62, 0.4) !important;
+html.dark [class*="bg-sky-"]:not(body),
+html.dark [class*="bg-blue-"]:not(body),
+html.dark [class*="bg-indigo-"]:not(body),
+.dark [class*="bg-sky-"]:not(body),
+.dark [class*="bg-blue-"]:not(body),
+.dark [class*="bg-indigo-"]:not(body) {
+  background-color: rgba(30, 58, 138, 0.45) !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
 }
 
-.dark .bg-blue-100 {
-  background-color: rgba(30, 58, 138, 0.4) !important;
+html.dark [class*="border-sky-"],
+html.dark [class*="border-blue-"],
+html.dark [class*="border-indigo-"],
+.dark [class*="border-sky-"],
+.dark [class*="border-blue-"],
+.dark [class*="border-indigo-"] {
+  border-color: rgba(56, 189, 248, 0.45) !important;
 }
 
-/* Dark mode upload cards container with clean solid background */
-.dark div[class*="rounded-2xl"][class*="border-slate-200"] {
-  background-color: #0a1118 !important;
-  border-color: transparent !important;
+/* 5. Brand / LoanLens Primary (Teal) */
+html.dark [class*="text-teal-"],
+.dark [class*="text-teal-"] {
+  color: #5eead4 !important;
 }
 
-/* Remove borders from rounded boxes and cards in dark mode */
-.dark [class*="rounded"][class*="border-"] {
-  border-color: transparent !important;
+html.dark [class*="bg-teal-"]:not(body),
+.dark [class*="bg-teal-"]:not(body) {
+  background-color: rgba(19, 78, 74, 0.45) !important;
+  border-color: rgba(45, 212, 191, 0.45) !important;
 }
 
-/* Keep only structural borders like dividers clear */
-.dark .border-t, .dark .border-b {
-  border-color: #2d3748 !important;
+html.dark [class*="border-teal-"],
+.dark [class*="border-teal-"] {
+  border-color: rgba(45, 212, 191, 0.45) !important;
 }
 
-/* Active Tab Navigation Buttons - Overview, Intake & Comparison, RBI Guide */
-.dark button[class*="px-3"][class*="py-1.5"][class*="bg-slate"] {
-  background-color: #3f4654 !important;
+/* ==========================================================================
+   Navigation, Buttons & Interactive States
+   ========================================================================== */
+
+/* Active Section Tabs */
+html.dark button[class*="bg-slate-900"],
+html.dark button[class*="bg-slate-700"],
+.dark button[class*="bg-slate-900"],
+.dark button[class*="bg-slate-700"] {
+  background-color: #0f766e !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+html.dark button[class*="text-slate-600"]:hover,
+html.dark button[class*="text-slate-400"]:hover,
+.dark button[class*="text-slate-600"]:hover,
+.dark button[class*="text-slate-400"]:hover {
+  background-color: #1e293b !important;
   color: #ffffff !important;
 }
 
+/* Table Hover */
+html.dark tr:hover,
+.dark tr:hover {
+  background-color: rgba(51, 65, 85, 0.35) !important;
+}
+
+/* Modals & Dialog Overlays */
+html.dark .fixed.inset-0 .bg-white,
+html.dark .fixed.inset-0 [class*="bg-white"],
+.dark .fixed.inset-0 .bg-white,
+.dark .fixed.inset-0 [class*="bg-white"] {
+  background-color: #0f172a !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Accessible Focus Indicators */
+html.dark *:focus-visible,
+.dark *:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+}

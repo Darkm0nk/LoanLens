@@ -136,30 +136,30 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-[#0a0f1d] rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/80">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-teal-800 text-white flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-teal-800 dark:bg-teal-700 text-white flex items-center justify-center">
               <FileText className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-teal-800 uppercase tracking-wider">
+                <span className="text-[11px] font-semibold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
                   {docTypeLabel}
                 </span>
                 {document.isDemo && (
-                  <span className="text-[10px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.2 rounded uppercase">
+                  <span className="text-[10px] font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 px-1.5 py-0.5 rounded uppercase">
                     Synthetic Sample
                   </span>
                 )}
               </div>
-              <h3 className="text-base font-bold text-slate-900 truncate max-w-md">{document.documentName}</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate max-w-md">{document.documentName}</h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -167,15 +167,15 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
 
         {/* Demo Notice Banner */}
         {document.isDemo ? (
-          <div className="px-6 py-2.5 bg-amber-50 border-b border-amber-200 text-amber-950 text-xs flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
+          <div className="px-6 py-2.5 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 text-xs flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
             <span>
               <strong>Sample Record Note:</strong> This document displays synthetic sample values for testing. No personal files were uploaded or analyzed for this entry.
             </span>
           </div>
         ) : (
-          <div className="px-6 py-2.5 bg-teal-50 border-b border-teal-200 text-teal-950 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-teal-700 shrink-0" />
+          <div className="px-6 py-2.5 bg-teal-50 dark:bg-teal-950/40 border-b border-teal-200 dark:border-teal-900/60 text-teal-950 dark:text-teal-200 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-teal-700 dark:text-teal-400 shrink-0" />
             <span>
               <strong>AI Extraction:</strong> Extracted from the uploaded document using Gemini structured output. Verify terms and references against the original document.
             </span>
@@ -183,37 +183,37 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
         )}
 
         {/* Document Metadata Bar */}
-        <div className="px-6 py-3 bg-slate-100/70 border-b border-slate-200 text-xs grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="px-6 py-3 bg-slate-100/70 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-xs grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div>
-            <span className="text-slate-500 block text-[11px]">Lender</span>
-            <span className="font-semibold text-slate-900">{document.lenderName}</span>
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Lender</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{document.lenderName}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px]">Borrower Profile</span>
-            <span className="font-semibold text-slate-900">{document.borrowerName}</span>
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Borrower Profile</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{document.borrowerName}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px]">Loan Type</span>
-            <span className="font-semibold text-slate-900">{document.loanType}</span>
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Loan Type</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{document.loanType}</span>
           </div>
           <div>
-            <span className="text-slate-500 block text-[11px]">Record Date</span>
-            <span className="font-semibold text-slate-900">{document.uploadDate}</span>
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Record Date</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{document.uploadDate}</span>
           </div>
         </div>
 
         {/* Terms Breakdown Table */}
         <div className="p-6 overflow-y-auto space-y-4">
           {document.rawSummary && (
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800">
-              <span className="font-semibold block mb-0.5 text-slate-900">Document Summary:</span>
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200">
+              <span className="font-semibold block mb-0.5 text-slate-900 dark:text-slate-100">Document Summary:</span>
               <span className="leading-relaxed">{document.rawSummary}</span>
             </div>
           )}
 
-          <div className="border border-slate-200 rounded-lg overflow-hidden">
+          <div className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 font-semibold">
+              <thead className="bg-slate-100 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-semibold">
                 <tr>
                   <th className="py-2.5 px-3">Loan Term</th>
                   <th className="py-2.5 px-3">Extracted Value</th>
@@ -221,45 +221,49 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                   <th className="py-2.5 px-3 hidden sm:table-cell">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {rows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-slate-900">{row.label}</td>
-                    <td className="py-2.5 px-3 font-mono font-medium text-slate-900">{row.val}</td>
-                    <td className="py-2.5 px-3 text-slate-600 text-[11px]">
+                  <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-slate-100">{row.label}</td>
+                    <td className="py-2.5 px-3 font-mono font-medium text-slate-900 dark:text-slate-100">{row.val}</td>
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 text-[11px]">
                       {row.ref && !row.ref.includes('not detected') ? (
                         <div className="space-y-1">
-                          <span className="font-mono block">{row.ref}</span>
-                          {row.verificationLevel === 'source_verified' || row.isVerified ? (
+                          <span className="font-mono block text-slate-700 dark:text-slate-300">{row.ref}</span>
+                          {document.isDemo ? (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800/70">
+                              Sample Benchmark Citation
+                            </span>
+                          ) : row.verificationLevel === 'source_verified' && row.isVerified !== false ? (
                             <div className="flex items-center gap-1 flex-wrap">
-                              <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                 Source Verified
                               </span>
                               {row.locationStatus === 'unpaginated_source' && (
-                                <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200" title="Document is unpaginated plain text; page number is AI-reported">
+                                <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="Document is unpaginated plain text; page number is AI-reported">
                                   Unpaginated Text
                                 </span>
                               )}
                             </div>
                           ) : row.verificationLevel === 'excerpt_corroborated' ? (
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                               Excerpt Corroborated
                             </span>
                           ) : row.verificationLevel === 'ai_extracted' ? (
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                               AI-Extracted
                             </span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                               Not Verified
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">Page reference not detected in document text</span>
+                        <span className="text-slate-400 dark:text-slate-500 italic">Page reference not detected in document text</span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500 text-[11px] hidden sm:table-cell">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 text-[11px] hidden sm:table-cell">
                       {row.notes || '—'}
                     </td>
                   </tr>
@@ -270,11 +274,11 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>{document.isDemo ? 'Synthetic Demo Record' : 'Processed via Gemini AI'}</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-medium transition-colors"
+            className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 rounded-md font-medium transition-colors"
           >
             Close
           </button>

@@ -67,24 +67,25 @@ export const REGULATORY_RULES: Record<string, RegulatoryRule> = {
   foreclosure_floating: {
     id: 'foreclosure_floating',
     topic: 'Prepayment & Foreclosure Charges',
-    circularId: 'DBOD.Dir.BC.115/13.03.00/2013-14 & DNBR (PD) CC.No.005/03.10.119/2014-15',
-    circularTitle: 'Levy of Foreclosure Charges / Pre-payment Penalty on Floating Rate Term Loans',
-    issueDate: 'May 7, 2014',
-    effectiveDate: 'Immediate upon issue',
+    circularId: 'RBI/2025-26/64 DoR.MCS.REC.38/01.01.001/2025-26 & DBOD.Dir.BC.115/13.03.00/2013-14',
+    circularTitle: 'Reserve Bank of India (Pre-payment Charges on Loans) Directions, 2025',
+    issueDate: 'July 2, 2025 (Directions 2025); May 7, 2014 (Foundational Directions)',
+    effectiveDate: 'January 1, 2026 (for loans sanctioned/renewed on or after Jan 1, 2026); May 7, 2014 (prior floating-rate loans)',
     sourceUrl: 'https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=8894&Mode=0',
     issuingAuthority: 'Reserve Bank of India',
     applicabilityConditions: [
-      'Applies strictly to floating rate term loans sanctioned to individual borrowers.',
-      'Does NOT apply to fixed-rate loans.',
-      'Does NOT apply to loans where a business entity, company, or partnership firm is a borrower or co-borrower.',
-      'Does NOT apply to loans borrowed for commercial or business purposes.',
+      'Applies to all floating-rate term loans sanctioned to individual borrowers for purposes other than business (housing, auto, personal) and Micro & Small Enterprises (MSEs).',
+      'Lock-in periods are strictly prohibited on eligible floating-rate individual loans.',
+      'Does NOT apply to fixed-rate loans (prepayment penalties remain permissible pursuant to transparent board-approved policy).',
+      'Does NOT apply to non-individual commercial entities, corporate borrowers, or business loans (other than eligible MSEs).',
+      'Regulated Entities covered: Commercial Banks, NBFCs (including HFCs), and Primary Urban Co-operative Banks.',
     ],
     summary:
-      'Banks and NBFCs cannot charge foreclosure charges or prepayment penalties on floating-rate term loans sanctioned to individual borrowers.',
+      'Banks and NBFCs cannot levy foreclosure charges, prepayment penalties, or enforce lock-in periods on floating-rate term loans sanctioned to individual borrowers for non-business purposes and MSEs.',
     guidanceText:
-      'Under RBI Circular DBOD.Dir.BC.115/13.03.00/2013-14, lenders shall not levy prepayment or foreclosure charges on floating-rate term loans to individual borrowers. If you are an individual retail borrower under a floating-rate facility, verify if foreclosure charges in the draft agreement apply to your category.',
+      'Under the Reserve Bank of India (Pre-payment Charges on Loans) Directions, 2025 (DoR.MCS.REC.38/01.01.001/2025-26, effective January 1, 2026) and foundational Circular DBOD.Dir.BC.115/13.03.00/2013-14, lenders shall not levy prepayment or foreclosure charges or impose lock-in periods on floating-rate term loans to individual borrowers for non-business purposes. If your draft agreement includes prepayment penalties or lock-in restrictions on a floating retail loan, seek clarification from the lender.',
     verificationNotice:
-      'Applicability Caveat: This statutory exemption applies specifically to individual retail borrowers on floating rates. Prepayment fees may be legally permissible for fixed-rate facilities, non-individual borrowers, or commercial loans. A discrepancy alone does not prove regulatory violation.',
+      'Applicability Caveat: This statutory prohibition applies strictly to individual borrowers taking floating-rate loans for non-business purposes (and eligible MSEs). Prepayment penalties may legally apply to fixed-rate loans or non-individual borrowers (e.g., companies/LLPs). A contractual difference alone requires verification against loan rate type and borrower category; do not assert regulatory violation without confirming borrower classification.',
   },
 
   insurance_bundling: {

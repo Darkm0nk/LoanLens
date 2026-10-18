@@ -43,29 +43,29 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
     const isSingleDoc = loadedDocCount === 1;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 sm:p-12 text-center shadow-xs space-y-4">
-          <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-500">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center shadow-xs space-y-4">
+          <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400">
             <FileText className="w-7 h-7" />
           </div>
 
           <div>
             {isSingleDoc ? (
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-full mb-2">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 border border-teal-200/80 dark:border-teal-800 px-2.5 py-0.5 rounded-full mb-2">
               1 of 3 Documents Loaded · Waiting for Second Document
             </span>
             ) : (
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full mb-2">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full mb-2">
               Ready for Document Intake
             </span>
             )}
 
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
               {isSingleDoc
                   ? 'Waiting for at least 2 real documents to compare'
                   : 'No Active Comparison Report'}
             </h3>
 
-            <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto mt-2 leading-relaxed">
               {isSingleDoc
                   ? 'Upload at least two loan documents above (KFS, Sanction Letter, or Loan Agreement) to initiate the cross-contract discrepancy audit. Real user files are never compared against demo data.'
                   : 'Upload at least two loan documents above (KFS, Sanction Letter, or Loan Agreement) or load a sample benchmark case to inspect discrepancies.'}
@@ -73,9 +73,9 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
           </div>
 
           {isSingleDoc && (
-              <div className="max-w-md mx-auto p-3 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-950 text-left">
+              <div className="max-w-md mx-auto p-3 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-xs text-amber-950 dark:text-amber-100 text-left">
                 <span className="font-bold block mb-1">Combined Document Notice:</span>
-                <span className="text-[11px] text-amber-900 leading-relaxed block">
+                <span className="text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed block">
                   If your file is an all-in-one loan package containing multiple schedules, upload the same file into the other document cards above to verify all sections.
                 </span>
               </div>
@@ -103,21 +103,21 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
     switch (report.recommendation) {
       case 'Review Variances with Lender':
         return {
-          bg: 'bg-amber-50/90 border-amber-300 text-amber-950',
-          badge: 'bg-amber-700 text-white',
-          icon: <AlertTriangle className="w-6 h-6 text-amber-700 shrink-0" />,
+          bg: 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100',
+          badge: 'bg-amber-700 dark:bg-amber-600 text-white',
+          icon: <AlertTriangle className="w-6 h-6 text-amber-700 dark:text-amber-400 shrink-0" />,
         };
       case 'Clarifications Recommended':
         return {
-          bg: 'bg-blue-50/90 border-blue-200 text-blue-950',
-          badge: 'bg-blue-700 text-white',
-          icon: <HelpCircle className="w-6 h-6 text-blue-700 shrink-0" />,
+          bg: 'bg-blue-50/90 dark:bg-sky-950/40 border-blue-200 dark:border-sky-700/60 text-blue-950 dark:text-sky-100',
+          badge: 'bg-blue-700 dark:bg-sky-600 text-white',
+          icon: <HelpCircle className="w-6 h-6 text-blue-700 dark:text-sky-400 shrink-0" />,
         };
       case 'Terms Aligned Across Documents':
         return {
-          bg: 'bg-emerald-50/90 border-emerald-200 text-emerald-950',
-          badge: 'bg-emerald-700 text-white',
-          icon: <CheckCircle2 className="w-6 h-6 text-emerald-700 shrink-0" />,
+          bg: 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-700/60 text-emerald-950 dark:text-emerald-100',
+          badge: 'bg-emerald-700 dark:bg-emerald-600 text-white',
+          icon: <CheckCircle2 className="w-6 h-6 text-emerald-700 dark:text-emerald-400 shrink-0" />,
         };
     }
   };
@@ -128,14 +128,14 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
       <div className="space-y-6">
         {/* Explicit Demo Mode Banner */}
         {isDemoMode ? (
-            <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950">
+            <div className="p-4 bg-amber-50/90 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950 dark:text-amber-100">
               <div className="flex items-start gap-2.5">
-                <Sparkles className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                <Sparkles className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
-                  <div className="font-bold uppercase tracking-wider text-[11px] text-amber-900">
+                  <div className="font-bold uppercase tracking-wider text-[11px] text-amber-900 dark:text-amber-200">
                     Synthetic Demonstration Mode Active
                   </div>
-                  <p className="text-amber-900 leading-relaxed">
+                  <p className="text-amber-900 dark:text-amber-200 leading-relaxed">
                     Displaying pre-computed sample benchmark for <strong>{report.borrowerName}</strong> ({report.loanType}).
                     Gemini AI has not analyzed private documents in this view. Upload your documents above to start a real audit.
                   </p>
@@ -143,14 +143,14 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
               </div>
               <button
                   onClick={onScrollToUpload}
-                  className="px-3.5 py-1.5 bg-amber-900 hover:bg-amber-950 text-white font-medium rounded-lg text-xs shrink-0 self-start sm:self-center transition-colors shadow-xs cursor-pointer"
+                  className="px-3.5 py-1.5 bg-amber-900 hover:bg-amber-950 dark:bg-amber-700 dark:hover:bg-amber-600 text-white font-medium rounded-lg text-xs shrink-0 self-start sm:self-center transition-colors shadow-xs cursor-pointer"
               >
                 Upload Real Documents
               </button>
             </div>
         ) : (
-            <div className="p-3 bg-teal-50/90 border border-teal-200 rounded-lg flex items-center gap-2 text-xs text-teal-950">
-              <Info className="w-4 h-4 text-teal-700 shrink-0" />
+            <div className="p-3 bg-teal-50/90 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 rounded-lg flex items-center gap-2 text-xs text-teal-950 dark:text-teal-100">
+              <Info className="w-4 h-4 text-teal-700 dark:text-teal-400 shrink-0" />
               <span>
             <strong>User Documents Audit:</strong> Results extracted directly from your uploaded files via server-side
             Gemini AI integration. No documents are stored on server disks.
@@ -160,13 +160,13 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
 
         {/* Combined Document Notice if extracted from single multi-section file */}
         {report.singleSourceNotice && (
-            <div className="p-3.5 bg-indigo-50/90 border border-indigo-200 rounded-xl flex items-start gap-2.5 text-xs text-indigo-950">
-              <FileText className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
+            <div className="p-3.5 bg-indigo-50/90 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 rounded-xl flex items-start gap-2.5 text-xs text-indigo-950 dark:text-indigo-100">
+              <FileText className="w-4 h-4 text-indigo-700 dark:text-indigo-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-            <span className="font-bold block text-indigo-950 text-[11px] uppercase tracking-wider">
+            <span className="font-bold block text-indigo-950 dark:text-indigo-200 text-[11px] uppercase tracking-wider">
               Single-Source Multi-Section Verification
             </span>
-                <span className="text-indigo-900 leading-relaxed block">
+                <span className="text-indigo-900 dark:text-indigo-200 leading-relaxed block">
               {report.singleSourceNotice}
             </span>
               </div>
@@ -183,21 +183,21 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${verdict.badge}`}>
                   Review Recommendation
                 </span>
-                  <span className="text-xs text-slate-700">
+                  <span className="text-xs text-slate-700 dark:text-slate-300">
                   {report.lenderName} · {report.loanType}
                 </span>
                   {isDemoMode && (
-                      <span className="text-[10px] font-semibold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-200/80 dark:bg-amber-900/60 px-1.5 py-0.5 rounded">
                     Sample Data
                   </span>
                   )}
                 </div>
-                <h3 className="text-2xl font-bold tracking-tight mt-1">{report.recommendation}</h3>
-                <p className="text-xs text-slate-700 mt-1 max-w-2xl leading-relaxed">
+                <h3 className="text-2xl font-bold tracking-tight mt-1 text-slate-900 dark:text-white">{report.recommendation}</h3>
+                <p className="text-xs text-slate-700 dark:text-slate-200 mt-1 max-w-2xl leading-relaxed">
                   {report.recommendationNote}
                 </p>
-                <p className="text-[11px] text-slate-600 mt-1">
-                  Evaluated profile: <span className="font-semibold">{report.borrowerName}</span>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
+                  Evaluated profile: <span className="font-semibold text-slate-900 dark:text-slate-200">{report.borrowerName}</span>
                 </p>
               </div>
             </div>
@@ -205,18 +205,18 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
             <div className="flex items-center gap-2.5 shrink-0">
               <button
                   onClick={onOpenDisputeLetter}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-4 py-2 bg-slate-900 dark:bg-teal-700 hover:bg-slate-800 dark:hover:bg-teal-600 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Mail className="w-4 h-4" />
                 <span>Draft Clarification Notice</span>
               </button>
               <button
                   onClick={handlePrintAudit}
-                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  className="px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                   title="Print complete contract audit report (A4 / PDF)"
                   aria-label="Print Audit"
               >
-                <Printer className="w-4 h-4 text-teal-700" />
+                <Printer className="w-4 h-4 text-teal-700 dark:text-teal-400" />
                 <span>Print Audit</span>
               </button>
             </div>
@@ -224,15 +224,15 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
 
           {/* Warning Highlights List */}
           {report.keyWarnings.length > 0 && (
-              <div className="pt-3 border-t border-slate-200/60">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block mb-2">
+              <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block mb-2">
               Specific Variances Identified:
             </span>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                   {report.keyWarnings.map((warning, idx) => (
-                      <div key={idx} className="p-2.5 rounded bg-white/90 border border-slate-200/80 flex items-start gap-2 shadow-2xs">
-                        <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                        <span className="text-slate-800 leading-snug">{warning}</span>
+                      <div key={idx} className="p-2.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-2 shadow-2xs">
+                        <ShieldAlert className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <span className="text-slate-800 dark:text-slate-200 leading-snug">{warning}</span>
                       </div>
                   ))}
                 </div>
@@ -240,8 +240,8 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
           )}
 
           {/* Cautious Disclaimer Strip */}
-          <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200/50 flex items-center gap-1.5">
-            <Scale className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <div className="pt-2 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200/50 dark:border-slate-700/50 flex items-center gap-1.5">
+            <Scale className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
             <span>
             <strong>Responsible Analysis Notice:</strong> A document discrepancy alone does not constitute proof of error or wrongdoing.
             Terms may adjust during underwriting due to benchmark reset schedules or administrative parameters. Clarify all points with your lender.
@@ -251,44 +251,44 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
 
         {/* Metrics Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs text-slate-500 font-medium block">Terms Evaluated</span>
-            <span className="text-2xl font-bold text-slate-900 font-mono block mt-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Terms Evaluated</span>
+            <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono block mt-1">
             {report.totalTermsEvaluated}
           </span>
-            <span className="text-[11px] text-slate-400">Core Terms Checked</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Core Terms Checked</span>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs text-amber-700 font-semibold block">Variances Noted</span>
-            <span className="text-2xl font-bold text-amber-700 font-mono block mt-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+            <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">Variances Noted</span>
+            <span className="text-2xl font-bold text-amber-700 dark:text-amber-400 font-mono block mt-1">
             {report.mismatchCount}
           </span>
-            <span className="text-[11px] text-slate-400">Requires Confirmation</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Requires Confirmation</span>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs text-emerald-700 font-semibold block">Consistent Terms</span>
-            <span className="text-2xl font-bold text-emerald-700 font-mono block mt-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">Consistent Terms</span>
+            <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 font-mono block mt-1">
             {report.matchCount}
           </span>
-            <span className="text-[11px] text-slate-400">Aligned Across Documents</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Aligned Across Documents</span>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs text-blue-700 font-semibold block">Missing Disclosures</span>
-            <span className="text-2xl font-bold text-blue-700 font-mono block mt-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+            <span className="text-xs text-blue-700 dark:text-sky-400 font-semibold block">Missing Disclosures</span>
+            <span className="text-2xl font-bold text-blue-700 dark:text-sky-400 font-mono block mt-1">
             {report.missingCount}
           </span>
-            <span className="text-[11px] text-slate-400">Omitted in Documents</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">Omitted in Documents</span>
           </div>
         </div>
 
         {/* Section Filter Controls & Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Contract Term Comparison Matrix</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Contract Term Comparison Matrix</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing {filteredComparisons.length} of {report.comparisons.length} terms · Click "Inspect Evidence" to view contract clauses
             </p>
           </div>
@@ -310,11 +310,11 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
             )}
 
             {/* Filter Segmented Control */}
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
               <button
                   onClick={() => setFilter('all')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      filter === 'all' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
                 All ({report.comparisons.length})
@@ -322,18 +322,18 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
               <button
                   onClick={() => setFilter('mismatch')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap flex items-center gap-1 ${
-                      filter === 'mismatch' ? 'bg-white text-amber-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      filter === 'mismatch' ? 'bg-white dark:bg-slate-700 text-amber-800 dark:text-amber-300 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
                 <span>Variances</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 font-mono font-bold">
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 font-mono font-bold">
                 {report.mismatchCount}
               </span>
               </button>
               <button
                   onClick={() => setFilter('match')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === 'match' ? 'bg-white text-emerald-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      filter === 'match' ? 'bg-white dark:bg-slate-700 text-emerald-800 dark:text-emerald-300 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
                 Matches ({report.matchCount})
@@ -341,7 +341,7 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
               <button
                   onClick={() => setFilter('missing')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === 'missing' ? 'bg-white text-blue-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      filter === 'missing' ? 'bg-white dark:bg-slate-700 text-blue-800 dark:text-sky-300 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
                 Missing ({report.missingCount})
