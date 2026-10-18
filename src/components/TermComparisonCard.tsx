@@ -107,13 +107,56 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
     }
   };
 
+  const regulatoryBadge = () => {
+    if (!comparison.regulatoryAssessment) return null;
+    switch (comparison.regulatoryAssessment) {
+      case 'compliant':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300">
+            Confirmed RBI Compliant
+          </span>
+        );
+      case 'exempt':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300">
+            Nil Foreclosure Aligned
+          </span>
+        );
+      case 'non_compliant':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-900 border border-rose-300">
+            Regulatory Variance Noted
+          </span>
+        );
+      case 'has_penalty':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-950 border border-amber-300">
+            Foreclosure Fee Noted
+          </span>
+        );
+      case 'not_assessed':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-300">
+            Compliance Not Assessed
+          </span>
+        );
+    }
+  };
+
   const isMismatch = comparison.status === 'mismatch';
 
-  const renderSourceRef = (ref?: string) => {
+  const renderSourceRef = (ref?: string, isVerifiedInSource?: boolean) => {
     if (!ref || ref === 'Not cited' || ref === 'Not specified' || ref.includes('not detected')) {
       return (
         <span className="text-slate-400 italic text-[11px]">
           Page reference not detected in document text
+        </span>
+      );
+    }
+    if (isVerifiedInSource === false || ref.includes('not verified') || ref.includes('Evidence not verified')) {
+      return (
+        <span className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium border border-amber-200" title={ref}>
+          Evidence not verified: excerpt does not substantiate value
         </span>
       );
     }
@@ -144,6 +187,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {regulatoryBadge()}
           {classificationBadge()}
           {statusBadge()}
           {onInspectEvidence && (
@@ -180,7 +224,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.kfs?.pageClauseRef)}
+            {renderSourceRef(comparison.values.kfs?.pageClauseRef, comparison.values.kfs?.isVerifiedInSource)}
           </div>
         </div>
 
@@ -200,7 +244,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.sanctionLetter?.pageClauseRef)}
+            {renderSourceRef(comparison.values.sanctionLetter?.pageClauseRef, comparison.values.sanctionLetter?.isVerifiedInSource)}
           </div>
         </div>
 
@@ -230,7 +274,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
-            {renderSourceRef(comparison.values.loanAgreement?.pageClauseRef)}
+            {renderSourceRef(comparison.values.loanAgreement?.pageClauseRef, comparison.values.loanAgreement?.isVerifiedInSource)}
           </div>
         </div>
       </div>

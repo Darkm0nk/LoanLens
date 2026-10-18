@@ -183,6 +183,31 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
                 {currentClass.icon}
                 <span>{currentClass.label}</span>
               </span>
+              {comparison.regulatoryAssessment === 'compliant' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 text-emerald-900 border-emerald-300">
+                  Confirmed RBI Compliant
+                </span>
+              )}
+              {comparison.regulatoryAssessment === 'exempt' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-emerald-100 text-emerald-900 border-emerald-300">
+                  Nil Foreclosure Aligned
+                </span>
+              )}
+              {comparison.regulatoryAssessment === 'non_compliant' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-rose-100 text-rose-900 border-rose-300">
+                  Regulatory Variance Noted
+                </span>
+              )}
+              {comparison.regulatoryAssessment === 'has_penalty' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-amber-100 text-amber-950 border-amber-300">
+                  Foreclosure Fee Noted
+                </span>
+              )}
+              {comparison.regulatoryAssessment === 'not_assessed' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-slate-100 text-slate-800 border-slate-300">
+                  Compliance Not Assessed
+                </span>
+              )}
               {comparison.isSampleData && (
                 <span className="text-[10px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-amber-700" />

@@ -188,18 +188,18 @@ export default function App() {
     }
   }
 
-  // Handle all-in-one multi-section extraction from a single combined PDF
+  // Handle multi-schedule extraction from a single combined PDF package
   async function handleProcessAllSectionsFromFile(file: File) {
     setIsProcessingCombined(true);
     try {
       await Promise.all([
         handleFileUpload('sanction_letter', file, {
           isCombined: true,
-          originSection: 'Section 2: Sanction Letter',
+          originSection: 'Full Document Scan (as Sanction Letter)',
         }),
         handleFileUpload('loan_agreement', file, {
           isCombined: true,
-          originSection: 'Section 3: Loan Agreement',
+          originSection: 'Full Document Scan (as Loan Agreement)',
         }),
       ]);
       setKfsDoc((prev) =>
@@ -208,7 +208,7 @@ export default function App() {
               ...prev,
               isCombinedPackage: true,
               originFileName: file.name,
-              originSection: prev.originSection || 'Section 1: Key Facts Statement',
+              originSection: prev.originSection || 'Full Document Scan (as Key Facts Statement)',
             }
           : null
       );
@@ -522,7 +522,7 @@ export default function App() {
                     Single Document Uploaded: "{lastUploadedFile.name}"
                   </span>
                         <p className="text-teal-800 leading-relaxed text-[11px]">
-                          To protect audit integrity, real documents are never compared against demo data. If your file is an <strong>All-in-One Combined PDF</strong>, extract other sections here:
+                          To protect audit integrity, real documents are never compared against demo data. If your file is a combined loan package containing multiple schedules, you can scan this file for Sanction Letter and Loan Agreement terms. <em>Note: Physical section splitting is not performed; the complete document is scanned for each contract schedule.</em>
                         </p>
                       </div>
                     </div>
@@ -532,7 +532,7 @@ export default function App() {
                         onClick={() => handleProcessAllSectionsFromFile(lastUploadedFile)}
                         className="px-3.5 py-2 bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition-colors cursor-pointer shadow-xs whitespace-nowrap"
                     >
-                      {isProcessingCombined ? 'Extracting Sections...' : 'Extract Other Sections from this File'}
+                      {isProcessingCombined ? 'Scanning Document...' : 'Scan File for Other Terms'}
                     </button>
                   </div>
               )}

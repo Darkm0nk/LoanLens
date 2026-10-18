@@ -15,6 +15,7 @@ import {
   validateTextContent,
   validateAiParsedData,
 } from '../src/utils/documentValidator';
+import { verifySourceSubstantiation } from '../src/utils/sourceVerifier';
 
 console.log('--- Starting LoanLens Quality & Audit Comprehensive Test Suite ---');
 
@@ -563,6 +564,332 @@ runTest('Sanction letter unverified citation triggers Needs manual verification 
   assert.strictEqual(amountComp?.status, 'mismatch');
   assert.strictEqual(amountComp?.values.sanctionLetter?.isVerifiedInSource, false);
   assert.strictEqual(amountComp?.classification, 'Needs manual verification');
+});
+
+// ---------------------------------------------------------
+// 10. REGULATORY STATUS & SOURCE SUBSTANTIATION REGRESSION AUDIT
+// ---------------------------------------------------------
+console.log('\n[10] Regulatory Status & Source Substantiation Regression Audit:');
+
+runTest('Missing or null isRbiCompliant produces explicit not_assessed state without false compliance assertion', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      penalCharges: {
+        value: 'As per bank policy',
+        isCompoundedInterest: null,
+        isRbiCompliant: null,
+        rawText: 'Penal charges applicable as per prevailing bank policy.',
+        pageClauseRef: 'Page 2, Item 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      penalCharges: {
+        value: 'As per bank policy',
+        isCompoundedInterest: null,
+        isRbiCompliant: null,
+        rawText: 'Penal charges applicable as per prevailing bank policy.',
+        pageClauseRef: 'Page 3, Clause 12',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const penal = report.comparisons.find((c) => c.fieldKey === 'penalCharges');
+  assert.ok(penal);
+  assert.strictEqual(penal.regulatoryAssessment, 'not_assessed');
+  assert.strictEqual(penal.classification, 'Needs manual verification');
+  assert.ok(!penal.summary.toLowerCase().includes('follow rbi guidelines'));
+  assert.ok(penal.summary.includes('insufficient evidence'));
+});
+
+runTest('Missing or null isFloatingNilExempt produces explicit not_assessed state on floating facility', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.kfsDoc.fields.interestRate,
+        rateType: 'floating',
+      },
+      prepaymentCharges: {
+        value: 'Prepayment as per schedule',
+        hasPenalty: null,
+        isFloatingNilExempt: null,
+        rawText: 'Prepayment terms apply as per schedule.',
+        pageClauseRef: 'Page 2, Item 9',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.interestRate,
+        rateType: 'floating',
+      },
+      prepaymentCharges: {
+        value: 'Prepayment as per schedule',
+        hasPenalty: null,
+        isFloatingNilExempt: null,
+        rawText: 'Prepayment terms apply as per schedule.',
+        pageClauseRef: 'Page 3, Clause 14',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const prepay = report.comparisons.find((c) => c.fieldKey === 'prepaymentCharges');
+  assert.ok(prepay);
+  assert.strictEqual(prepay.regulatoryAssessment, 'not_assessed');
+  assert.strictEqual(prepay.classification, 'Needs manual verification');
+  assert.ok(prepay.summary.includes('Insufficient evidence'));
+});
+
+runTest('Contradictory penal charge provisions between KFS and Agreement flag Possible regulatory concern', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      penalCharges: {
+        value: '₹500 flat fee per delay',
+        isCompoundedInterest: false,
+        isRbiCompliant: true,
+        rawText: 'Delayed payment penal fee: ₹500 flat per default.',
+        pageClauseRef: 'Page 2, Item 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      penalCharges: {
+        value: '24% compounded monthly',
+        isCompoundedInterest: true,
+        isRbiCompliant: false,
+        rawText: 'Overdue installment subject to 24% p.a. compounded monthly penal interest.',
+        pageClauseRef: 'Page 5, Clause 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const penal = report.comparisons.find((c) => c.fieldKey === 'penalCharges');
+  assert.ok(penal);
+  assert.strictEqual(penal.status, 'mismatch');
+  assert.strictEqual(penal.severity, 'warning');
+  assert.strictEqual(penal.classification, 'Possible regulatory concern');
+  assert.strictEqual(penal.regulatoryAssessment, 'non_compliant');
+  assert.ok(penal.summary.includes('Contradictory penal charge provisions'));
+});
+
+runTest('Contradictory prepayment terms between KFS and Agreement flag Possible regulatory concern', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.kfsDoc.fields.interestRate,
+        rateType: 'floating',
+      },
+      prepaymentCharges: {
+        value: 'Nil / Zero',
+        hasPenalty: false,
+        isFloatingNilExempt: true,
+        rawText: 'Nil prepayment charges on individual floating loan.',
+        pageClauseRef: 'Page 2, Item 9',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.interestRate,
+        rateType: 'floating',
+      },
+      prepaymentCharges: {
+        value: '2% prepayment penalty',
+        hasPenalty: true,
+        isFloatingNilExempt: false,
+        rawText: 'A prepayment charge of 2% shall be levied on premature closure.',
+        pageClauseRef: 'Page 4, Clause 11',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const prepay = report.comparisons.find((c) => c.fieldKey === 'prepaymentCharges');
+  assert.ok(prepay);
+  assert.strictEqual(prepay.status, 'mismatch');
+  assert.strictEqual(prepay.severity, 'warning');
+  assert.strictEqual(prepay.classification, 'Possible regulatory concern');
+  assert.strictEqual(prepay.regulatoryAssessment, 'has_penalty');
+  assert.ok(prepay.summary.includes('Contradictory prepayment terms'));
+});
+
+runTest('Confirmed positive penal compliance produces clean match with compliant status', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      penalCharges: {
+        value: '₹350 per month overdue fee',
+        isCompoundedInterest: false,
+        isRbiCompliant: true,
+        rawText: 'Late payment penal charge: ₹350 flat per month. No penal interest compounding.',
+        pageClauseRef: 'Page 2, Section 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      penalCharges: {
+        value: '₹350 per month overdue fee',
+        isCompoundedInterest: false,
+        isRbiCompliant: true,
+        rawText: 'Late payment penal charge: ₹350 flat per month. No penal interest compounding.',
+        pageClauseRef: 'Page 2, Section 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const penal = report.comparisons.find((c) => c.fieldKey === 'penalCharges');
+  assert.ok(penal);
+  assert.strictEqual(penal.status, 'match');
+  assert.strictEqual(penal.severity, 'clean');
+  assert.strictEqual(penal.regulatoryAssessment, 'compliant');
+  assert.strictEqual(penal.classification, undefined);
+});
+
+runTest('Confirmed negative penal non-compliance produces mismatch with non_compliant status', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      penalCharges: {
+        value: '24% compounded interest',
+        isCompoundedInterest: true,
+        isRbiCompliant: false,
+        rawText: 'Overdue installment subject to 24% p.a. compounded monthly penal interest.',
+        pageClauseRef: 'Page 2, Item 8',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      penalCharges: {
+        value: '24% compounded interest',
+        isCompoundedInterest: true,
+        isRbiCompliant: false,
+        rawText: 'Overdue installment subject to 24% p.a. compounded monthly penal interest.',
+        pageClauseRef: 'Page 3, Clause 9',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const penal = report.comparisons.find((c) => c.fieldKey === 'penalCharges');
+  assert.ok(penal);
+  assert.strictEqual(penal.status, 'mismatch');
+  assert.strictEqual(penal.severity, 'warning');
+  assert.strictEqual(penal.regulatoryAssessment, 'non_compliant');
+  assert.strictEqual(penal.classification, 'Possible regulatory concern');
+});
+
+runTest('Fixed-rate loan with matching prepayment penalty does not trigger false floating-rate violation', () => {
+  const kfs: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.kfsDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.kfsDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.kfsDoc.fields.interestRate,
+        rateType: 'fixed',
+      },
+      prepaymentCharges: {
+        value: '2% on prepaid amount',
+        hasPenalty: true,
+        isFloatingNilExempt: false,
+        rawText: 'Prepayment penalty of 2% on prepaid amount for fixed-rate personal facility.',
+        pageClauseRef: 'Page 2, Clause 11',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const agreement: ExtractedLoanDocument = {
+    ...DEMO_SCENARIO_CLEAN.agreementDoc,
+    fields: {
+      ...DEMO_SCENARIO_CLEAN.agreementDoc.fields,
+      interestRate: {
+        ...DEMO_SCENARIO_CLEAN.agreementDoc.fields.interestRate,
+        rateType: 'fixed',
+      },
+      prepaymentCharges: {
+        value: '2% on prepaid amount',
+        hasPenalty: true,
+        isFloatingNilExempt: false,
+        rawText: 'Prepayment penalty of 2% on prepaid amount for fixed-rate personal facility.',
+        pageClauseRef: 'Page 3, Clause 15',
+        isVerifiedInSource: true,
+      },
+    },
+  };
+  const report = compareLoanDocuments(kfs, null, agreement);
+  const prepay = report.comparisons.find((c) => c.fieldKey === 'prepaymentCharges');
+  assert.ok(prepay);
+  assert.strictEqual(prepay.status, 'match');
+  assert.strictEqual(prepay.severity, 'clean');
+  assert.strictEqual(prepay.classification, undefined);
+  assert.ok(prepay.summary.includes('Fixed-rate facility'));
+});
+
+runTest('Fabricated pageClauseRef with placeholder source text evaluates to isVerifiedInSource: false', () => {
+  const result = verifySourceSubstantiation(4200000, 'Not specified in document', 'Page 4, Clause 2.1', 'loanAmount');
+  assert.strictEqual(result.isVerified, false);
+  assert.ok(result.reason?.includes('Verbatim excerpt missing'));
+
+  const resultEmpty = verifySourceSubstantiation(4200000, '', 'Page 4, Clause 2.1', 'loanAmount');
+  assert.strictEqual(resultEmpty.isVerified, false);
+});
+
+runTest('Plausible pageClauseRef with mismatched numeric source text evaluates to isVerifiedInSource: false', () => {
+  const resultRate = verifySourceSubstantiation(8.75, 'The applicable interest rate is 10.50% per annum.', 'Page 2, Clause 3', 'interestRate');
+  assert.strictEqual(resultRate.isVerified, false);
+  assert.ok(resultRate.reason?.includes('does not substantiate'));
+
+  const resultAmt = verifySourceSubstantiation(4200000, 'The Borrower shall pay processing fee of Rs. 5,000.', 'Page 1, Clause 1', 'loanAmount');
+  assert.strictEqual(resultAmt.isVerified, false);
+  assert.ok(resultAmt.reason?.includes('does not substantiate'));
+});
+
+runTest('Supported citation with matching source text and numbers evaluates to isVerifiedInSource: true', () => {
+  const resultRate = verifySourceSubstantiation(8.75, 'Applicable rate of interest shall be floating rate of 8.75% per annum.', 'Page 1, Clause 2.1', 'interestRate');
+  assert.strictEqual(resultRate.isVerified, true);
+
+  const resultAmt = verifySourceSubstantiation(4200000, 'Sanctioned facility amount of INR 42,00,000/- (Forty Two Lakhs Only).', 'Page 1, Schedule A', 'loanAmount');
+  assert.strictEqual(resultAmt.isVerified, true);
+
+  const resultTenure = verifySourceSubstantiation(240, 'Loan tenure shall be 240 months from first disbursement.', 'Page 2, Item 4', 'tenureMonths');
+  assert.strictEqual(resultTenure.isVerified, true);
 });
 
 console.log(`\n========================================`);

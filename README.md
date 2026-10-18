@@ -58,7 +58,7 @@ Run the quality and audit test suite:
 npm test
 ```
 
-The test suite executes 42 automated deterministic checks across two comprehensive test suites:
+The test suite executes 52 automated deterministic checks across two comprehensive test suites:
 - **Financial Calculations (6 tests):** Reducing-balance EMI formula accuracy, zero percent interest edge cases, missing input rejection, lifetime impact cost variance, and assumption disclosures.
 - **Matching Values (1 test):** 100% term-by-term match verification across all 9 core loan terms.
 - **Mismatches (1 test):** Principal, interest rate, tenure, EMI, fee, insurance, penal charge, and prepayment charge variance detection.
@@ -68,7 +68,14 @@ The test suite executes 42 automated deterministic checks across two comprehensi
 - **Failed AI Responses & Integrity (5 tests):** Malformed JSON rejection, missing schema fields rejection, missing required loan term rejection, empty/primitive model response rejection, synthetic demo flag preservation.
 - **Regulatory Sourcing & Grounding (2 tests):** Circular identifier validation, official HTTPS URL verification, absence of inflammatory or sensationalist language.
 - **Side-by-Side Classification & Evidence Integrity (6 tests):** Regulatory finding classification (Confirmed discrepancy, Missing information, Possible regulatory concern, Needs manual verification), clean matches verified without false positive warnings, strict affirmative `isVerifiedInSource === true` requirement, and sanction letter unverified citation handling.
-- **Data Isolation & Contamination Guards (11 tests):** Hard isolation guards preventing demo and real document cross-audit, minimum 2-real-document requirement, demo record purging upon real document upload, document replacement integrity, invalidation on document clear, failed extraction isolation, ₹0 formatting prevention for missing values, and combined multi-section document attribution.
+- **Regulatory Status & Source Substantiation Regression (10 tests):** Missing or null regulatory status handling (`isRbiCompliant: null`, `isFloatingNilExempt: null`) producing explicit `not_assessed` states without false positive/negative claims, contradictory penal clause detection, contradictory prepayment term detection, verified positive compliance matches, confirmed negative non-compliance variance reporting, fixed-rate prepayment penalty exclusion, fabricated citation rejection with placeholder text, mismatched numeric source excerpt rejection, and confirmed substantiated citations.
+- **Data Isolation & Contamination Guards (11 tests):** Hard isolation guards preventing demo and real document cross-audit, minimum 2-real-document requirement, demo record purging upon real document upload, document replacement integrity, invalidation on document clear, failed extraction isolation, ₹0 formatting prevention for missing values, and combined document attribution without misleading physical section splitting claims.
+
+To execute automated headless browser UI tests with Playwright:
+```bash
+npm run test:ui
+```
+Executes 5 end-to-end browser tests in headless Chromium verifying dashboard navigation, dynamic borrower avatars, upload validation error dismissal, clean match evidence inspection, and intake guard states.
 
 To execute live Gemini API end-to-end integration tests (requires valid `GEMINI_API_KEY` and local server running on port 3000):
 ```bash

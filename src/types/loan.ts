@@ -23,14 +23,19 @@ export interface InsuranceField extends FieldExtraction<number | null> {
   policyName?: string;
 }
 
+export type RegulatoryComplianceStatus = 'compliant' | 'non_compliant' | 'not_assessed';
+export type ForeclosureExemptionStatus = 'exempt' | 'has_penalty' | 'not_assessed';
+
 export interface PenalChargesField extends FieldExtraction<string> {
-  isCompoundedInterest: boolean;
-  isRbiCompliant: boolean;
+  isCompoundedInterest: boolean | null;
+  isRbiCompliant: boolean | null;
+  assessmentStatus?: RegulatoryComplianceStatus;
 }
 
 export interface PrepaymentChargesField extends FieldExtraction<string> {
-  hasPenalty: boolean;
-  isFloatingNilExempt: boolean;
+  hasPenalty: boolean | null;
+  isFloatingNilExempt: boolean | null;
+  assessmentStatus?: ForeclosureExemptionStatus;
 }
 
 export interface ExtractedLoanFields {
@@ -77,6 +82,7 @@ export interface FieldComparison {
   status: DiscrepancyStatus;
   severity: DiscrepancySeverity;
   classification?: FindingClassification;
+  regulatoryAssessment?: 'compliant' | 'non_compliant' | 'not_assessed' | 'exempt' | 'has_penalty';
   isSampleData?: boolean;
   values: {
     kfs?: {

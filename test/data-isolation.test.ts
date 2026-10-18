@@ -367,7 +367,7 @@ runTest('Documents extracted from single combined package are clearly flagged wi
     documentName: 'My_Combined_Loan_Package.pdf',
     isCombinedPackage: true,
     originFileName: 'My_Combined_Loan_Package.pdf',
-    originSection: 'Section 1: Key Facts Statement',
+    originSection: 'Full Document Scan (as Key Facts Statement)',
   });
 
   const combinedAgreement = createRealDocument({
@@ -375,7 +375,7 @@ runTest('Documents extracted from single combined package are clearly flagged wi
     documentName: 'My_Combined_Loan_Package.pdf',
     isCombinedPackage: true,
     originFileName: 'My_Combined_Loan_Package.pdf',
-    originSection: 'Section 3: Loan Agreement',
+    originSection: 'Full Document Scan (as Loan Agreement)',
   });
 
   const report = compareLoanDocuments(combinedKfs, null, combinedAgreement);
