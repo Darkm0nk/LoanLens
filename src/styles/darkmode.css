@@ -1,0 +1,148 @@
+/* Dark Mode Global Styles */
+
+.dark {
+  color-scheme: dark;
+  background-color: #050811 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Force light text on all dark mode elements */
+.dark * {
+  background-color: inherit;
+  color: inherit;
+}
+
+/* Specific text element overrides */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #ffffff !important;
+}
+
+.dark p, .dark label, .dark li, .dark td, .dark th, .dark dt, .dark dd, .dark span {
+  color: #e2e8f0 !important;
+}
+
+/* Tailwind color overrides */
+.dark [class*="text-slate"], .dark [class*="text-gray"], .dark [class*="text-blue"],
+.dark [class*="text-amber"], .dark [class*="text-teal"], .dark [class*="text-emerald"],
+.dark [class*="text-red"], .dark [class*="text-green"], .dark [class*="text-yellow"] {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-slate-900, .dark .text-gray-900, .dark .text-slate-800, .dark .text-gray-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-700, .dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-600, .dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-500, .dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400, .dark .text-gray-400 {
+  color: #64748b !important;
+}
+
+.dark .text-slate-300, .dark .text-gray-300 {
+  color: #475569 !important;
+}
+
+/* Deep color text overrides */
+.dark .text-amber-950, .dark .text-amber-900,
+.dark .text-teal-950, .dark .text-teal-900,
+.dark .text-emerald-950, .dark .text-emerald-900,
+.dark .text-blue-950, .dark .text-blue-900,
+.dark .text-slate-900, .dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+/* Form Elements */
+.dark input, .dark textarea, .dark select {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+.dark input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Links */
+.dark a {
+  color: #60a5fa !important;
+}
+
+.dark a:hover {
+  color: #93c5fd !important;
+}
+
+/* Backgrounds - convert light to dark */
+.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #0f172a !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #334155 !important;
+}
+
+/* Borders */
+.dark .border-slate-200 {
+  border-color: #475569 !important;
+}
+
+.dark .border-slate-300 {
+  border-color: #64748b !important;
+}
+
+/* Colored badge backgrounds to dark versions */
+.dark .bg-amber-50 {
+  background-color: rgba(78, 67, 32, 0.5) !important;
+}
+
+.dark .bg-teal-50 {
+  background-color: rgba(15, 76, 83, 0.5) !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(13, 79, 57, 0.5) !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(15, 53, 89, 0.5) !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgba(22, 42, 96, 0.5) !important;
+}
+
+.dark .bg-amber-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-teal-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: #374151 !important;
+}
+
+
+
