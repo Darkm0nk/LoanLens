@@ -52,13 +52,13 @@
   color: #475569 !important;
 }
 
-/* Deep color text overrides */
+/* Deep color text overrides - muted versions */
 .dark .text-amber-950, .dark .text-amber-900,
 .dark .text-teal-950, .dark .text-teal-900,
 .dark .text-emerald-950, .dark .text-emerald-900,
 .dark .text-blue-950, .dark .text-blue-900,
 .dark .text-slate-900, .dark .text-slate-800 {
-  color: #f1f5f9 !important;
+  color: #cbd5e1 !important;
 }
 
 /* Form Elements */
@@ -74,11 +74,11 @@
 
 /* Links */
 .dark a {
-  color: #60a5fa !important;
+  color: #94a3b8 !important;
 }
 
 .dark a:hover {
-  color: #93c5fd !important;
+  color: #cbd5e1 !important;
 }
 
 /* Backgrounds - convert light to dark */
@@ -98,16 +98,89 @@
   background-color: #334155 !important;
 }
 
-/* Borders */
+/* Borders - remove most borders in dark mode for cleaner look */
 .dark .border-slate-200 {
-  border-color: #475569 !important;
+  border-color: transparent !important;
 }
 
 .dark .border-slate-300 {
-  border-color: #64748b !important;
+  border-color: transparent !important;
 }
 
-/* Colored badge backgrounds to dark versions */
-.dark .bg-amber-50 {
-  background-color: rgba(78, 67, 32, 0.5) !important;
+.dark .border-amber-200 {
+  border-color: transparent !important;
 }
+
+.dark .border-teal-200 {
+  border-color: transparent !important;
+}
+
+.dark .border-emerald-200 {
+  border-color: transparent !important;
+}
+
+.dark .border-blue-200 {
+  border-color: transparent !important;
+}
+
+.dark .border-amber-300 {
+  border-color: transparent !important;
+}
+
+.dark .border-teal-300 {
+  border-color: transparent !important;
+}
+
+/* Colored badge backgrounds to dark versions - muted and subtle */
+.dark .bg-amber-50 {
+  background-color: rgba(120, 53, 15, 0.3) !important;
+}
+
+.dark .bg-teal-50 {
+  background-color: rgba(45, 85, 89, 0.3) !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(20, 83, 62, 0.3) !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(30, 58, 138, 0.3) !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgba(55, 48, 163, 0.3) !important;
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.4) !important;
+}
+
+.dark .bg-teal-100 {
+  background-color: rgba(45, 85, 89, 0.4) !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: rgba(20, 83, 62, 0.4) !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: rgba(30, 58, 138, 0.4) !important;
+}
+
+/* Dark mode upload cards container with clean solid background */
+.dark div[class*="rounded-2xl"][class*="border-slate-200"] {
+  background-color: #0a1118 !important;
+  border-color: transparent !important;
+}
+
+/* Remove borders from rounded boxes and cards in dark mode */
+.dark [class*="rounded"][class*="border-"] {
+  border-color: transparent !important;
+}
+
+/* Keep only structural borders like dividers clear */
+.dark .border-t, .dark .border-b {
+  border-color: #2d3748 !important;
+}
+
