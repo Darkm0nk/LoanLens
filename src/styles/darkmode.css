@@ -267,23 +267,6 @@ html.dark [class*="border-teal-"],
    Navigation, Buttons & Interactive States
    ========================================================================== */
 
-/* Active Section Tabs */
-html.dark button[class*="bg-slate-900"],
-html.dark button[class*="bg-slate-700"],
-.dark button[class*="bg-slate-900"],
-.dark button[class*="bg-slate-700"] {
-  background-color: #0f766e !important;
-  color: #ffffff !important;
-  font-weight: 600;
-}
-
-html.dark button[class*="text-slate-600"]:hover,
-html.dark button[class*="text-slate-400"]:hover,
-.dark button[class*="text-slate-600"]:hover,
-.dark button[class*="text-slate-400"]:hover {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
-}
 
 /* Table Hover */
 html.dark tr:hover,

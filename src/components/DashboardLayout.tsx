@@ -148,19 +148,46 @@ export default function DashboardLayout({
                         <div className="flex items-center gap-2 text-xs">
                             <button
                                 onClick={() => onNavigate('dashboard')}
-                                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${safeSection === 'dashboard' ? darkMode ? 'bg-slate-700 text-white font-semibold' : 'bg-slate-900 text-white font-semibold' : darkMode ? 'text-slate-400 hover:bg-slate-700/60' : 'text-slate-600 hover:bg-slate-200/60'}`}
+                                aria-current={safeSection === 'dashboard' ? 'page' : undefined}
+                                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                                    safeSection === 'dashboard'
+                                        ? darkMode
+                                            ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
+                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                        : darkMode
+                                            ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'
+                                }`}
                             >
                                 Overview
                             </button>
                             <button
                                 onClick={() => onNavigate('audit')}
-                                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${safeSection === 'audit' || safeSection === 'compare' ? darkMode ? 'bg-slate-700 text-white font-semibold' : 'bg-slate-900 text-white font-semibold' : darkMode ? 'text-slate-400 hover:bg-slate-700/60' : 'text-slate-600 hover:bg-slate-200/60'}`}
+                                aria-current={safeSection === 'audit' || safeSection === 'compare' ? 'page' : undefined}
+                                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                                    safeSection === 'audit' || safeSection === 'compare'
+                                        ? darkMode
+                                            ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
+                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                        : darkMode
+                                            ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'
+                                }`}
                             >
                                 Intake & Comparison
                             </button>
                             <button
                                 onClick={() => onNavigate('rbi')}
-                                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${safeSection === 'rbi' ? darkMode ? 'bg-slate-700 text-white font-semibold' : 'bg-slate-900 text-white font-semibold' : darkMode ? 'text-slate-400 hover:bg-slate-700/60' : 'text-slate-600 hover:bg-slate-200/60'}`}
+                                aria-current={safeSection === 'rbi' ? 'page' : undefined}
+                                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                                    safeSection === 'rbi'
+                                        ? darkMode
+                                            ? 'bg-teal-600 text-white font-semibold shadow-xs border border-teal-500/80 ring-1 ring-teal-400/30'
+                                            : 'bg-slate-900 text-white font-semibold shadow-xs'
+                                        : darkMode
+                                            ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 bg-transparent'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 bg-transparent'
+                                }`}
                             >
                                 RBI Guide
                             </button>
