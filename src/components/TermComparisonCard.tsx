@@ -238,8 +238,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         </div>
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           {regulatoryBadge()}
-          {classificationBadge()}
-          {statusBadge()}
+          {comparison.status === 'match' ? statusBadge() : (classificationBadge() || statusBadge())}
           {onInspectEvidence && (
             <button
               type="button"
@@ -264,13 +263,8 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             <span>Key Facts Statement (KFS)</span>
             <span className="text-[10px] text-slate-400 font-normal">Pre-Contract</span>
           </div>
-          <div className="text-sm font-bold text-slate-900 font-mono flex items-center justify-between flex-wrap gap-1">
-            <span>{comparison.values.kfs?.display || 'Not submitted'}</span>
-            {comparison.isSampleData && comparison.values.kfs && (
-              <span className="text-[10px] font-normal text-amber-800 bg-amber-100/80 px-1.5 py-0.2 rounded font-sans">
-                Sample
-              </span>
-            )}
+          <div className="text-sm font-bold text-slate-900 font-mono">
+            {comparison.values.kfs?.display || 'Not submitted'}
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
@@ -292,13 +286,8 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             <span>Sanction Letter</span>
             <span className="text-[10px] text-slate-400 font-normal">Offer</span>
           </div>
-          <div className="text-sm font-bold text-slate-900 font-mono flex items-center justify-between flex-wrap gap-1">
-            <span>{comparison.values.sanctionLetter?.display || 'Not submitted'}</span>
-            {comparison.isSampleData && comparison.values.sanctionLetter && (
-              <span className="text-[10px] font-normal text-amber-800 bg-amber-100/80 px-1.5 py-0.2 rounded font-sans">
-                Sample
-              </span>
-            )}
+          <div className="text-sm font-bold text-slate-900 font-mono">
+            {comparison.values.sanctionLetter?.display || 'Not submitted'}
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
@@ -327,16 +316,11 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             <span className="text-[10px] text-slate-400 font-normal">Execution Draft</span>
           </div>
           <div
-            className={`text-sm font-bold font-mono flex items-center justify-between flex-wrap gap-1 ${
+            className={`text-sm font-bold font-mono ${
               isMismatch ? 'text-rose-950 font-extrabold' : 'text-slate-900'
             }`}
           >
-            <span>{comparison.values.loanAgreement?.display || 'Not submitted'}</span>
-            {comparison.isSampleData && comparison.values.loanAgreement && (
-              <span className="text-[10px] font-normal text-amber-800 bg-amber-100/80 px-1.5 py-0.2 rounded font-sans">
-                Sample
-              </span>
-            )}
+            {comparison.values.loanAgreement?.display || 'Not submitted'}
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-start gap-1">
             <span className="font-semibold text-slate-600 shrink-0">Source:</span>
@@ -389,18 +373,13 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
       {comparison.lenderQuestion && (
         <div className="mt-3 p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800 flex items-center gap-1.5 flex-wrap">
-              <span>Clarification Question for Loan Officer</span>
-              {comparison.isSampleData && (
-                <span className="text-[10px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.2 rounded normal-case font-sans">
-                  Sample Case Template
-                </span>
-              )}
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800">
+              Clarification Question for Loan Officer
             </span>
             <button
               type="button"
               onClick={handleCopyQuestion}
-              className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 transition-colors px-2 py-0.5 rounded hover:bg-slate-200/70"
+              className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 transition-colors px-2 py-0.5 rounded hover:bg-slate-200/70 cursor-pointer"
               title="Copy question text to clipboard"
             >
               {copied ? (
@@ -468,7 +447,7 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
             className="text-[11px] text-teal-800 hover:text-teal-950 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer group"
           >
             <FileText className="w-3.5 h-3.5 text-teal-700 group-hover:scale-110 transition-transform" />
-            <span className="underline decoration-teal-400 underline-offset-2">Inspect Side-by-Side Contract Evidence</span>
+            <span className="hover:underline">Compare Excerpts Side-by-Side</span>
           </button>
         ) : (
           <div />
@@ -476,37 +455,27 @@ export const TermComparisonCard: React.FC<TermComparisonCardProps> = ({
         <button
           type="button"
           onClick={() => setShowRawExcerpts(!showRawExcerpts)}
-          className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium transition-colors"
+          className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium transition-colors cursor-pointer"
         >
-          <FileText className="w-3 h-3 text-slate-400" />
           <span>{showRawExcerpts ? 'Hide Quick Excerpts' : 'Quick Excerpts'}</span>
           {showRawExcerpts ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
       </div>
 
       {showRawExcerpts && (
-        <div className="mt-3 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] font-mono space-y-2 border border-slate-800">
+        <div className="mt-2.5 p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] font-mono space-y-2 border border-slate-800">
           <div>
-            <span className="text-teal-400 font-semibold block">// Key Facts Statement Excerpt:</span>
+            <span className="text-teal-400 font-semibold block">Key Facts Statement:</span>
             <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.kfs?.rawText || 'Not specified in document'}</p>
           </div>
           <div>
-            <span className="text-teal-400 font-semibold block">// Sanction Letter Excerpt:</span>
+            <span className="text-teal-400 font-semibold block">Sanction Letter:</span>
             <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.sanctionLetter?.rawText || 'Not specified in document'}</p>
           </div>
           <div>
-            <span className="text-teal-400 font-semibold block">// Loan Agreement Excerpt:</span>
+            <span className="text-teal-400 font-semibold block">Loan Agreement:</span>
             <p className="text-slate-300 whitespace-pre-wrap">{comparison.values.loanAgreement?.rawText || 'Not specified in document'}</p>
           </div>
-        </div>
-      )}
-
-      {comparison.isSampleData && (
-        <div className="mt-3 p-2 rounded bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-900 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-          <span>
-            <strong>Synthetic Benchmark Note:</strong> Values shown are part of a pre-computed sample profile ({comparison.label}). Gemini has not analyzed private documents in this view.
-          </span>
         </div>
       )}
     </div>

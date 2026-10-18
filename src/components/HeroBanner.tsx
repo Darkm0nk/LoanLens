@@ -48,14 +48,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               className="px-5 py-2.5 bg-teal-800 hover:bg-teal-900 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer"
             >
               <UploadCloud className="w-4 h-4" />
-              <span>Upload Your Loan Documents</span>
+              <span>Upload Loan Documents</span>
             </button>
             <button
               type="button"
               onClick={onScrollToUpload}
               className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium text-xs sm:text-sm rounded-lg transition-colors cursor-pointer"
             >
-              <span>View Intake Options</span>
+              <span>View Intake Workspace</span>
             </button>
           </div>
 
@@ -63,7 +63,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           <div className="w-full pt-3">
             <div className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-teal-700" />
-              <span>Explore Instant Demo Cases (Pre-Computed Synthetic Data):</span>
+              <span>Explore Instant Demo Cases:</span>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
               <button
@@ -81,7 +81,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     Sample Case A: Variances Noted (Home Loan)
                   </div>
                   <div className="text-[11px] text-slate-600">
-                    Synthetic profile: ₹78k principal variance + 0.50% rate difference + penal clause
+                    ₹78k principal variance · 0.50% rate difference · compounding clause
                   </div>
                 </div>
               </button>
@@ -101,7 +101,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     Sample Case B: Consistent Alignment (Personal Loan)
                   </div>
                   <div className="text-[11px] text-slate-600">
-                    Synthetic profile: Aligned terms across KFS, Sanction & Agreement with 100% match
+                    Aligned terms across KFS, Sanction & Agreement (100% match)
                   </div>
                 </div>
               </button>
@@ -174,7 +174,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               className="w-full py-2.5 px-4 bg-teal-800 hover:bg-teal-900 active:bg-teal-950 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs"
             >
               <FileSearch className="w-4 h-4" />
-              <span>Upload Your Loan Documents Below</span>
+              <span>Start Contract Audit</span>
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
           </div>

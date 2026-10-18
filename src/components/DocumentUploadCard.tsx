@@ -214,12 +214,6 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
               )}
             </div>
 
-            {isDemo && (
-              <div className="text-[10px] text-amber-800 bg-amber-100/60 border border-amber-200/70 p-2 rounded leading-tight">
-                <strong>Sample Document Note:</strong> This card currently displays synthetic data for demonstration. Click the button below to upload your real file.
-              </div>
-            )}
-
             <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/70">
               <div>
                 <span className="text-[11px] text-slate-500 block">Lender</span>
@@ -326,14 +320,14 @@ export const DocumentUploadCard: React.FC<DocumentUploadCardProps> = ({
               >
                 <UploadCloud className="w-10 h-10 text-teal-700 mx-auto mb-2.5" />
                 <p className="text-xs font-bold text-slate-900">
-                  Click to browse or drop your {title}
+                  Drop {title} here or browse
                 </p>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Supports PDF, scanned images (PNG/JPG), or TXT (Max 25MB)
+                  Supports PDF, images (PNG/JPG), or TXT (Max 25MB)
                 </p>
                 <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded-md text-[11px] font-semibold text-teal-800 shadow-2xs">
                   <ArrowUpCircle className="w-3.5 h-3.5" />
-                  <span>Select File from Computer</span>
+                  <span>Select File</span>
                 </div>
               </div>
             ) : (

@@ -61,17 +61,17 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
 
             <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto mt-2 leading-relaxed">
               {isSingleDoc
-                  ? 'You have uploaded 1 real document. To ensure trustworthy audit findings, real user documents are never compared against synthetic demo data. Please upload your Sanction Letter or Loan Agreement to initiate the cross-contract discrepancy audit.'
+                  ? 'Upload at least two loan documents above (KFS, Sanction Letter, or Loan Agreement) to initiate the cross-contract discrepancy audit. Real user files are never compared against demo data.'
                   : 'Upload at least two loan documents above (KFS, Sanction Letter, or Loan Agreement) or load a sample benchmark case to inspect discrepancies.'}
             </p>
           </div>
 
           {isSingleDoc && (
               <div className="max-w-md mx-auto p-3 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-950 text-left">
-                <span className="font-bold block mb-1">Notice for Combined / Multi-Section PDFs:</span>
+                <span className="font-bold block mb-1">Combined Document Notice:</span>
                 <span className="text-[11px] text-amber-900 leading-relaxed block">
-              If your uploaded file is an all-in-one loan package containing multiple sections (e.g., KFS on Page 1 and Loan Agreement on Page 3), upload the same file into the other document cards above to cross-verify all sections.
-            </span>
+                  If your file is an all-in-one loan package containing multiple schedules, upload the same file into the other document cards above to verify all sections.
+                </span>
               </div>
           )}
 
@@ -130,14 +130,14 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
                     Synthetic Demonstration Mode Active
                   </div>
                   <p className="text-amber-900 leading-relaxed">
-                    Displaying pre-computed synthetic sample data for <strong>{report.borrowerName}</strong> ({report.loanType}).
-                    Gemini AI has <strong>not</strong> evaluated personal files in this view. To audit real papers, upload your PDF files above.
+                    Displaying pre-computed sample benchmark for <strong>{report.borrowerName}</strong> ({report.loanType}).
+                    Gemini AI has not analyzed private documents in this view. Upload your documents above to start a real audit.
                   </p>
                 </div>
               </div>
               <button
                   onClick={onScrollToUpload}
-                  className="px-3.5 py-1.5 bg-amber-900 hover:bg-amber-950 text-white font-medium rounded-lg text-xs shrink-0 self-start sm:self-center transition-colors shadow-xs"
+                  className="px-3.5 py-1.5 bg-amber-900 hover:bg-amber-950 text-white font-medium rounded-lg text-xs shrink-0 self-start sm:self-center transition-colors shadow-xs cursor-pointer"
               >
                 Upload Real Documents
               </button>
@@ -199,14 +199,14 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
             <div className="flex items-center gap-2.5 shrink-0">
               <button
                   onClick={onOpenDisputeLetter}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Mail className="w-4 h-4" />
                 <span>Draft Clarification Notice</span>
               </button>
               <button
                   onClick={() => window.print()}
-                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Audit</span>
@@ -244,32 +244,23 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
         {/* Metrics Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500 font-medium block">Terms Evaluated</span>
-              {isDemoMode && <span className="text-[10px] text-amber-800 bg-amber-100/70 px-1 py-0.2 rounded font-sans">Sample</span>}
-            </div>
+            <span className="text-xs text-slate-500 font-medium block">Terms Evaluated</span>
             <span className="text-2xl font-bold text-slate-900 font-mono block mt-1">
             {report.totalTermsEvaluated}
           </span>
-            <span className="text-[11px] text-slate-400">Standard RBI Checklist</span>
+            <span className="text-[11px] text-slate-400">Core Terms Checked</span>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-amber-700 font-semibold block">Variances Noted</span>
-              {isDemoMode && <span className="text-[10px] text-amber-800 bg-amber-100/70 px-1 py-0.2 rounded font-sans">Sample</span>}
-            </div>
+            <span className="text-xs text-amber-700 font-semibold block">Variances Noted</span>
             <span className="text-2xl font-bold text-amber-700 font-mono block mt-1">
             {report.mismatchCount}
           </span>
-            <span className="text-[11px] text-slate-400">Requires Lender Confirmation</span>
+            <span className="text-[11px] text-slate-400">Requires Confirmation</span>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-emerald-700 font-semibold block">Consistent Terms</span>
-              {isDemoMode && <span className="text-[10px] text-amber-800 bg-amber-100/70 px-1 py-0.2 rounded font-sans">Sample</span>}
-            </div>
+            <span className="text-xs text-emerald-700 font-semibold block">Consistent Terms</span>
             <span className="text-2xl font-bold text-emerald-700 font-mono block mt-1">
             {report.matchCount}
           </span>
@@ -277,14 +268,11 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-blue-700 font-semibold block">Missing Disclosures</span>
-              {isDemoMode && <span className="text-[10px] text-amber-800 bg-amber-100/70 px-1 py-0.2 rounded font-sans">Sample</span>}
-            </div>
+            <span className="text-xs text-blue-700 font-semibold block">Missing Disclosures</span>
             <span className="text-2xl font-bold text-blue-700 font-mono block mt-1">
             {report.missingCount}
           </span>
-            <span className="text-[11px] text-slate-400">Omitted in Submitted Files</span>
+            <span className="text-[11px] text-slate-400">Omitted in Documents</span>
           </div>
         </div>
 
@@ -293,7 +281,7 @@ export const ComparisonDashboard: React.FC<ComparisonDashboardProps> = ({
           <div>
             <h3 className="text-lg font-bold text-slate-900 tracking-tight">Contract Term Comparison Matrix</h3>
             <p className="text-xs text-slate-500">
-              Showing {filteredComparisons.length} of {report.comparisons.length} terms · Click "Inspect Evidence" to examine verbatim source clauses
+              Showing {filteredComparisons.length} of {report.comparisons.length} terms · Click "Inspect Evidence" to view contract clauses
             </p>
           </div>
 

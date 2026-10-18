@@ -138,7 +138,7 @@ Contact: [Insert Phone / Email]`;
                 )}
               </div>
               <p className="text-xs text-slate-500">
-                Formal clarification letter grounded in RBI circulars and exact document clauses
+                Formal clarification letter grounded in RBI circulars and contract clauses
               </p>
             </div>
           </div>
@@ -230,7 +230,7 @@ Contact: [Insert Phone / Email]`;
 
         {/* Footer info */}
         <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 flex items-center justify-between">
-          <span>Borrower Recommendation: Submit via official lender correspondence channel and retain copy for records.</span>
+          <span>Submit via official lender correspondence and retain a copy for your records.</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 text-xs text-slate-700 hover:text-slate-900 font-medium transition-colors"

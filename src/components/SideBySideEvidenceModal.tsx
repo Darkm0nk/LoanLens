@@ -254,9 +254,6 @@ export const SideBySideEvidenceModal: React.FC<SideBySideEvidenceModalProps> = (
         <div className="p-5 border-b border-slate-200 bg-slate-50/80 flex items-start justify-between gap-4">
           <div className="space-y-1.5 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-teal-800 bg-teal-100 px-2 py-0.5 rounded">
-                Interactive Side-by-Side Audit
-              </span>
               <span
                 className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border flex items-center gap-1 ${currentClass.badge}`}
               >

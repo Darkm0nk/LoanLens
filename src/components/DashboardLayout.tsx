@@ -141,11 +141,11 @@ export default function DashboardLayout({
                         ) : realDocCount >= 2 ? (
                             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-md">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                                <span>Live Audit Active · Gemini 3.8 Flash</span>
+                                <span>Live Audit Active</span>
                             </span>
                         ) : realDocCount === 1 ? (
                             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 rounded-md">
-                                <span>Intake in Progress (1 of 2 Needed)</span>
+                                <span>Waiting for 2nd Document</span>
                             </span>
                         ) : (
                             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold text-teal-900 bg-teal-50 border border-teal-200 rounded-md">
@@ -176,13 +176,9 @@ export default function DashboardLayout({
                 <div className="p-8 md:p-10 space-y-8 flex-1 max-w-[1600px] w-full mx-auto">
                     {/* Breadcrumb Section Indicator */}
                     <div className="flex items-center justify-between pb-4 border-b border-slate-200/80">
-                        <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-lg">
-                Current Section: {safeSection.toUpperCase()}
-              </span>
-                            <span className="text-xs text-slate-500">
-                {loadedCount} of 3 documents active
-              </span>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-teal-600" />
+                            <span>{loadedCount} of 3 documents active</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                             <button

@@ -486,7 +486,7 @@ export default function App() {
                     Upload Documents & Review Comparison Matrix
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Upload your files below. The side-by-side contract discrepancy report and financial calculations update automatically in real-time.
+                    Upload your loan files below to cross-evaluate contract terms and calculate financial impacts in real-time.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap shrink-0">
@@ -522,7 +522,7 @@ export default function App() {
                     Single Document Uploaded: "{lastUploadedFile.name}"
                   </span>
                         <p className="text-teal-800 leading-relaxed text-[11px]">
-                          To protect audit integrity, real documents are never compared against demo data. If your file is a combined loan package containing multiple schedules, you can scan this file for Sanction Letter and Loan Agreement terms. <em>Note: Physical section splitting is not performed; the complete document is scanned for each contract schedule.</em>
+                          Real documents are never compared against demo data. If your file is a combined loan package containing multiple schedules, you can scan it across all slots.
                         </p>
                       </div>
                     </div>
@@ -599,7 +599,7 @@ export default function App() {
                     Live Comparison Matrix & Financial Impact
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Displays side-by-side term variances and potential financial discrepancies between your uploaded documents.
+                    Side-by-side contract variances and potential financial discrepancies between your uploaded documents.
                   </p>
                 </div>
                 <ComparisonDashboard
@@ -620,7 +620,7 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div>
               <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">
-                Section 4: Borrower Protection Framework
+                Borrower Rights & Safeguards
               </span>
                   <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-1">
                     RBI Regulatory Circulars & Rights
@@ -631,7 +631,7 @@ export default function App() {
                     onClick={() => setIsRbiModalOpen(true)}
                     className="px-4 py-2 bg-teal-800 text-white text-xs font-semibold rounded-lg shadow-xs hover:bg-teal-900 transition-colors cursor-pointer"
                 >
-                  Open Full Regulatory Modal
+                  Open Regulatory Guide
                 </button>
               </div>
 
