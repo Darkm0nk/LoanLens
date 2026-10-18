@@ -184,3 +184,9 @@
   border-color: #2d3748 !important;
 }
 
+/* Active Tab Navigation Buttons - Overview, Intake & Comparison, RBI Guide */
+.dark button[class*="px-3"][class*="py-1.5"][class*="bg-slate"] {
+  background-color: #3f4654 !important;
+  color: #ffffff !important;
+}
+
